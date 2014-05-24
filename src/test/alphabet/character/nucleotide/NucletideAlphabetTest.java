@@ -82,11 +82,12 @@ public class NucletideAlphabetTest {
         System.out.println("Test took " +new Date(stop.getTime()-start.getTime()).getTime()+" mils.");
 
 
-        start=new Date();
+        /*start=new Date();
         for(int i=0;i<numberOfIteratons;i++){
             NucleotideAlphabet.ALPHABET.getRCCharacter(values[r.nextInt(valuesSize)].getNucleotide().getPillar());
         }
         stop=new Date();
+        */
         System.out.println("Test took " +new Date(stop.getTime()-start.getTime()).getTime()+" mils.");
 
         start=new Date();
