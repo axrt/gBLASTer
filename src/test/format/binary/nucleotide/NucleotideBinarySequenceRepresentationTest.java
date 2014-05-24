@@ -116,6 +116,8 @@ public class NucleotideBinarySequenceRepresentationTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        testFile1.delete();
+        testFile2.delete();
     }
 
 

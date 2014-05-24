@@ -2,10 +2,10 @@ package format.binary.nucleotide;
 
 import alphabet.Alphabet;
 import alphabet.character.nucleotide.Nucleotide;
+import alphabet.nucleotide.NucleotideAlphabet;
 import format.binary.BinarySequenceRepresentation;
 import sequence.nucleotide.NucleotideSequence;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -63,7 +63,7 @@ public class NucleotideBinarySequenceRepresentation extends BinarySequenceRepres
         private Alphabet<Nucleotide> nucleotideAlphabet;
 
         public Builder() {
-
+             this.nucleotideAlphabet= NucleotideAlphabet.get();
         }
 
         public Builder sequences(List<NucleotideSequence<Nucleotide>> sequences) {
@@ -87,8 +87,8 @@ public class NucleotideBinarySequenceRepresentation extends BinarySequenceRepres
         }
 
         public NucleotideBinarySequenceRepresentation build() {
-            if (this.sequences == null || this.header == null || this.stop == null || this.nucleotideAlphabet == null) {
-                throw new IllegalStateException("Sequences, header, record stop and alphabet must be set prior to build!");
+            if (this.sequences == null || this.header == null || this.stop == null ) {
+                throw new IllegalStateException("Sequences, header and record stop must be set prior to build! Default alphabet is Nucletide.");
             }
             return new NucleotideBinarySequenceRepresentation(this);
         }

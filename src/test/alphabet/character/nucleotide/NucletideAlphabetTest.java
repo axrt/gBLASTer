@@ -14,28 +14,40 @@ public class NucletideAlphabetTest {
     private final static Alphabet<Nucleotide> NUCLEOTIDE_ALPHABET = NucleotideAlphabet.get();
 
     @Test
-    public void testEncode(){
+    public void testEncode() {
 
-        final String testString="ATGCatgc-?NRMWSKYVHDBnrmwskyvhdb";
+        final String testString = "ATGCatgc-?NRMWSKYVHDBnrmwskyvhdb";
         System.out.println(testString);
-        final byte[]representations=new byte[testString.length()];
-        for(int i=0;i<testString.length();i++){
-            representations[i]= NUCLEOTIDE_ALPHABET.toRepresentaton(testString.charAt(i));
+        final byte[] representations = new byte[testString.length()];
+        for (int i = 0; i < testString.length(); i++) {
+            representations[i] = NUCLEOTIDE_ALPHABET.toRepresentaton(testString.charAt(i));
         }
-        for(int i=0;i<representations.length;i++){
-            Assert.assertTrue(Character.toUpperCase(testString.charAt(i))==NUCLEOTIDE_ALPHABET.toPillar(representations[i]));
+        for (int i = 0; i < representations.length; i++) {
+            Assert.assertTrue(Character.toUpperCase(testString.charAt(i)) == NUCLEOTIDE_ALPHABET.toPillar(representations[i]));
             System.out.print(NUCLEOTIDE_ALPHABET.toPillar(representations[i]));
         }
-        Assert.assertArrayEquals(NUCLEOTIDE_ALPHABET.encode(testString),representations);
-        Assert.assertEquals(testString.toUpperCase(),NUCLEOTIDE_ALPHABET.decode(representations));
+        Assert.assertArrayEquals(NUCLEOTIDE_ALPHABET.encode(testString), representations);
+        Assert.assertEquals(testString.toUpperCase(), NUCLEOTIDE_ALPHABET.decode(representations));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testUnexistingCharacter(){
-         NUCLEOTIDE_ALPHABET.toRepresentaton('j');
+    public void testUnexistingCharacter() {
+        NUCLEOTIDE_ALPHABET.toRepresentaton('j');
     }
+
     @Test(expected = IllegalArgumentException.class)
-    public void testUnexistingByteRepresentation(){
-        NUCLEOTIDE_ALPHABET.toPillar((byte)0b1111111);
+    public void testUnexistingByteRepresentation() {
+        NUCLEOTIDE_ALPHABET.toPillar((byte) 0b1111111);
+    }
+
+
+    public void testRC(){
+        final String testString = "ATGCRMWSKYN";
+        final NucleotideAlphabet alph=NucleotideAlphabet.get();
+        Assert.assertEquals(testString,alph.rcString(alph.rcString(testString)));
+        Assert.assertEquals(testString,alph.rcString(alph.rcString(alph.rcString(alph.rcByteArray(testString)))));
+        Assert.assertEquals(testString,alph.rcString(alph.rcString(alph.rcByteArray(alph.rcString(testString)))));
     }
 }
+
+
