@@ -9,7 +9,11 @@ import sequence.Sequence;
  */
 public class NucleotideSequence<T extends Nucleotide> extends Sequence<T> {
 
-    public NucleotideSequence(String sequence, String ac) {
+    protected NucleotideSequence(String sequence, String ac) {
         super(sequence, ac);
+    }
+
+    public static NucleotideSequence<Nucleotide> get(String sequence, String ac){
+        return new NucleotideSequence<>(sequence,ac);
     }
 }
