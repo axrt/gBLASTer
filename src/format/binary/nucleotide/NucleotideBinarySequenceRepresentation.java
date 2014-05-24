@@ -37,7 +37,7 @@ public class NucleotideBinarySequenceRepresentation extends BinarySequenceRepres
             byteArrayOutputStream.write(ByteBuffer.allocate(4).putInt(sequenceRepresentations.size()).array());
             //For each sequence add positions to the header
             final int hl = this.header.length + 4;
-            int current = hl;//First byte of the positions
+            int current = hl+(sequenceRepresentations.size()+1)*4;//First byte of the positions
             for (int i = 0; i < sequenceRepresentations.size(); i++) {
                 byteArrayOutputStream.write(ByteBuffer.allocate(4).putInt(current).array());
                 current += sequenceRepresentations.get(i).length + 33;//33 cuz 256 bits==32 bytes for the AC and 1 byte for the stop

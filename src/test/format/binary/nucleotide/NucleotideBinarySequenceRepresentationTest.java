@@ -60,8 +60,7 @@ public class NucleotideBinarySequenceRepresentationTest {
             e.printStackTrace();
         }
         //Now read back
-        try (DataInputStream dataInputStream = new DataInputStream(new FileInputStream(testFile1));
-             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(new byte[1024])) {
+        try (DataInputStream dataInputStream = new DataInputStream(new FileInputStream(testFile1))) {
             byte[] h = new byte[4];
             final int n = dataInputStream.read(h);
             final String header = new String(h, 0, n);
@@ -70,10 +69,10 @@ public class NucleotideBinarySequenceRepresentationTest {
             final int numberOfSeqs = dataInputStream.readInt();
             System.out.println("Number of sequences is: " + numberOfSeqs);
             Assert.assertEquals(numberOfSeqs, 2);
-            final int[] starts = new int[numberOfSeqs+1];
-            for (int i = 0; i < numberOfSeqs+1; i++) {
+            final int[] starts = new int[numberOfSeqs + 1];
+            for (int i = 0; i < numberOfSeqs + 1; i++) {
                 starts[i] = dataInputStream.readInt();
-                if(i<numberOfSeqs) {
+                if (i < numberOfSeqs) {
                     System.out.println("Sequence " + i + " starts at:" + starts[i]);
                 }
             }
@@ -85,14 +84,39 @@ public class NucleotideBinarySequenceRepresentationTest {
                 System.out.println("Sequence " + i + " AC is: " + ac);
                 buffer = new byte[starts[i + 1] - starts[i] - 32];
                 dataInputStream.read(buffer);
-                final String sequence = NucleotideAlphabet.get().decode(Arrays.copyOf(buffer,buffer.length-1));
+                final String sequence = NucleotideAlphabet.get().decode(Arrays.copyOf(buffer, buffer.length - 1));
                 System.out.println("Sequence " + i + ": " + sequence);
             }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        //Now random sequence access test
+        try (DataInputStream dataInputStream = new DataInputStream(new FileInputStream(testFile1))) {
+            byte[] h = new byte[4];
+            final int n = dataInputStream.read(h);
+            final String header = new String(h, 0, n);
+            System.out.println("Header is: " + header);
+            Assert.assertEquals(header, "test");
+            final int numberOfSeqs = dataInputStream.readInt();
+            System.out.println("Number of sequences is: " + numberOfSeqs);
+            Assert.assertEquals(numberOfSeqs, 2);
+            final int[] starts = new int[numberOfSeqs + 1];
+            for (int i = 0; i < numberOfSeqs + 1; i++) {
+                starts[i] = dataInputStream.readInt();
+                if (i < numberOfSeqs) {
+                    System.out.println("Sequence " + i + " starts at:" + starts[i]);
+                }
+            }
+            byte[]buffer=new byte[32+33];
+            System.out.println(dataInputStream.skipBytes(starts[1]-20));
+            dataInputStream.read(buffer);
+            System.out.println("AC is: " + new String(buffer,0,32));
+            System.out.println("Sequence is: " + NucleotideAlphabet.get().decode(Arrays.copyOfRange(buffer,32, buffer.length-1)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+
 
 }
