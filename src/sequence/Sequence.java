@@ -1,6 +1,10 @@
 package sequence;
 
 import alphabet.character.Character;
+import alphabet.character.nucleotide.Nucleotide;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by alext on 5/23/14.
@@ -10,8 +14,10 @@ public abstract class Sequence<T extends Character> {
 
     protected final String sequence;
     protected final String ac;
-
+    protected List<T> characters;
+    protected boolean hasBeenInitialized;
     protected Sequence(String sequence, String ac) {
+        this.hasBeenInitialized=false;
         this.sequence = sequence;
         this.ac = ac;
     }
@@ -28,4 +34,7 @@ public abstract class Sequence<T extends Character> {
     public String getSequence() {
         return sequence;
     }
+
+    public abstract boolean init();
+
 }

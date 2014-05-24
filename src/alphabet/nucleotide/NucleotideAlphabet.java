@@ -4,6 +4,10 @@ import alphabet.Alphabet;
 import alphabet.character.nucleotide.Nucleotide;
 import sequence.Sequence;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 /**
  * Created by alext on 5/23/14.
  * TODO document class
@@ -15,7 +19,6 @@ public final class NucleotideAlphabet extends Alphabet<Nucleotide> {
         G(new Nucleotide('G', (byte) 0b01001000)), //G
         C(new Nucleotide('C', (byte) 0b00101000)), //C
         T(new Nucleotide('T', (byte) 0b00011000)), //T
-        U(new Nucleotide('U', (byte) 0b00011000)), //T
 
         R(new Nucleotide('R', (byte) 0b11000000)), //A or G
         M(new Nucleotide('M', (byte) 0b10100000)), //A or C
@@ -30,14 +33,37 @@ public final class NucleotideAlphabet extends Alphabet<Nucleotide> {
         B(new Nucleotide('B', (byte) 0b01110000)), //G or C or T
         N(new Nucleotide('N', (byte) 0b11110000)), //A or G or C or T
 
-        GAP(new Nucleotide('-', (byte) 0b00000100)), //Alignement gap (–)
+        GAP(new Nucleotide('-', (byte) 0b00000100)), //Alignment gap (–)
         Q(new Nucleotide('?', (byte) 0b00000010)), //Unknown character (?)
         ;
 
         private final Nucleotide nucleotide;
 
+        public Nucleotide getNucleotide() {
+            return nucleotide;
+        }
+
+        private static Map<Character,Nucleotide> byPillar=new HashMap<>();
+        static{
+            for(ALPHABET a:ALPHABET.values()){
+                byPillar.put(a.nucleotide.getPillar(),a.nucleotide);  //Hashmap turned out to be faster in tests against switch statement
+            }
+        }
+        private static Map<Byte,Nucleotide> byRepresentation=new HashMap<>();
+        static{
+            for(ALPHABET a:ALPHABET.values()){
+                byRepresentation.put(a.nucleotide.getRepresentation(),a.nucleotide);
+            }
+        }
         ALPHABET(Nucleotide nucleotide) {
             this.nucleotide = nucleotide;
+        }
+
+        public static Optional<Nucleotide> getByPillar(char pillar){
+             return Optional.of(byPillar.get(pillar));
+        }
+        public static Optional<Nucleotide> getByRepresentation(byte representation){
+            return Optional.of(byRepresentation.get(representation));
         }
     }
 
