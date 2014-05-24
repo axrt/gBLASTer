@@ -17,7 +17,7 @@ import java.util.Random;
 public class NucletideAlphabetTest {
     private final static Alphabet<Nucleotide> NUCLEOTIDE_ALPHABET = NucleotideAlphabet.get();
 
-    //@Test
+    @Test
     public void testEncode() {
 
         final String testString = "ATGCatgc-?NRMWSKYVHDBnrmwskyvhdb";
@@ -34,17 +34,17 @@ public class NucletideAlphabetTest {
         Assert.assertEquals(testString.toUpperCase(), NUCLEOTIDE_ALPHABET.decode(representations));
     }
 
-   // @Test(expected = IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testUnexistingCharacter() {
         NUCLEOTIDE_ALPHABET.toRepresentaton('j');
     }
 
-    //@Test(expected = IllegalArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testUnexistingByteRepresentation() {
         NUCLEOTIDE_ALPHABET.toPillar((byte) 0b1111111);
     }
 
-   // @Test
+    @Test
     public void testRC(){
         final String testString = "ATGCRMWSKYN";
         final NucleotideAlphabet alph=NucleotideAlphabet.get();
@@ -79,6 +79,21 @@ public class NucletideAlphabetTest {
            NucleotideAlphabet.ALPHABET.getByPillar(values[r.nextInt(valuesSize)].getNucleotide().getPillar());
         }
          stop=new Date();
+        System.out.println("Test took " +new Date(stop.getTime()-start.getTime()).getTime()+" mils.");
+
+
+        start=new Date();
+        for(int i=0;i<numberOfIteratons;i++){
+            NucleotideAlphabet.ALPHABET.getRCCharacter(values[r.nextInt(valuesSize)].getNucleotide().getPillar());
+        }
+        stop=new Date();
+        System.out.println("Test took " +new Date(stop.getTime()-start.getTime()).getTime()+" mils.");
+
+        start=new Date();
+        for(int i=0;i<numberOfIteratons;i++){
+            alph.rc(values[r.nextInt(valuesSize)].getNucleotide().getPillar());
+        }
+        stop=new Date();
         System.out.println("Test took " +new Date(stop.getTime()-start.getTime()).getTime()+" mils.");
     }
 }

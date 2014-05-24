@@ -43,27 +43,32 @@ public final class NucleotideAlphabet extends Alphabet<Nucleotide> {
             return nucleotide;
         }
 
-        private static Map<Character,Nucleotide> byPillar=new HashMap<>();
-        static{
-            for(ALPHABET a:ALPHABET.values()){
-                byPillar.put(a.nucleotide.getPillar(),a.nucleotide);  //Hashmap turned out to be faster in tests against switch statement
+        private static Map<Character, Nucleotide> byPillar = new HashMap<>();
+
+        static {
+            for (ALPHABET a : ALPHABET.values()) {
+                byPillar.put(a.nucleotide.getPillar(), a.nucleotide);  //Hashmap turned out to be faster in tests against switch statement
             }
         }
-        private static Map<Byte,Nucleotide> byRepresentation=new HashMap<>();
-        static{
-            for(ALPHABET a:ALPHABET.values()){
-                byRepresentation.put(a.nucleotide.getRepresentation(),a.nucleotide);
+
+        private static Map<Byte, Nucleotide> byRepresentation = new HashMap<>();
+
+        static {
+            for (ALPHABET a : ALPHABET.values()) {
+                byRepresentation.put(a.nucleotide.getRepresentation(), a.nucleotide);
             }
         }
+
         ALPHABET(Nucleotide nucleotide) {
             this.nucleotide = nucleotide;
         }
 
-        public static Optional<Nucleotide> getByPillar(char pillar){
-             return Optional.of(byPillar.get(pillar));
+        public static Optional<Nucleotide> getByPillar(char pillar) {
+            return Optional.ofNullable(byPillar.get(Character.toUpperCase(pillar)));
         }
-        public static Optional<Nucleotide> getByRepresentation(byte representation){
-            return Optional.of(byRepresentation.get(representation));
+
+        public static Optional<Nucleotide> getByRepresentation(byte representation) {
+            return Optional.ofNullable(byRepresentation.get(representation));
         }
     }
 
@@ -72,98 +77,22 @@ public final class NucleotideAlphabet extends Alphabet<Nucleotide> {
         //Convert to uppercase to reduce redundancy in coding
         pillar = Character.toUpperCase(pillar);
         //Select byte representation to return
-        switch (pillar) {
-
-            case 'A':
-                return ALPHABET.A.nucleotide.getRepresentation();
-            case 'G':
-                return ALPHABET.G.nucleotide.getRepresentation();
-            case 'C':
-                return ALPHABET.C.nucleotide.getRepresentation();
-            case 'T':
-                return ALPHABET.T.nucleotide.getRepresentation();
-
-            case 'R':
-                return ALPHABET.R.nucleotide.getRepresentation();
-            case 'M':
-                return ALPHABET.M.nucleotide.getRepresentation();
-            case 'W':
-                return ALPHABET.W.nucleotide.getRepresentation();
-            case 'S':
-                return ALPHABET.S.nucleotide.getRepresentation();
-            case 'K':
-                return ALPHABET.K.nucleotide.getRepresentation();
-            case 'Y':
-                return ALPHABET.Y.nucleotide.getRepresentation();
-
-            case 'V':
-                return ALPHABET.V.nucleotide.getRepresentation();
-            case 'H':
-                return ALPHABET.H.nucleotide.getRepresentation();
-            case 'D':
-                return ALPHABET.D.nucleotide.getRepresentation();
-            case 'B':
-                return ALPHABET.B.nucleotide.getRepresentation();
-            case 'N':
-                return ALPHABET.N.nucleotide.getRepresentation();
-
-            case '-':
-                return ALPHABET.GAP.nucleotide.getRepresentation();
-            case '?':
-                return ALPHABET.Q.nucleotide.getRepresentation();
-
-            default:
-                throw new IllegalArgumentException("Invalid nucleotide character: ".concat(String.valueOf(pillar)));
-
+        final Optional<Nucleotide> o = ALPHABET.getByPillar(pillar);
+        if (o.isPresent()) {
+            return o.get().getRepresentation();
+        } else {
+            throw new IllegalArgumentException("Invalid nucleotide character: ".concat(String.valueOf(pillar)));
         }
     }
 
     @Override
     public char toPillar(byte representation) {
-        switch (representation) {
-
-            case (byte) 0b10001000:
-                return ALPHABET.A.nucleotide.getPillar();
-            case (byte) 0b01001000:
-                return ALPHABET.G.nucleotide.getPillar();
-            case (byte) 0b00101000:
-                return ALPHABET.C.nucleotide.getPillar();
-            case (byte) 0b00011000:
-                return ALPHABET.T.nucleotide.getPillar();
-
-            case (byte) 0b11000000:
-                return ALPHABET.R.nucleotide.getPillar();
-            case (byte) 0b10100000:
-                return ALPHABET.M.nucleotide.getPillar();
-            case (byte) 0b10010000:
-                return ALPHABET.W.nucleotide.getPillar();
-            case (byte) 0b01100000:
-                return ALPHABET.S.nucleotide.getPillar();
-            case (byte) 0b01010000:
-                return ALPHABET.K.nucleotide.getPillar();
-            case (byte) 0b00110000:
-                return ALPHABET.Y.nucleotide.getPillar();
-
-            case (byte) 0b11100000:
-                return ALPHABET.V.nucleotide.getPillar();
-            case (byte) 0b10110000:
-                return ALPHABET.H.nucleotide.getPillar();
-            case (byte) 0b11010000:
-                return ALPHABET.D.nucleotide.getPillar();
-            case (byte) 0b01110000:
-                return ALPHABET.B.nucleotide.getPillar();
-            case (byte) 0b11110000:
-                return ALPHABET.N.nucleotide.getPillar();
-
-            case (byte) 0b00000100:
-                return ALPHABET.GAP.nucleotide.getPillar();
-            case (byte) 0b00000010:
-                return ALPHABET.Q.nucleotide.getPillar();
-
-            default:
-                throw new IllegalArgumentException("No character representation for a given bytecode!");
+        final Optional<Nucleotide> o = ALPHABET.getByRepresentation(representation);
+        if (o.isPresent()) {
+            return o.get().getPillar();
+        } else {
+            throw new IllegalArgumentException("No character representation for a given bytecode!");
         }
-
     }
 
     @Override
@@ -213,8 +142,8 @@ public final class NucleotideAlphabet extends Alphabet<Nucleotide> {
             case 'N':
                 return ALPHABET.N.nucleotide.getPillar();
 
-            default:
-                throw new IllegalArgumentException("Cannot get a reverse complement for the given character " + letter + '!');
+            default: return '0';
+                //throw new IllegalArgumentException("Cannot get a reverse complement for the given character " + letter + '!');
         }
     }
 
@@ -267,6 +196,7 @@ public final class NucleotideAlphabet extends Alphabet<Nucleotide> {
         }
         return representation;
     }
+
     public byte[] rcByteArray(Sequence<Nucleotide> nucleotideSequence) {
         return rcByteArray(nucleotideSequence.getSequence());
     }
@@ -278,22 +208,22 @@ public final class NucleotideAlphabet extends Alphabet<Nucleotide> {
         return representations;
     }
 
-    public String rcString(String sequence){
-        final char[]pillars=new char[sequence.length()];
-        for(int i=0;i<pillars.length;i++){
-            pillars[i]=rc(sequence.charAt(i));
+    public String rcString(String sequence) {
+        final char[] pillars = new char[sequence.length()];
+        for (int i = 0; i < pillars.length; i++) {
+            pillars[i] = rc(sequence.charAt(i));
         }
         return new String(pillars);
     }
 
-    public String rcString(Sequence<Nucleotide> nucleotideSequence){
-       return rcString(nucleotideSequence.getSequence());
+    public String rcString(Sequence<Nucleotide> nucleotideSequence) {
+        return rcString(nucleotideSequence.getSequence());
     }
 
-    public String rcString(byte[]representations){
-        final char[]pillars=new char[representations.length];
-        for(int i=0;i<pillars.length;i++){
-            pillars[i]=rc(representations[i]);
+    public String rcString(byte[] representations) {
+        final char[] pillars = new char[representations.length];
+        for (int i = 0; i < pillars.length; i++) {
+            pillars[i] = rc(representations[i]);
         }
         return new String(pillars);
     }
