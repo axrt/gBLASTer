@@ -64,11 +64,15 @@ public final class NucleotideAlphabet extends Alphabet<Nucleotide> {
         }
 
         public static Optional<Nucleotide> getByPillar(char pillar) {
-            return Optional.ofNullable(byPillar.get(Character.toUpperCase(pillar)));
+            final Optional<Nucleotide> o = Optional.ofNullable(byPillar.get(Character.toUpperCase(pillar)));
+            o.orElseThrow(() -> new IllegalArgumentException("Invalid nucleotide character: ".concat(String.valueOf(pillar))));
+            return o;
         }
 
         public static Optional<Nucleotide> getByRepresentation(byte representation) {
-            return Optional.ofNullable(byRepresentation.get(representation));
+            final Optional<Nucleotide> o = Optional.ofNullable(byRepresentation.get(representation));
+            o.orElseThrow(() -> new IllegalArgumentException("No character representation for a given bytecode!"));
+            return o;
         }
     }
 
@@ -77,22 +81,12 @@ public final class NucleotideAlphabet extends Alphabet<Nucleotide> {
         //Convert to uppercase to reduce redundancy in coding
         pillar = Character.toUpperCase(pillar);
         //Select byte representation to return
-        final Optional<Nucleotide> o = ALPHABET.getByPillar(pillar);
-        if (o.isPresent()) {
-            return o.get().getRepresentation();
-        } else {
-            throw new IllegalArgumentException("Invalid nucleotide character: ".concat(String.valueOf(pillar)));
-        }
+        return ALPHABET.getByPillar(pillar).get().getRepresentation();
     }
 
     @Override
     public char toPillar(byte representation) {
-        final Optional<Nucleotide> o = ALPHABET.getByRepresentation(representation);
-        if (o.isPresent()) {
-            return o.get().getPillar();
-        } else {
-            throw new IllegalArgumentException("No character representation for a given bytecode!");
-        }
+        return ALPHABET.getByRepresentation(representation).get().getPillar();
     }
 
     @Override
@@ -142,8 +136,9 @@ public final class NucleotideAlphabet extends Alphabet<Nucleotide> {
             case 'N':
                 return ALPHABET.N.nucleotide.getPillar();
 
-            default: return '0';
-                //throw new IllegalArgumentException("Cannot get a reverse complement for the given character " + letter + '!');
+            default:
+                return '0';
+            //throw new IllegalArgumentException("Cannot get a reverse complement for the given character " + letter + '!');
         }
     }
 
