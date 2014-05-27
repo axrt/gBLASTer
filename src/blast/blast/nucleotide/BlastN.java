@@ -118,13 +118,20 @@ public class BlastN extends AbstractBlast {
             this.die(Optional.of(has.stream()), SUBJECT);
             return this;//will never be reached
         }
-        public BlastBuilder outfmt(Optional<OUTFMT_VALS> value,OUTFMT_VALS.CUSTOM_FMT_VALS ... custom_fmt_vals) {
+        public BlastBuilder outfmt(Optional<OUTFMT_VALS> value,Optional<OUTFMT_VALS.CUSTOM_FMT_VALS> ... custom_fmt_vals) {
             value.ifPresent(v -> {
                 final Set<OUTFMT_VALS> allowedVals;
-                if((allowedVals=Stream.of(TABULAR,TABULAR_WITH_COMMENT_LINES,COMMA_SEP_VALS).collect(Collectors.toSet())).contains(v)){
-                    this.optionalParams.put(OUTFMT, v.toString().concat(Arrays.asList(custom_fmt_vals).stream().map(alv->alv.toString()).collect(joining(" "))));
+                if(!(allowedVals=Stream.of(TABULAR,TABULAR_WITH_COMMENT_LINES,COMMA_SEP_VALS).collect(Collectors.toSet())).contains(v)){
+                    if(custom_fmt_vals!=null){
+                        throw new IllegalArgumentException("Custom parameters allowed only with ".concat(allowedVals.stream().map(alv->toString()).collect(joining(", "))).concat("!"));
+                    }
+                    this.optionalParams.put(OUTFMT, v.toString());
                 }else{
-                  throw new IllegalArgumentException("Custom parameters allowed only with ".concat(allowedVals.stream().map(alv->toString()).collect(joining(", "))).concat("!"));
+                    if(custom_fmt_vals==null){
+                        this.optionalParams.put(OUTFMT, v.toString().concat(" ".concat(CUSTOM_FMT_VALS.std.toString())));
+                    }else{
+                        this.optionalParams.put(OUTFMT, v.toString().concat(" ").concat(Arrays.asList(custom_fmt_vals).stream().filter(alv->alv.isPresent()).map(alv->alv.toString()).collect(joining(" "))));
+                    }
                 }
             });
             return this;
