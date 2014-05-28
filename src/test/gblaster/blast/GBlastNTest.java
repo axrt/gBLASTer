@@ -31,7 +31,7 @@ public class GBlastNTest {
         final IterationEventBuffer buffer=new IterationEventBuffer(bufferCapasity);
 
         executor.execute(buffer);
-        final GBlastN gblastn =(GBlastN) new GBlastN.BlastNBuilder(toBlastN, toTestFile, db).num_threads(Optional.of(12)).build();
+        final GBlastN gblastn =(GBlastN) new GBlastN.GBlastNBuilder(toBlastN, toTestFile, db).num_threads(Optional.of(12)).build();
         gblastn.addListener(buffer);
         final Future<Optional<BlastOutput>> future = executor.submit(gblastn);
         try {

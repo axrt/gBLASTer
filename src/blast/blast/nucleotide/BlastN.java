@@ -2,7 +2,6 @@ package blast.blast.nucleotide;
 
 import blast.blast.AbstractBlast;
 import blast.blast.BlastHelper;
-import blast.output.BlastOutput;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -21,85 +20,53 @@ import static java.util.stream.Collectors.toList;
 public abstract class BlastN<E> extends AbstractBlast<E> {
 
 
-    public static abstract class BlastBuilder {
-        protected final Path pathToBlast;
-        protected final Path queryFile;
-        protected final String database;
-        protected final Map<String, String> optionalParams;
+    public static abstract class BlastNBuilder extends AbstractBlast.BlastBuilder {
 
-        public BlastBuilder(Path pathToBlast, Path queryFile, String database) {
-            this.pathToBlast = pathToBlast;
-            this.database = database;
-            this.queryFile = queryFile;
-            this.optionalParams = new LinkedHashMap<>();
+        protected BlastNBuilder(Path pathToBlast, Path queryFile, String database) {
+            super(pathToBlast, queryFile, database);
         }
-
+        @Override
         protected void die(Optional<Stream<String>> params, String addition) {
             params.orElseThrow(() -> new IllegalArgumentException("Inconsistent parameter ".concat(addition).concat("!")));
             params.ifPresent(s -> new IllegalArgumentException("The BLASTN command already contains ".concat(s.collect(joining(", "))).concat(" commands, which are incompatible with ").concat(addition)));
         }
 
-        public BlastBuilder out(Optional<Path>value){
-            value.ifPresent(v -> this.optionalParams.put(OUT, v.toFile().getPath()));
-            return this;
-        }
-
-        public BlastBuilder strand(Optional<BlastHelper.STRAND_VALS> value) {
+        public BlastNBuilder strand(Optional<BlastHelper.STRAND_VALS> value) {
             value.ifPresent(v -> this.optionalParams.put(STRAND, v.toString()));
             return this;
         }
-
-        public BlastBuilder query_loc(Optional<String> value) {
-            value.ifPresent(v -> this.optionalParams.put(QUERY_LOC, v));
-            return this;
-        }
-
-        public BlastBuilder task(Optional<BlastHelper.TASK_VALS> value) {
+        @Override
+        public <BLASTN_TASK_VALS>BlastNBuilder task(Optional<BLASTN_TASK_VALS> value) {
             value.ifPresent(v -> this.optionalParams.put(TASK, v.toString()));
             return this;
         }
 
-        public BlastBuilder evalue(Optional<Double> value) {
-            value.ifPresent(v -> this.optionalParams.put(EVALUE, v.toString()));
-            return this;
-        }
-
-        public BlastBuilder word_size(Optional<Integer> value) {
-            value.ifPresent(v -> this.optionalParams.put(WORD_SIZE, v.toString()));
-            return this;
-        }
-
-        public BlastBuilder gapopen(Optional<Integer> value) {
-            value.ifPresent(v -> this.optionalParams.put(GAPOPEN, v.toString()));
-            return this;
-        }
-
-        public BlastBuilder gapextend(Optional<Integer> value) {
+        public BlastNBuilder gapextend(Optional<Integer> value) {
             value.ifPresent(v -> this.optionalParams.put(GAPEXTEND, v.toString()));
             return this;
         }
 
-        public BlastBuilder penalty(Optional<Integer> value) {
+        public BlastNBuilder penalty(Optional<Integer> value) {
             value.ifPresent(v -> this.optionalParams.put(PENALTY, v.toString()));
             return this;
         }
 
-        public BlastBuilder reward(Optional<Integer> value) {
+        public BlastNBuilder reward(Optional<Integer> value) {
             value.ifPresent(v -> this.optionalParams.put(REWARD, v.toString()));
             return this;
         }
 
-        public BlastBuilder use_index(Optional<Boolean> value) {
+        public BlastNBuilder use_index(Optional<Boolean> value) {
             value.ifPresent(v -> this.optionalParams.put(USE_INDEX, v.toString()));
             return this;
         }
 
-        public BlastBuilder index_name(Optional<String> value) {
+        public BlastNBuilder index_name(Optional<String> value) {
             value.ifPresent(v -> this.optionalParams.put(INDEX_NAME, v));
             return this;
         }
 
-        public BlastBuilder subject(Optional<Path> value) {
+        public BlastNBuilder subject(Optional<Path> value) {
             final List<String> has = Stream.of(DB, GILIST, SEQIDLIST, NEGATIVE_GILIST, DB_SOFT_MASK, DB_HARD_MASK).filter(s -> this.optionalParams.containsKey(s)).collect(toList());
             if (!has.isEmpty()) {
                 value.ifPresent(v -> this.optionalParams.put(SUBJECT, v.toFile().getPath()));
@@ -109,7 +76,7 @@ public abstract class BlastN<E> extends AbstractBlast<E> {
             return this;
         }
 
-        public BlastBuilder subject_loc(Optional<String> value) {
+        public BlastNBuilder subject_loc(Optional<String> value) {
             final List<String> has = Stream.of(DB, GILIST, SEQIDLIST, NEGATIVE_GILIST, DB_SOFT_MASK, DB_HARD_MASK, REMOTE).filter(s -> this.optionalParams.containsKey(s)).collect(toList());
             if (!has.isEmpty()) {
                 value.ifPresent(v -> this.optionalParams.put(SUBJECT, v));
@@ -119,7 +86,7 @@ public abstract class BlastN<E> extends AbstractBlast<E> {
             return this;//will never be reached
         }
 
-        public BlastBuilder outfmt(Optional<OUTFMT_VALS> value, Optional<OUTFMT_VALS.CUSTOM_FMT_VALS>... custom_fmt_vals) {
+        public BlastNBuilder outfmt(Optional<OUTFMT_VALS> value, Optional<OUTFMT_VALS.CUSTOM_FMT_VALS>... custom_fmt_vals) {
             value.ifPresent(v -> {
                 final Set<OUTFMT_VALS> allowedVals;
                 if (!(allowedVals = Stream.of(TABULAR, TABULAR_WITH_COMMENT_LINES, COMMA_SEP_VALS).collect(Collectors.toSet())).contains(v)) {
@@ -138,12 +105,12 @@ public abstract class BlastN<E> extends AbstractBlast<E> {
             return this;
         }
 
-        public BlastBuilder show_gis() {
+        public BlastNBuilder show_gis() {
             this.optionalParams.put(SHOW_GIS, "");
             return this;
         }
 
-        public BlastBuilder num_threads(Optional<Integer> value) {
+        public BlastNBuilder num_threads(Optional<Integer> value) {
             value.ifPresent(v -> this.optionalParams.put(NUM_THREADS, v.toString()));
             return this;
         }

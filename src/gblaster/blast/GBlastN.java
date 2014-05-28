@@ -1,6 +1,5 @@
 package gblaster.blast;
 
-import blast.blast.AbstractBlast;
 import blast.blast.BlastHelper;
 import blast.blast.nucleotide.BlastN;
 import blast.output.BlastOutput;
@@ -33,7 +32,7 @@ public class GBlastN extends BlastN<Iteration> {
 
     protected final List<String> command;
 
-    protected GBlastN(BlastNBuilder builder) {
+    protected GBlastN(GBlastNBuilder builder) {
         super();
         this.command = builder.getCommand();
     }
@@ -66,9 +65,9 @@ public class GBlastN extends BlastN<Iteration> {
         return Optional.empty();
     }
 
-    public static class BlastNBuilder extends BlastBuilder {
+    public static class GBlastNBuilder extends BlastNBuilder {
 
-        public BlastNBuilder(Path pathToBlast, Path queryFile, String database) {
+        public GBlastNBuilder(Path pathToBlast, Path queryFile, String database) {
             super(pathToBlast, queryFile, database);
 
         }

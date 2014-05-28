@@ -1,9 +1,7 @@
 package blast.blast;
 
 import blast.output.BlastOutput;
-import blast.output.Iteration;
 import org.xml.sax.*;
-import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 import javax.xml.bind.JAXBContext;
@@ -46,12 +44,24 @@ public final class BlastHelper {
     //General search options
     public static final String TASK = "-task";
 
-    public static enum TASK_VALS {
+    public static enum BLASTN_TASK_VALS {
         BLASTN("blastn"), BLASTN_SHORT("blastn-short"), DC_MEGABLAST("dc-megablast"),
         MEGABLAST("megablast"), RMBLASTN("rmblastn");
         private String commandOption;
 
-        private TASK_VALS(String commandOption) {
+        private BLASTN_TASK_VALS(String commandOption) {
+            this.commandOption = commandOption;
+        }
+        @Override
+        public String toString() {
+            return this.commandOption;
+        }
+    }
+    public static enum BLASTP_TASK_VALS {
+        BLASTP("blastp"), BLASTP_SHORT("blastp-short"), DELTABLAST("deltablast");
+        private String commandOption;
+
+        private BLASTP_TASK_VALS(String commandOption) {
             this.commandOption = commandOption;
         }
         @Override
