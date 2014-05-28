@@ -11,37 +11,37 @@ import java.util.stream.Stream;
 
 import static blast.blast.BlastHelper.*;
 import static blast.blast.BlastHelper.OUTFMT_VALS.*;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+
 /**
  * Created by alext on 5/27/14.
  * TODO document class
  */
-public class BlastN extends AbstractBlast {
+public abstract class BlastN<E> extends AbstractBlast<E> {
 
 
-    @Override
-    public BlastOutput call() throws Exception {
-        return null;
-    }
+    public static abstract class BlastBuilder {
+        protected final Path pathToBlast;
+        protected final Path queryFile;
+        protected final String database;
+        protected final Map<String, String> optionalParams;
 
-    public static class BlastBuilder {
-        private final Path pathToBlast;
-        private final Path queryFile;
-        private final String database;
-        private final Path outFile;
-        private final Map<String, String> optionalParams;
-
-        public BlastBuilder(Path pathToBlast, Path queryFile, String database, Path outFile) {
+        public BlastBuilder(Path pathToBlast, Path queryFile, String database) {
             this.pathToBlast = pathToBlast;
-            this.outFile = outFile;
             this.database = database;
             this.queryFile = queryFile;
             this.optionalParams = new LinkedHashMap<>();
         }
 
-        protected void die(Optional<Stream<String>> params, String addition){
-            params.orElseThrow(()->new IllegalArgumentException("Inconsistent parameter ".concat(addition).concat("!")));
-            params.ifPresent(s-> new IllegalArgumentException("The BLASTN command already contains ".concat(s.collect(joining(", "))).concat(" commands, which are incompatible with ").concat(addition)));
+        protected void die(Optional<Stream<String>> params, String addition) {
+            params.orElseThrow(() -> new IllegalArgumentException("Inconsistent parameter ".concat(addition).concat("!")));
+            params.ifPresent(s -> new IllegalArgumentException("The BLASTN command already contains ".concat(s.collect(joining(", "))).concat(" commands, which are incompatible with ").concat(addition)));
+        }
+
+        public BlastBuilder out(Optional<Path>value){
+            value.ifPresent(v -> this.optionalParams.put(OUT, v.toFile().getPath()));
+            return this;
         }
 
         public BlastBuilder strand(Optional<BlastHelper.STRAND_VALS> value) {
@@ -105,12 +105,12 @@ public class BlastN extends AbstractBlast {
                 value.ifPresent(v -> this.optionalParams.put(SUBJECT, v.toFile().getPath()));
                 return this;
             }
-            this.die(Optional.of(has.stream()),SUBJECT);
+            this.die(Optional.of(has.stream()), SUBJECT);
             return this;
         }
 
         public BlastBuilder subject_loc(Optional<String> value) {
-            final List<String> has = Stream.of(DB, GILIST, SEQIDLIST, NEGATIVE_GILIST, DB_SOFT_MASK, DB_HARD_MASK,REMOTE).filter(s -> this.optionalParams.containsKey(s)).collect(toList());
+            final List<String> has = Stream.of(DB, GILIST, SEQIDLIST, NEGATIVE_GILIST, DB_SOFT_MASK, DB_HARD_MASK, REMOTE).filter(s -> this.optionalParams.containsKey(s)).collect(toList());
             if (!has.isEmpty()) {
                 value.ifPresent(v -> this.optionalParams.put(SUBJECT, v));
                 return this;
@@ -118,23 +118,36 @@ public class BlastN extends AbstractBlast {
             this.die(Optional.of(has.stream()), SUBJECT);
             return this;//will never be reached
         }
-        public BlastBuilder outfmt(Optional<OUTFMT_VALS> value,Optional<OUTFMT_VALS.CUSTOM_FMT_VALS> ... custom_fmt_vals) {
+
+        public BlastBuilder outfmt(Optional<OUTFMT_VALS> value, Optional<OUTFMT_VALS.CUSTOM_FMT_VALS>... custom_fmt_vals) {
             value.ifPresent(v -> {
                 final Set<OUTFMT_VALS> allowedVals;
-                if(!(allowedVals=Stream.of(TABULAR,TABULAR_WITH_COMMENT_LINES,COMMA_SEP_VALS).collect(Collectors.toSet())).contains(v)){
-                    if(custom_fmt_vals!=null){
-                        throw new IllegalArgumentException("Custom parameters allowed only with ".concat(allowedVals.stream().map(alv->toString()).collect(joining(", "))).concat("!"));
+                if (!(allowedVals = Stream.of(TABULAR, TABULAR_WITH_COMMENT_LINES, COMMA_SEP_VALS).collect(Collectors.toSet())).contains(v)) {
+                    if (custom_fmt_vals != null) {
+                        throw new IllegalArgumentException("Custom parameters allowed only with ".concat(allowedVals.stream().map(alv -> toString()).collect(joining(", "))).concat("!"));
                     }
                     this.optionalParams.put(OUTFMT, v.toString());
-                }else{
-                    if(custom_fmt_vals==null){
+                } else {
+                    if (custom_fmt_vals == null) {
                         this.optionalParams.put(OUTFMT, v.toString().concat(" ".concat(CUSTOM_FMT_VALS.std.toString())));
-                    }else{
-                        this.optionalParams.put(OUTFMT, v.toString().concat(" ").concat(Arrays.asList(custom_fmt_vals).stream().filter(alv->alv.isPresent()).map(alv->alv.toString()).collect(joining(" "))));
+                    } else {
+                        this.optionalParams.put(OUTFMT, v.toString().concat(" ").concat(Arrays.asList(custom_fmt_vals).stream().filter(alv -> alv.isPresent()).map(alv -> alv.toString()).collect(joining(" "))));
                     }
                 }
             });
             return this;
         }
+
+        public BlastBuilder show_gis() {
+            this.optionalParams.put(SHOW_GIS, "");
+            return this;
+        }
+
+        public BlastBuilder num_threads(Optional<Integer> value) {
+            value.ifPresent(v -> this.optionalParams.put(NUM_THREADS, v.toString()));
+            return this;
+        }
+        public abstract BlastN build();
+
     }
 }

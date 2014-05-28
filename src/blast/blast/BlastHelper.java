@@ -1,10 +1,9 @@
 package blast.blast;
 
 import blast.output.BlastOutput;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
+import blast.output.Iteration;
+import org.xml.sax.*;
+import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 import javax.xml.bind.JAXBContext;

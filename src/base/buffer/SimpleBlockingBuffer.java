@@ -7,7 +7,7 @@ import java.util.concurrent.ArrayBlockingQueue;
  * Created by alext on 5/23/14.
  * TODO document class
  */
-public class SimpleBlockingBuffer<E> extends ArrayBlockingQueue<E> {
+public abstract class SimpleBlockingBuffer<E> extends ArrayBlockingQueue<E> {
 
     protected boolean done;
 
@@ -25,4 +25,13 @@ public class SimpleBlockingBuffer<E> extends ArrayBlockingQueue<E> {
         super(capacity, fair, c);
         this.done=false;
     }
+
+    public synchronized boolean isDone(){
+        return this.done;
+    }
+
+    /**
+     * Should allow to finish the job and set boolean done to true
+     */
+    public abstract void release();
 }
