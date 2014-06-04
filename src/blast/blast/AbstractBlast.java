@@ -26,7 +26,7 @@ public abstract class AbstractBlast<E> implements Callable<Optional<BlastOutput>
         this.listeners = new ArrayList<>();
     }
 
-    public abstract static class BlastBuilder {
+    public abstract static class BlastBuilder<E,T extends AbstractBlast<E>> {
         protected final Path pathToBlast;
         protected final Path queryFile;
         protected final String database;
@@ -52,10 +52,7 @@ public abstract class AbstractBlast<E> implements Callable<Optional<BlastOutput>
             value.ifPresent(v -> this.optionalParams.put(OUT, v.toFile().getPath()));
             return this;
         }
-        public <T>BlastBuilder task(Optional<T> value) {
-            value.ifPresent(v -> this.optionalParams.put(TASK, v.toString()));
-            return this;
-        }
+
         public BlastBuilder evalue(Optional<Double> value) {
             value.ifPresent(v -> this.optionalParams.put(EVALUE, v.toString()));
             return this;
@@ -97,9 +94,10 @@ public abstract class AbstractBlast<E> implements Callable<Optional<BlastOutput>
             value.ifPresent(v -> this.optionalParams.put(NUM_THREADS, v.toString()));
             return this;
         }
+        public abstract T build();
     }
 
-    public static class BlastNBuilder extends BlastBuilder{
+    public abstract static class BlastNBuilder<E,T extends AbstractBlast<E>> extends BlastBuilder<E,T>{
 
         public BlastNBuilder(Path pathToBlast, Path queryFile, String database) {
             super(pathToBlast, queryFile, database);
@@ -110,7 +108,7 @@ public abstract class AbstractBlast<E> implements Callable<Optional<BlastOutput>
             params.orElseThrow(() -> new IllegalArgumentException("Inconsistent parameter ".concat(addition).concat("!")));
             params.ifPresent(s -> new IllegalArgumentException("The BLASTN command already contains ".concat(s.collect(joining(", "))).concat(" commands, which are incompatible with ").concat(addition)));
         }
-        @Override
+
         public <BLASTN_TASK_VALS>BlastNBuilder task(Optional<BLASTN_TASK_VALS> value) {
             value.ifPresent(v -> this.optionalParams.put(TASK, v.toString()));
             return this;
@@ -189,7 +187,7 @@ public abstract class AbstractBlast<E> implements Callable<Optional<BlastOutput>
         }
     }
 
-    public static class BlastPBuilder extends BlastBuilder{
+    public abstract static class BlastPBuilder<E,T extends AbstractBlast<E>> extends BlastBuilder<E,T>{
         public BlastPBuilder(Path pathToBlast, Path queryFile, String database) {
             super(pathToBlast, queryFile, database);
         }

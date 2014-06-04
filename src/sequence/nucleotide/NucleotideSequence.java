@@ -18,19 +18,8 @@ public class NucleotideSequence<T extends Nucleotide> extends Sequence<T> {
 
 
     public static NucleotideSequence<Nucleotide> get(String sequence, String ac){
+
         return new NucleotideSequence<>(sequence,ac);
     }
 
-    @Override
-    public boolean init() {
-        if(!this.hasBeenInitialized){
-            synchronized (this.characters){
-                if(!this.hasBeenInitialized) {
-                    this.characters = new ArrayList<>(this.sequence.length());
-                    this.hasBeenInitialized = true;
-                }
-            }
-        }
-        return this.hasBeenInitialized;
-    }
 }

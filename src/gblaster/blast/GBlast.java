@@ -78,21 +78,21 @@ public class GBlast extends AbstractBlast<Iteration> {
         return this.listeners.stream().mapToInt((l) -> l.listen(event)).sum();
     }
 
-    public static class GBlastPBuilder extends BlastPBuilder {
+    public static class GBlastPBuilder extends BlastPBuilder<Iteration,GBlast> {
         public GBlastPBuilder(Path pathToBlast, Path queryFile, String database) {
             super(pathToBlast, queryFile, database);
         }
-
+        @Override
         public GBlast build() {
             return new GBlast(this);
         }
     }
 
-    public static class GBlastNBuilder extends BlastNBuilder {
+    public static class GBlastNBuilder extends BlastNBuilder<Iteration,GBlast> {
         public GBlastNBuilder(Path pathToBlast, Path queryFile, String database) {
             super(pathToBlast, queryFile, database);
         }
-
+        @Override
         public GBlast build() {
             return new GBlast(this);
         }

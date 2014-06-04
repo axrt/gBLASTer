@@ -8,7 +8,14 @@ import alphabet.character.*;
  */
 public class AminoAcid extends alphabet.character.Character {
 
-    public AminoAcid(char pillar, byte representation) {
+    protected final String threeLetterRep;
+
+    public AminoAcid(char pillar, byte representation,String threeLetterRep) {
         super(pillar, representation);
+        this.threeLetterRep=threeLetterRep;
+    }
+
+    public String getThreeLetterRep() {
+        return this.threeLetterRep;
     }
 }
