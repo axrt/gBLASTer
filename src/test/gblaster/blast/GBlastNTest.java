@@ -4,7 +4,8 @@ import base.buffer.SimpleBlockingBuffer;
 import blast.blast.AbstractBlast;
 import blast.output.BlastOutput;
 import blast.output.Iteration;
-import gblaster.blast.GBlastN;
+
+import gblaster.blast.GBlast;
 import org.junit.Test;
 
 import java.nio.file.Path;
@@ -31,7 +32,8 @@ public class GBlastNTest {
         final IterationEventBuffer buffer=new IterationEventBuffer(bufferCapasity);
 
         executor.execute(buffer);
-        final GBlastN gblastn =(GBlastN) new GBlastN.GBlastNBuilder(toBlastN, toTestFile, db).num_threads(Optional.of(12)).build();
+        final AbstractBlast.BlastBuilder builder = new GBlast.GBlastNBuilder(toBlastN, toTestFile, db).num_threads(Optional.of(12));
+        final GBlast gblastn =((GBlast.GBlastNBuilder)builder).build();
         gblastn.addListener(buffer);
         final Future<Optional<BlastOutput>> future = executor.submit(gblastn);
         try {

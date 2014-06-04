@@ -1,7 +1,6 @@
 package gblaster.blast;
 
-import blast.blast.BlastHelper;
-import blast.blast.nucleotide.BlastN;
+import blast.blast.AbstractBlast;
 import blast.output.BlastOutput;
 import blast.output.Iteration;
 
@@ -18,21 +17,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static blast.blast.BlastHelper.*;
-
 /**
- * Created by alext on 5/28/14.
+ * Created by alext on 6/4/14.
  * TODO document class
  */
-public class GBlastN extends BlastN<Iteration> {
+public class GBlast extends AbstractBlast<Iteration> {
 
     protected final List<String> command;
 
-    protected GBlastN(GBlastNBuilder builder) {
+    protected GBlast(BlastBuilder builder) {
         super();
         this.command = builder.getCommand();
     }
@@ -51,51 +47,22 @@ public class GBlastN extends BlastN<Iteration> {
             final JAXBContext jc = JAXBContext.newInstance(Iteration.class);
             final Unmarshaller unmarshaller = jc.createUnmarshaller();
 
-            while(xsr.hasNext()) {
-                if(xsr.isStartElement() && xsr.getLocalName().equals("Iteration")) {
+            while (xsr.hasNext()) {
+                if (xsr.isStartElement() && xsr.getLocalName().equals("Iteration")) {
                     final JAXBElement<Iteration> jb = unmarshaller.unmarshal(xsr, Iteration.class);
                     final Iteration iteration = jb.getValue();
-                    this.notifyListeners(new BlastEvent<>(iteration));
+                    this.notifyListeners(new AbstractBlast.BlastEvent<>(iteration));
                 }
                 xsr.next();
             }
-            bufferedReader.lines().forEach(l->System.out.println("BLAST ERR:>".concat(l)));
+            bufferedReader.lines().forEach(l -> System.out.println("BLAST ERR:>".concat(l)));
         }
 
         return Optional.empty();
     }
 
-    public static class GBlastNBuilder extends BlastNBuilder {
-
-        public GBlastNBuilder(Path pathToBlast, Path queryFile, String database) {
-            super(pathToBlast, queryFile, database);
-
-        }
-
-        @Override
-        public GBlastN build() {
-            return new GBlastN(this);
-        }
-
-        public List<String> getCommand() {
-            this.optionalParams.put(OUTFMT, BlastHelper.OUTFMT_VALS.XML.toString());
-            final List<String> command = new ArrayList<>();
-            command.add(this.pathToBlast.toFile().getPath());
-            command.add(QUERY);
-            command.add(this.queryFile.toFile().getPath());
-            command.add(DB);
-            command.add(this.database);
-            this.optionalParams.entrySet().stream().forEach(e -> {
-                command.add(e.getKey());
-                command.add(e.getValue());
-            });
-
-            return command;
-        }
-    }
-
     @Override
-    public synchronized int addListener(BlastEventListner<Iteration> listner){
+    public synchronized int addListener(BlastEventListner<Iteration> listner) {
         this.listeners.add(listner);
         return this.listeners.size();
     }
@@ -108,6 +75,26 @@ public class GBlastN extends BlastN<Iteration> {
 
     @Override
     public synchronized int notifyListeners(BlastEvent<Iteration> event) {
-        return this.listeners.stream().mapToInt((l)->l.listen(event)).sum();
+        return this.listeners.stream().mapToInt((l) -> l.listen(event)).sum();
+    }
+
+    public static class GBlastPBuilder extends BlastPBuilder {
+        public GBlastPBuilder(Path pathToBlast, Path queryFile, String database) {
+            super(pathToBlast, queryFile, database);
+        }
+
+        public GBlast build() {
+            return new GBlast(this);
+        }
+    }
+
+    public static class GBlastNBuilder extends BlastNBuilder {
+        public GBlastNBuilder(Path pathToBlast, Path queryFile, String database) {
+            super(pathToBlast, queryFile, database);
+        }
+
+        public GBlast build() {
+            return new GBlast(this);
+        }
     }
 }
