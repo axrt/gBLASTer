@@ -2,14 +2,12 @@ package alphabet.translate;
 
 import alphabet.character.amino.AminoAcid;
 import alphabet.character.nucleotide.Nucleotide;
+import alphabet.nucleotide.NucleotideAlphabet;
 import alphabet.protein.AminoAcidAlphabet;
 import sequence.Sequence;
 import sequence.protein.ORF;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Spliterator;
-import java.util.Spliterators;
+import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -17,18 +15,32 @@ import java.util.stream.StreamSupport;
  * Created by alext on 6/4/14.
  * TODO document class
  */
-public class GRibosome extends Ribosome<Nucleotide, AminoAcid> {
+public class GRibosome extends Ribosome<Nucleotide, AminoAcid, ORF> {
 
     protected final Map<String, AminoAcid> codonTable;
-
-    public GRibosome(Sequence<Nucleotide> matrix, Map<String, AminoAcid> codonTable) {
+    protected final String rcMatrix;
+    protected GRibosome(Sequence<Nucleotide> matrix, Map<String, AminoAcid> codonTable) {
         super(matrix);
         this.codonTable = codonTable;
+        this.rcMatrix= NucleotideAlphabet.get().rcString(matrix);
     }
 
     @Override
-    public Stream<Sequence<AminoAcid>> translate() {
-        return null;
+    public Stream<ORF> translate() {
+
+        return Stream.of(
+                new Frame(this.matrix.getSequence(), 0),
+                new Frame(this.matrix.getSequence(), 1),
+                new Frame(this.matrix.getSequence(), 2),
+                new Frame(this.rcMatrix, 0),
+                new Frame(this.rcMatrix, 1),
+                new Frame(this.rcMatrix, 2)
+        ).flatMap(frame -> frame.run());
+    }
+
+    public Stream<ORF> translateParallel() {
+
+       return this.translate().parallel();
     }
 
     protected class Frame {
@@ -37,14 +49,14 @@ public class GRibosome extends Ribosome<Nucleotide, AminoAcid> {
         private final int frame;
 
         public Frame(String matrixString, int frame) {
-            this.matrixString = matrixString;
-            this.frame=frame;
+            this.matrixString = matrixString.substring(frame);
+            this.frame = frame;
         }
 
-        protected Stream<Sequence<AminoAcid>> run() {
+        protected Stream<ORF> run() {
 
 
-            Iterator<Sequence<AminoAcid>> iter = new Iterator<Sequence<AminoAcid>>() {
+            Iterator<ORF> iter = new Iterator<ORF>() {
                 int position = 0;
                 int count = 0;
 
@@ -58,24 +70,36 @@ public class GRibosome extends Ribosome<Nucleotide, AminoAcid> {
                 }
 
                 @Override
-                public Sequence<AminoAcid> next() {
+                public ORF next() {
+                    if (!hasNext()) {
+                        throw new NoSuchElementException();
+                    }
                     final StringBuilder stringBuilder = new StringBuilder();
                     int start = position;
                     for (; position < matrixString.length() - 6; position += 3) {
                         final AminoAcid nextAA = codonTable.get(matrixString.substring(position, position + 3));
                         if (nextAA == null || nextAA.getPillar() == AminoAcidAlphabet.ALPHABET.STOP.getAA().getPillar()) {
+                            position+=3;
+                            if(stringBuilder.length()==0){
+                                stringBuilder.append(AminoAcidAlphabet.ALPHABET.STOP.toString());
+                            }
                             break;
                         }
                         stringBuilder.append(nextAA.getPillar());
                     }
                     count++;
-                    return ORF.get(stringBuilder.toString(),String.valueOf(count),start,position,frame);
-
+                    final ORF orf = ORF.get(stringBuilder.toString(), String.valueOf(count), start, position, frame);
+                    //System.out.println("new orf was born");
+                    return orf;
                 }
             };
             return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
-                    iter, Spliterator.ORDERED | Spliterator.NONNULL), false);
+                    iter, Spliterator.NONNULL), false);
         }
 
+    }
+
+    public static GRibosome newInstance(Sequence<Nucleotide> matrix, Map<String, AminoAcid> codonTable) {
+        return new GRibosome(matrix, codonTable);
     }
 }

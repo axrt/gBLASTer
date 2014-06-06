@@ -48,6 +48,7 @@ public class NucletideAlphabetTest {
     public void testRC(){
         final String testString = "ATGCRMWSKYN";
         final NucleotideAlphabet alph=NucleotideAlphabet.get();
+        System.out.println("RC: "+alph.rcString(testString));
         Assert.assertEquals(testString, alph.rcString(alph.rcString(testString)));
         Assert.assertEquals(testString,alph.rcString(alph.rcString(alph.rcString(alph.rcByteArray(testString)))));
         Assert.assertEquals(testString,alph.rcString(alph.rcString(alph.rcByteArray(alph.rcString(testString)))));

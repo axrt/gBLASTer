@@ -189,7 +189,7 @@ public final class NucleotideAlphabet extends Alphabet<Nucleotide> {
         for (int i = 0; i < representation.length; i++) {
             representation[i] = rcByte(sequence.charAt(i));
         }
-        return representation;
+        return reverse(representation);
     }
 
     public byte[] rcByteArray(Sequence<Nucleotide> nucleotideSequence) {
@@ -198,9 +198,9 @@ public final class NucleotideAlphabet extends Alphabet<Nucleotide> {
 
     public byte[] rcByteArray(byte[] representations) {
         for (int i = 0; i < representations.length; i++) {
-            representations[i] = rcByte(rcByte(representations[i]));
+            representations[i] = rcByte(representations[i]);
         }
-        return representations;
+        return reverse(representations);
     }
 
     public String rcString(String sequence) {
@@ -208,7 +208,7 @@ public final class NucleotideAlphabet extends Alphabet<Nucleotide> {
         for (int i = 0; i < pillars.length; i++) {
             pillars[i] = rc(sequence.charAt(i));
         }
-        return new String(pillars);
+        return new StringBuilder(new String(pillars)).reverse().toString();
     }
 
     public String rcString(Sequence<Nucleotide> nucleotideSequence) {
@@ -220,13 +220,21 @@ public final class NucleotideAlphabet extends Alphabet<Nucleotide> {
         for (int i = 0; i < pillars.length; i++) {
             pillars[i] = rc(representations[i]);
         }
-        return new String(pillars);
+        return new StringBuilder(new String(pillars)).reverse().toString();
     }
 
     private static class LazyHolder {
         private static final NucleotideAlphabet INSTANCE = new NucleotideAlphabet();
     }
 
+    private static byte[] reverse(byte[] data) {
+        for (int left = 0, right = data.length - 1; left < right; left++, right--) {
+            byte temp = data[left];
+            data[left] = data[right];
+            data[right] = temp;
+        }
+        return data;
+    }
     public static NucleotideAlphabet get() {
         return LazyHolder.INSTANCE;
     }

@@ -10,7 +10,7 @@ import java.util.stream.Stream;
  * Created by alext on 6/4/14.
  * TODO document class
  */
-public abstract class Ribosome<N extends Character,A extends Character> {
+public abstract class Ribosome<N extends Character,A extends Character, S extends Sequence<A>> {
 
     protected final Sequence<N> matrix;
 
@@ -18,6 +18,6 @@ public abstract class Ribosome<N extends Character,A extends Character> {
         this.matrix = matrix;
     }
 
-    public abstract Stream<Sequence<A>> translate();
+    public abstract Stream<S> translate() throws Exception;
 
 }
