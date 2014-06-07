@@ -18,6 +18,10 @@ public class ORF extends ProteinSequence<AminoAcid> {
         this.frame = frame;
     }
 
+    public int getFrame() {
+        return frame;
+    }
+
     @Override
     public String toString() {
         final StringBuilder stringBuilder=new StringBuilder();
@@ -30,7 +34,7 @@ public class ORF extends ProteinSequence<AminoAcid> {
         stringBuilder.append("start: ");
         stringBuilder.append(this.start);
         stringBuilder.append('\n');
-        stringBuilder.append("start: ");
+        stringBuilder.append("stop: ");
         stringBuilder.append(this.stop);
         stringBuilder.append('\n');
         stringBuilder.append(this.sequence);

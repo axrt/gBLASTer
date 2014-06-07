@@ -1,13 +1,20 @@
 package test.alphabet.translate;
 
 import alphabet.character.amino.AminoAcid;
+import alphabet.character.nucleotide.Nucleotide;
 import alphabet.translate.GRibosome;
+import alphabet.translate.GStreamRibosome;
 import alphabet.translate.GeneticCode;
+import alphabet.translate.Ribosome;
+import com.sun.xml.internal.messaging.saaj.util.ByteInputStream;
 import junit.extensions.TestSetup;
 import org.junit.Test;
 import sequence.nucleotide.NucleotideSequence;
 import sequence.protein.ORF;
 
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Map;
 import java.util.Random;
@@ -32,7 +39,7 @@ public class GRibosomeTest {
        //process(randomMatrixBuilder.toString());
 
 
-        final int iters=100000;
+        final int iters=1;
         randomMatrixBuilder=new StringBuilder();
         for(int i=0;i<iters;i++) {
             for (String first : nucleotides) {
@@ -47,11 +54,14 @@ public class GRibosomeTest {
         }
         Date prStart;
         Date prStop;
-        String result;
+        String resultSequence=null;
+        String resultInputsteam=null;
 
-        final GRibosome ribosome = GRibosome.newInstance(NucleotideSequence.get(randomMatrixBuilder.toString(),"test"), GeneticCode.STANDARD);
+        final NucleotideSequence<Nucleotide> nucleotideNucleotideSequence=NucleotideSequence.get(randomMatrixBuilder.toString(),"test");
+        final GRibosome ribosome = GRibosome.newInstance(nucleotideNucleotideSequence, GeneticCode.STANDARD);
+        final GStreamRibosome gStreamRibosome=GStreamRibosome.newInstance(new ByteArrayInputStream(randomMatrixBuilder.toString().getBytes(StandardCharsets.UTF_16)),GeneticCode.STANDARD);
 
-        prStart=new Date();
+        /*prStart=new Date();
         wasteParallel(ribosome,100);
         prStop=new Date();
         System.out.println("Time wasting parallel with "+iters+" genetic code iterations: "+benchmark(prStart,prStop).getTime()+" mils.");
@@ -61,23 +71,36 @@ public class GRibosomeTest {
         prStop=new Date();
         System.out.println("Time wasting singular with "+iters+" genetic code iterations: "+benchmark(prStart,prStop).getTime()+" mils.");
 
-       /* prStart=new Date();
+        prStart=new Date();
         final String resultParallel = processParallel(randomMatrixBuilder.toString());
         prStop=new Date();
         System.out.println("Time processing parallel with "+iters+" genetic code iterations: "+benchmark(prStart,prStop).getTime()+" mils.");
+        */
 
-        prStart=new Date();
-        result = process(randomMatrixBuilder.toString());
-        prStop=new Date();
-        System.out.println("Time processing singular with "+iters+" genetic code iterations: "+benchmark(prStart,prStop).getTime()+" mils.");*/
+        try {
+            prStart=new Date();
+            resultSequence = process(ribosome);
+            prStop=new Date();
+            System.out.println("Time processing ribosome with "+iters+" genetic code iterations: "+benchmark(prStart,prStop).getTime()+" mils.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            prStart=new Date();
+            resultInputsteam = process(gStreamRibosome);
+            prStop=new Date();
+            System.out.println("Time processing setream-based ribosome with "+iters+" genetic code iterations: "+benchmark(prStart,prStop).getTime()+" mils.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
 
-
-        //TestSetup.assertEquals(result,resultParallel);
+        TestSetup.assertEquals(resultSequence,resultInputsteam);
     }
-    private String process(String matrix){
-        final GRibosome ribosome= GRibosome.newInstance(NucleotideSequence.get(matrix,"test"), GeneticCode.STANDARD);
-        return ribosome.translate().map(ORF::toString).collect(Collectors.joining("\n"));
+    private String process(Ribosome<Nucleotide, AminoAcid, ORF> ribosome) throws Exception {
+        return ribosome.translate().sorted(Comparator.comparing(o->o.getFrame())).map(ORF::toString).collect(Collectors.joining("\n"));
     }
     private void waste(GRibosome ribosome,int times){
         for(int i=0;i<times;i++) {
@@ -100,39 +123,4 @@ public class GRibosomeTest {
         new GRibosomeTest().test();
     }
 
-    /**
-     * Created by alext on 6/5/14.
-     * TODO document class
-     */
-    public static class GeneticCodeTest {
-
-        @Test
-        public void test(){
-
-            final Map<String,AminoAcid> genteicCode=GeneticCode.STANDARD;
-
-            final String expectedResult="FFLLLLLLIIIMVVVVSSSSPPPPTTTTAAAAYYXXHHQQNNKKDDEECCXWRRRRSSRRGGGG";
-
-            final String[]rotator={"T","C","A","G"};
-            StringBuilder testBuilder=new StringBuilder(64);
-            for(String first:rotator){
-                for(String second:rotator){
-                    for(String third:rotator){
-                        testBuilder.append(second);
-                        testBuilder.append(first);
-                        testBuilder.append(third);
-                    }
-                }
-            }
-            //System.out.println(testBuilder.toString());
-            final String testMatrix=testBuilder.toString();
-            testBuilder=new StringBuilder(64);
-            for(int i=0;i<testMatrix.length();i+=3){
-                final String codon=testMatrix.substring(i, i + 3);
-                testBuilder.append(genteicCode.get(codon).getPillar());
-            }
-            System.out.println(testBuilder.toString());
-            TestSetup.assertEquals(expectedResult,testBuilder.toString());
-        }
-    }
 }

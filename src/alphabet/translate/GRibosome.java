@@ -79,7 +79,7 @@ public class GRibosome extends Ribosome<Nucleotide, AminoAcid, ORF> {
                     for (; position < matrixString.length() - 6; position += 3) {
                         final AminoAcid nextAA = codonTable.get(matrixString.substring(position, position + 3));
                         if (nextAA == null || nextAA.getPillar() == AminoAcidAlphabet.ALPHABET.STOP.getAA().getPillar()) {
-                            position+=3;
+
                             if(stringBuilder.length()==0){
                                 stringBuilder.append(AminoAcidAlphabet.ALPHABET.STOP.toString());
                             }
@@ -89,6 +89,7 @@ public class GRibosome extends Ribosome<Nucleotide, AminoAcid, ORF> {
                     }
                     count++;
                     final ORF orf = ORF.get(stringBuilder.toString(), String.valueOf(count), start, position, frame);
+                    position+=3;
                     //System.out.println("new orf was born");
                     return orf;
                 }
