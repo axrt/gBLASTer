@@ -32,14 +32,16 @@ public class GRibosomeTest {
         final Random random=new Random();
         final String[]nucleotides={"T","C","A","G"};
         StringBuilder randomMatrixBuilder=new StringBuilder();
+        final int iters=5000;
+        for(int i=0;i<iters;i++){
+            randomMatrixBuilder.append(nucleotides[random.nextInt(4)]);
+        }
 
-        //for(int i=0;i<5000;i++){
-            //randomMatrixBuilder.append(nucleotides[random.nextInt(4)]);
-        //}
+
        //process(randomMatrixBuilder.toString());
 
 
-        final int iters=1;
+        /*
         randomMatrixBuilder=new StringBuilder();
         for(int i=0;i<iters;i++) {
             for (String first : nucleotides) {
@@ -51,7 +53,7 @@ public class GRibosomeTest {
                     }
                 }
             }
-        }
+        }*/
         Date prStart;
         Date prStop;
         String resultSequence=null;
@@ -59,7 +61,7 @@ public class GRibosomeTest {
 
         final NucleotideSequence<Nucleotide> nucleotideNucleotideSequence=NucleotideSequence.get(randomMatrixBuilder.toString(),"test");
         final GRibosome ribosome = GRibosome.newInstance(nucleotideNucleotideSequence, GeneticCode.STANDARD);
-        final GStreamRibosome gStreamRibosome=GStreamRibosome.newInstance(new ByteArrayInputStream(randomMatrixBuilder.toString().getBytes(StandardCharsets.UTF_16)),GeneticCode.STANDARD);
+        final GStreamRibosome gStreamRibosome=GStreamRibosome.newInstance(new ByteArrayInputStream(randomMatrixBuilder.toString().getBytes(StandardCharsets.UTF_16BE)),GeneticCode.STANDARD);
 
         /*prStart=new Date();
         wasteParallel(ribosome,100);
@@ -97,10 +99,10 @@ public class GRibosomeTest {
         }
 
 
-        TestSetup.assertEquals(resultSequence,resultInputsteam);
+        TestSetup.assertEquals(resultSequence,resultInputsteam); //This test will not pass due to that the Ribosome has the actual STOP orf returned, and the other does not
     }
     private String process(Ribosome<Nucleotide, AminoAcid, ORF> ribosome) throws Exception {
-        return ribosome.translate().sorted(Comparator.comparing(o->o.getFrame())).map(ORF::toString).collect(Collectors.joining("\n"));
+        return ribosome.translate().sorted(Comparator.comparing(o->o.getSequence())).map(ORF::getSequence).collect(Collectors.joining("\n"));
     }
     private void waste(GRibosome ribosome,int times){
         for(int i=0;i<times;i++) {

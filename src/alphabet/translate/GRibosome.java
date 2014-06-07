@@ -18,11 +18,9 @@ import java.util.stream.StreamSupport;
 public class GRibosome extends Ribosome<Nucleotide, AminoAcid, ORF> {
 
     protected final Map<String, AminoAcid> codonTable;
-    protected final String rcMatrix;
     protected GRibosome(Sequence<Nucleotide> matrix, Map<String, AminoAcid> codonTable) {
         super(matrix);
         this.codonTable = codonTable;
-        this.rcMatrix= NucleotideAlphabet.get().rcString(matrix);
     }
 
     @Override
@@ -31,10 +29,7 @@ public class GRibosome extends Ribosome<Nucleotide, AminoAcid, ORF> {
         return Stream.of(
                 new Frame(this.matrix.getSequence(), 0),
                 new Frame(this.matrix.getSequence(), 1),
-                new Frame(this.matrix.getSequence(), 2),
-                new Frame(this.rcMatrix, 0),
-                new Frame(this.rcMatrix, 1),
-                new Frame(this.rcMatrix, 2)
+                new Frame(this.matrix.getSequence(), 2)
         ).flatMap(frame -> frame.run());
     }
 
@@ -62,7 +57,7 @@ public class GRibosome extends Ribosome<Nucleotide, AminoAcid, ORF> {
 
                 @Override
                 public boolean hasNext() {
-                    if (position < matrixString.length() - 6) {
+                    if (position < matrixString.length()) {
                         return true;
                     } else {
                         return false;
@@ -76,7 +71,7 @@ public class GRibosome extends Ribosome<Nucleotide, AminoAcid, ORF> {
                     }
                     final StringBuilder stringBuilder = new StringBuilder();
                     int start = position;
-                    for (; position < matrixString.length() - 6; position += 3) {
+                    for (; position < matrixString.length() - 2; position += 3) {
                         final AminoAcid nextAA = codonTable.get(matrixString.substring(position, position + 3));
                         if (nextAA == null || nextAA.getPillar() == AminoAcidAlphabet.ALPHABET.STOP.getAA().getPillar()) {
 

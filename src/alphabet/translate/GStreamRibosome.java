@@ -35,17 +35,16 @@ public class GStreamRibosome extends Ribosome<Nucleotide, AminoAcid, ORF> {
         try (final DataInputStream dataInputStream = new DataInputStream(inputStream)) {
             //Initialization to emulate the frame shift
             final Frame[] frames = {new Frame(0), new Frame(1), new Frame(2)};
-            boolean b = initFrames(frames[0], dataInputStream.readChar());
-
-            if (b) {
+            try{
                 char n = dataInputStream.readChar();
-                b = initFrames(frames[0], n);
-                if (b) {
-                    initFrames(frames[1], n);
+                frames[0].accept(n);
+                n= dataInputStream.readChar();
+                frames[0].accept(n);
+                frames[1].accept(n);
+            }catch (EOFException e){
 
-                } else return Stream.empty();
-
-            } else return Stream.empty();
+                return Stream.empty();
+            }
 
             //If here - can proceed
             Iterator<ORF> iter = new Iterator<ORF>() {
@@ -59,15 +58,15 @@ public class GStreamRibosome extends Ribosome<Nucleotide, AminoAcid, ORF> {
                                 nu = dataInputStream.readChar();
                                 if (nu == '\n') next(); //skip new lines
 
-                                final boolean atLeastOne = (frames[0].accept(nu) | frames[1].accept(nu) | frames[2].accept(nu)) && orfs.size() > 0;
+                                final boolean atLeastOne = (frames[0].accept(nu) | frames[1].accept(nu) | frames[2].accept(nu));
                                 if (atLeastOne) {
                                     break;
                                 }
                             }
-                        }catch (EOFException e){
-                            streamIsEmpty=true;
-                            for(Frame f:frames){
-                               f.finalizeORF();
+                        } catch (EOFException e) {
+                            streamIsEmpty = true;
+                            for (Frame f : frames) {
+                                f.finalizeORF();
                             }
                         }
                     } catch (IOException e) {
@@ -78,38 +77,29 @@ public class GStreamRibosome extends Ribosome<Nucleotide, AminoAcid, ORF> {
                 @Override
                 public boolean hasNext() {
 
-                    if(!orfs.isEmpty()||!streamIsEmpty){
+                    if (!orfs.isEmpty() || !streamIsEmpty) {
                         return true;
-                    }else return false;
+                    } else return false;
 
                 }
 
                 @Override
                 public ORF next() {
-                    if (!orfs.isEmpty()) {
-                        final ORF orf=orfs.poll();
+                    if (orfs.size()>0) {
+                        final ORF orf = orfs.poll();
                         //System.out.println(orf);
                         return orf;
                     }
                     if (hasNext()) {
                         read();
-                        final ORF orf=orfs.poll();
-                        if(orf==null)throw new RuntimeException("Could not find a single ORF, please check input!");
+                        final ORF orf = orfs.poll();
+                        if (orf == null) throw new RuntimeException("Could not find a single ORF, please check input!");
                         return orf;
                     } else throw new NoSuchElementException();
                 }
             };
             return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
                     iter, Spliterator.NONNULL), false);
-        }
-    }
-
-    protected static boolean initFrames(Frame f, char nu) {
-        if (nu == -1) {
-            return false;
-        } else {
-            f.accept(nu);
-            return true;
         }
     }
 
@@ -133,16 +123,17 @@ public class GStreamRibosome extends Ribosome<Nucleotide, AminoAcid, ORF> {
 
         protected boolean accept(char nucleotide) {
 
-            this.triplet[this.pointer++] = nucleotide;
-
+            this.triplet[this.pointer] = nucleotide;
+            this.pointer++;
             if (this.pointer > 2) {
                 this.pointer = 0;
-                final AminoAcid aa = codonTable.get(new String(this.triplet)); //TODO think of a reusable container for this
-                if (aa == null || aa.getPillar()==AminoAcidAlphabet.ALPHABET.STOP.getAA().getPillar()) {
+                final String codon = new String(this.triplet);
+                final AminoAcid aa = codonTable.get(codon); //TODO think of a reusable container for this, StringBuilder seems quite obvious, but the genetic table has to be redesigned in this case
+                if (aa == null || aa.getPillar() == AminoAcidAlphabet.ALPHABET.STOP.getAA().getPillar()) {
 
-                    if(this.orfBuilder.length()==0){
+                    if (this.orfBuilder.length() == 0) {
                         return false;
-                    } else{
+                    } else {
                         this.finalizeORF();
                         return true;
                     }
@@ -163,7 +154,8 @@ public class GStreamRibosome extends Ribosome<Nucleotide, AminoAcid, ORF> {
             this.orfStart = this.orfStop + 1;
         }
     }
-    public static GStreamRibosome newInstance(InputStream inputStream, Map<String, AminoAcid> codonTable){
-        return new GStreamRibosome(inputStream,codonTable);
+
+    public static GStreamRibosome newInstance(InputStream inputStream, Map<String, AminoAcid> codonTable) {
+        return new GStreamRibosome(inputStream, codonTable);
     }
 }
