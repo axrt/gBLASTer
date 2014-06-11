@@ -11,32 +11,42 @@ import java.util.stream.Collectors;
  */
 public class LargeChromosome extends Chromosome {
 
-    private final InputStream record;
+    private final InputStream sequence;
     private final LargeFormat format;
-    protected LargeChromosome(String ac, InputStream record,LargeFormat format) {
-        super(ac, "",format);
-        this.record=record;
-        this.format=format;
+
+    protected LargeChromosome(String ac, InputStream sequence, LargeFormat format) {
+        super("", ac, format);
+        this.sequence = sequence;
+        this.format = format;
     }
 
     @Override
     public String getSequence() {
-        try {
-            try(BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(this.record))){
-                return bufferedReader.lines().skip(1).collect(Collectors.joining());
-            }
-        } catch (IOException e) {
+        try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(this.sequence))) {
+            return bufferedReader.lines().collect(Collectors.joining());
 
-        } finally {
-            return "";
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
-    public static LargeChromosome fromRecord(InputStream inputStream,LargeFormat largeFormat) throws Exception {
-        if(!largeFormat.checkFormatting(inputStream)){
-          throw new IllegalArgumentException("Bad record format!");
+    public static LargeChromosome fromRecord(InputStream inputStream, LargeFormat largeFormat) throws Exception {
+        final BufferedInputStream bufferedInputStream=new BufferedInputStream(inputStream,1000);
+        int zero= 1000;
+        bufferedInputStream.mark(zero);
+        if (!largeFormat.checkFormatting(bufferedInputStream)) {
+            throw new IllegalArgumentException("Bad record format!");
         }
-        final String ac=largeFormat.getAc(inputStream);
-        return new LargeChromosome(ac, inputStream,largeFormat);
+        bufferedInputStream.reset();
+        final String ac = largeFormat.getAc(bufferedInputStream);
+        bufferedInputStream.reset();
+        byte buffer[]=new byte[1];
+        while(bufferedInputStream.read(buffer)>-1){
+            if(buffer[0]==(byte)'\n'){
+                break;
+            }
+        }
+        bufferedInputStream.mark(zero);
+        return new LargeChromosome(ac, bufferedInputStream, largeFormat);
     }
 }

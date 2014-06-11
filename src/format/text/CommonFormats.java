@@ -49,36 +49,17 @@ public class CommonFormats {
     public static class LargeFasta extends Fasta implements LargeFormat {
         @Override
         public boolean checkFormatting(InputStream toCheck) throws IOException {
-            try (Reader reader = new InputStreamReader(toCheck)) {
-                final char[] buffer = new char[256];
-                reader.read(buffer);
-                if (!String.valueOf(buffer[0]).equals(FASTA_START)) {
-                    return false;
-                }
-
-                while (reader.read(buffer) != -1) {
-                    for (int i = 0; i < buffer.length; i++) {
-                        if (buffer[i] == '\n') {
-                            return true;
-                        }
-                    }
-                }
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(toCheck));
+            final String line = bufferedReader.readLine();
+            if (line != null && line.startsWith(FASTA_START) && bufferedReader.readLine() != null) {
+                return true;
             }
             return false;
         }
 
         @Override
         public String getAc(InputStream record) throws IOException {
-            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(record))) {
-
-                final String ac = bufferedReader.readLine();
-                if (ac == null || !ac.startsWith(FASTA_START)) {
-                    throw new IllegalArgumentException("Not a fasta-formatted record!");
-                } else {
-                    record.reset();
-                    return ac.substring(1, ac.length());
-                }
-            }
+            return new BufferedReader(new InputStreamReader(record)).readLine();
         }
 
         @Override
@@ -101,20 +82,19 @@ public class CommonFormats {
         }
 
         @Override
-        public Stream<InputStream> iterateRecords(InputStream multiRecord,Path toTmpFile) {
+        public Stream<InputStream> iterateRecords(InputStream multiRecord, Path toTmpFile) {
 
 
             Iterator<InputStream> iter = new Iterator<InputStream>() {
                 private final File tmpFile = toTmpFile.toFile();
                 private String line;
-                private int counter = 0;
                 private boolean empty = false;
-                private final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(multiRecord));
+                private final PushbackInputStream pushbackInputStream=new PushbackInputStream(multiRecord);
 
-                private void cleanup(){
+                private void cleanup() {
                     try {
-                        bufferedReader.close();
-                        this.tmpFile.delete();
+                        pushbackInputStream.close();
+                        tmpFile.delete();
                     } catch (IOException ee) {
                         throw new UncheckedIOException(ee);
                     }
@@ -122,8 +102,12 @@ public class CommonFormats {
 
                 @Override
                 public boolean hasNext() {
-                    if(this.empty){
-                       cleanup();
+                    if (this.empty) {
+                        cleanup();
+                    } else{
+                        if(this.tmpFile.exists()){
+                            tmpFile.delete();
+                        }
                     }
                     return !this.empty;
                 }
@@ -131,26 +115,23 @@ public class CommonFormats {
                 @Override
                 public InputStream next() {
                     try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(this.tmpFile))) {
-                        while ((line = bufferedReader.readLine()) != null) {
-                            if (this.counter == 0) {
-                                bufferedWriter.write(line);
-                                bufferedWriter.newLine();
-                                continue;
-                            }
-                            if (line.startsWith(FASTA_START)) {
+                        byte[]buffer=new byte[1];
+                        int count=0;
+                        int read;
+                        while((read=pushbackInputStream.read(buffer))!=-1){
+                            if(count!=0&&FASTA_START.charAt(0)==(char)buffer[0]){
+                                pushbackInputStream.unread(buffer);
                                 break;
-                            } else {
-                                bufferedWriter.write(line);
-                                bufferedWriter.newLine();
                             }
+                            bufferedWriter.write((char)buffer[0]);
+                            count++;
                         }
-                        if (line == null) {
-                            this.empty = true;
+                        if(read==-1){
+                           this.empty=true;
                         }
-                        this.counter++;
                         return new FileInputStream(this.tmpFile);
                     } catch (IOException e) {
-                           cleanup();
+                        cleanup();
                         throw new UncheckedIOException(e);
                     }
                 }
