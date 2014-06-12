@@ -1,5 +1,7 @@
 package format.text;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import java.io.*;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -64,21 +66,7 @@ public class CommonFormats {
 
         @Override
         public void passSequence(InputStream record, OutputStream destination) throws IOException {
-
-            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(record));
-                 BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(destination)) {
-                bufferedReader.lines().skip(1).forEach(l -> {
-                    try {
-                        final byte[] buffer = l.getBytes();
-                        bufferedOutputStream.write(buffer);
-                    } catch (IOException io) {
-                        throw new UncheckedIOException(io);
-                    }
-                });
-            } catch (UncheckedIOException e) {
-                throw e.getCause();
-            }
-            record.reset();
+            throw new NotImplementedException();
         }
 
         @Override
@@ -87,16 +75,15 @@ public class CommonFormats {
 
             Iterator<InputStream> iter = new Iterator<InputStream>() {
                 private final File tmpFile = toTmpFile.toFile();
-                private String line;
                 private boolean empty = false;
-                private final PushbackInputStream pushbackInputStream=new PushbackInputStream(multiRecord);
+                private final PushbackInputStream pushbackInputStream = new PushbackInputStream(multiRecord);
 
                 private void cleanup() {
+                    tmpFile.delete();
                     try {
-                        pushbackInputStream.close();
-                        tmpFile.delete();
-                    } catch (IOException ee) {
-                        throw new UncheckedIOException(ee);
+                        this.pushbackInputStream.close();
+                    } catch (IOException e) {
+                       throw new UncheckedIOException(e);
                     }
                 }
 
@@ -104,9 +91,9 @@ public class CommonFormats {
                 public boolean hasNext() {
                     if (this.empty) {
                         cleanup();
-                    } else{
-                        if(this.tmpFile.exists()){
-                            tmpFile.delete();
+                    } else {
+                        if (this.tmpFile.exists()) {
+                            this.tmpFile.delete();
                         }
                     }
                     return !this.empty;
@@ -115,19 +102,19 @@ public class CommonFormats {
                 @Override
                 public InputStream next() {
                     try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(this.tmpFile))) {
-                        byte[]buffer=new byte[1];
-                        int count=0;
+                        byte[] buffer = new byte[1];
+                        int count = 0;
                         int read;
-                        while((read=pushbackInputStream.read(buffer))!=-1){
-                            if(count!=0&&FASTA_START.charAt(0)==(char)buffer[0]){
+                        while ((read = pushbackInputStream.read(buffer)) != -1) {
+                            if (count != 0 && FASTA_START.charAt(0) == (char) buffer[0]) {
                                 pushbackInputStream.unread(buffer);
                                 break;
                             }
-                            bufferedWriter.write((char)buffer[0]);
+                            bufferedWriter.write((char) buffer[0]);
                             count++;
                         }
-                        if(read==-1){
-                           this.empty=true;
+                        if (read == -1) {
+                            this.empty = true;
                         }
                         return new FileInputStream(this.tmpFile);
                     } catch (IOException e) {

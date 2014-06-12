@@ -5,10 +5,7 @@ import alphabet.character.nucleotide.Nucleotide;
 import alphabet.protein.AminoAcidAlphabet;
 import sequence.protein.ORF;
 
-import java.io.DataInputStream;
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -32,76 +29,79 @@ public class GStreamRibosome extends Ribosome<Nucleotide, AminoAcid, ORF> {
 
     @Override
     public Stream<ORF> translate() throws IOException {
-        try (final DataInputStream dataInputStream = new DataInputStream(inputStream)) {
-            //Initialization to emulate the frame shift
-            final Frame[] frames = {new Frame(0), new Frame(1), new Frame(2)};
-            try{
-                char n = dataInputStream.readChar();
-                frames[0].accept(n);
-                n= dataInputStream.readChar();
-                frames[0].accept(n);
-                frames[1].accept(n);
-            }catch (EOFException e){
+        DataInputStream dataInputStream = new DataInputStream(this.inputStream);
+        //Initialization to emulate the frame shift
+        final Frame[] frames = {new Frame(0), new Frame(1), new Frame(2)};
+        final byte[] buffer = new byte[1];
+        try {
 
-                return Stream.empty();
-            }
+            char n = (char) dataInputStream.readByte();
+            frames[0].accept(n);
+            n = (char) dataInputStream.readByte();
+            frames[0].accept(n);
+            frames[1].accept(n);
+        } catch (EOFException e) {
 
-            //If here - can proceed
-            Iterator<ORF> iter = new Iterator<ORF>() {
-                boolean streamIsEmpty = false;
+            return Stream.empty();
+        }
 
-                private void read() {
+        //If here - can proceed
+        Iterator<ORF> iter = new Iterator<ORF>() {
+            boolean streamIsEmpty = false;
+
+            private void read() {
+                try {
+                    char nu;
                     try {
-                        char nu;
-                        try {
-                            while (true) {
-                                nu = dataInputStream.readChar();
-                                if (nu == '\n') next(); //skip new lines
+                        while (true) {
 
-                                final boolean atLeastOne = (frames[0].accept(nu) | frames[1].accept(nu) | frames[2].accept(nu));
-                                if (atLeastOne) {
-                                    break;
-                                }
-                            }
-                        } catch (EOFException e) {
-                            streamIsEmpty = true;
-                            for (Frame f : frames) {
-                                f.finalizeORF();
+                            nu = (char) dataInputStream.readByte();
+                            if (nu == '\n') next(); //skip new lines
+
+                            final boolean atLeastOne = (frames[0].accept(nu) | frames[1].accept(nu) | frames[2].accept(nu));
+                            if (atLeastOne) {
+                                break;
                             }
                         }
-                    } catch (IOException e) {
+                    } catch (EOFException e) {
                         streamIsEmpty = true;
+                        for (Frame f : frames) {
+                            f.finalizeORF();
+                        }
                     }
+                } catch (IOException e) {
+                    streamIsEmpty = true;
+                    throw new UncheckedIOException(e);
                 }
+            }
 
-                @Override
-                public boolean hasNext() {
+            @Override
+            public boolean hasNext() {
 
-                    if (!orfs.isEmpty() || !streamIsEmpty) {
-                        return true;
-                    } else return false;
+                if (!orfs.isEmpty() || !streamIsEmpty) {
+                    return true;
+                } else return false;
 
+            }
+
+            @Override
+            public ORF next() {
+                if (orfs.size() > 0) {
+                    final ORF orf = orfs.poll();
+                    return orf;
                 }
-
-                @Override
-                public ORF next() {
-                    if (orfs.size()>0) {
-                        final ORF orf = orfs.poll();
-                        //System.out.println(orf);
-                        return orf;
-                    }
-                    if (hasNext()) {
-                        read();
-                        final ORF orf = orfs.poll();
-                        if (orf == null) throw new RuntimeException("Could not find a single ORF, please check input!");
-                        return orf;
-                    } else throw new NoSuchElementException();
-                }
-            };
-            return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
-                    iter, Spliterator.NONNULL), false);
-        }
+                if (hasNext()) {
+                    read();
+                    final ORF orf = orfs.poll();
+                    if (orf == null) throw new RuntimeException("Could not find a single ORF, please check input!");
+                    return orf;
+                } else throw new NoSuchElementException();
+            }
+        };
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
+                iter, Spliterator.NONNULL), false);
     }
+
 
     protected class Frame {
 
@@ -147,11 +147,13 @@ public class GStreamRibosome extends Ribosome<Nucleotide, AminoAcid, ORF> {
         }
 
         protected void finalizeORF() {
-            final ORF orf = ORF.get(this.orfBuilder.toString(), String.valueOf(this.orfsCreated), this.orfStart, this.orfStop, this.frame);
-            orfs.add(orf);
-            this.orfsCreated++;
-            this.orfBuilder = new StringBuilder();
-            this.orfStart = this.orfStop + 1;
+            if(orfBuilder.length()>0) {
+                final ORF orf = ORF.get(this.orfBuilder.toString(), String.valueOf(this.orfsCreated), this.orfStart, this.orfStop, this.frame);
+                orfs.add(orf);
+                this.orfsCreated++;
+                this.orfBuilder = new StringBuilder();
+                this.orfStart = this.orfStop + 1;
+            }
         }
     }
 

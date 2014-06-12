@@ -2,6 +2,7 @@ package format.text;
 
 import sequence.Sequence;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
@@ -13,8 +14,8 @@ import java.util.stream.Stream;
  */
 public interface LargeFormat extends Format{
 
-    public boolean checkFormatting(InputStream toCheck) throws Exception;
-    public String getAc(InputStream record)throws Exception;
-    public void passSequence(InputStream record, OutputStream destination)throws Exception;
+    public boolean checkFormatting(InputStream toCheck) throws IOException;
+    public String getAc(InputStream record)throws IOException;
+    public void passSequence(InputStream record, OutputStream destination)throws IOException;
     public Stream<InputStream> iterateRecords(InputStream multiRecord,Path toTmpFile);
 }

@@ -13,6 +13,7 @@ import sequence.nucleotide.NucleotideSequence;
 import sequence.protein.ORF;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.Date;
@@ -32,17 +33,17 @@ public class GRibosomeTest {
         final Random random=new Random();
         final String[]nucleotides={"T","C","A","G"};
         StringBuilder randomMatrixBuilder=new StringBuilder();
-        final int iters=5000;
+        final int iters=5003;
         for(int i=0;i<iters;i++){
-            randomMatrixBuilder.append(nucleotides[random.nextInt(4)]);
+           randomMatrixBuilder.append(nucleotides[random.nextInt(4)]);
         }
 
 
        //process(randomMatrixBuilder.toString());
 
 
-        /*
-        randomMatrixBuilder=new StringBuilder();
+
+        /*randomMatrixBuilder=new StringBuilder();
         for(int i=0;i<iters;i++) {
             for (String first : nucleotides) {
                 for (String second : nucleotides) {
@@ -61,7 +62,7 @@ public class GRibosomeTest {
 
         final NucleotideSequence<Nucleotide> nucleotideNucleotideSequence=NucleotideSequence.get(randomMatrixBuilder.toString(),"test");
         final GRibosome ribosome = GRibosome.newInstance(nucleotideNucleotideSequence, GeneticCode.STANDARD);
-        final GStreamRibosome gStreamRibosome=GStreamRibosome.newInstance(new ByteArrayInputStream(randomMatrixBuilder.toString().getBytes(StandardCharsets.UTF_16BE)),GeneticCode.STANDARD);
+        final GStreamRibosome gStreamRibosome=GStreamRibosome.newInstance(new ByteArrayInputStream(randomMatrixBuilder.toString().getBytes(StandardCharsets.UTF_8)),GeneticCode.STANDARD);
 
         /*prStart=new Date();
         wasteParallel(ribosome,100);

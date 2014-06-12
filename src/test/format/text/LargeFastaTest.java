@@ -1,5 +1,7 @@
-package format.text;
+package test.format.text;
 
+import format.text.CommonFormats;
+import format.text.LargeFormat;
 import org.junit.Test;
 
 import java.io.*;
