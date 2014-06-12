@@ -9,7 +9,7 @@ import sequence.nucleotide.genome.Genome;
  */
 public interface GenomeDAO extends ChromosomeDAO{
 
-    public int saveGenomeForName(String name,Genome<? extends Chromosome> genome) throws Exception;
+    public int saveGenomeForName(Genome<? extends Chromosome> genome) throws Exception;
     public boolean genomeForNameExists(String name)throws Exception;
 
 }

@@ -1,10 +1,11 @@
-package sequence.nucleotide.genome;
+package test.sequence.nucleotide.genome;
 
 import alphabet.character.amino.AminoAcid;
 import alphabet.translate.GStreamRibosome;
 import alphabet.translate.GeneticCode;
 import format.text.CommonFormats;
 import org.junit.Test;
+import sequence.nucleotide.genome.LargeGenome;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -32,13 +33,13 @@ public class LargeGenomeTest {
             chromosomes.stream()
                     .map(ch -> GStreamRibosome.newInstance(ch.getSequenceInputstream(), standard))
                     .flatMap(gsr ->
-            {
-                try {
-                    return gsr.translate();
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            })
+                    {
+                        try {
+                            return gsr.translate();
+                        } catch (IOException e) {
+                            throw new UncheckedIOException(e);
+                        }
+                    })
 
                     .forEach(orf -> System.out.println(orf.toString()));
 
