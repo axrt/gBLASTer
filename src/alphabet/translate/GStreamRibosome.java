@@ -131,12 +131,7 @@ public class GStreamRibosome extends Ribosome<Nucleotide, AminoAcid, ORF> {
                 final AminoAcid aa = codonTable.get(codon); //TODO think of a reusable container for this, StringBuilder seems quite obvious, but the genetic table has to be redesigned in this case
                 if (aa == null || aa.getPillar() == AminoAcidAlphabet.ALPHABET.STOP.getAA().getPillar()) {
 
-                    if (this.orfBuilder.length() == 0) {
-                        return false;
-                    } else {
-                        this.finalizeORF();
-                        return true;
-                    }
+                    return this.finalizeORF();
 
                 } else {
                     this.orfBuilder.append(aa.getPillar());
@@ -146,13 +141,16 @@ public class GStreamRibosome extends Ribosome<Nucleotide, AminoAcid, ORF> {
             return false;
         }
 
-        protected void finalizeORF() {
+        protected boolean finalizeORF() {
             if(orfBuilder.length()>0) {
                 final ORF orf = ORF.get(this.orfBuilder.toString(), String.valueOf(this.orfsCreated), this.orfStart, this.orfStop, this.frame);
                 orfs.add(orf);
                 this.orfsCreated++;
                 this.orfBuilder = new StringBuilder();
                 this.orfStart = this.orfStop + 1;
+                return true;
+            }else {
+                return false;
             }
         }
     }
