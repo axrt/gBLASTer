@@ -43,4 +43,7 @@ public class Genome<C extends Chromosome> extends ArrayList<C> {
         this.name = name;
     }
 
+    public String getName() {
+        return name;
+    }
 }

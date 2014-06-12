@@ -43,8 +43,7 @@ public class MySQLConnector extends Connector {
      * @throws java.sql.SQLException
      */
     @Override
-    public boolean connectToDatabase() throws SQLException,
-            ClassNotFoundException {
+    public boolean connectToDatabase() throws SQLException{
         this.connection = DriverManager.getConnection(this.URL, this.connectionProperties);
         if (this.connection != null) {
             return (this.connected = true);

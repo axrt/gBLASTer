@@ -61,7 +61,7 @@ public class CommonFormats {
 
         @Override
         public String getAc(InputStream record) throws IOException {
-            return new BufferedReader(new InputStreamReader(record)).readLine();
+            return new BufferedReader(new InputStreamReader(record)).readLine().substring(1);
         }
 
         @Override
