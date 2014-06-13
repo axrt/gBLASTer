@@ -1,5 +1,7 @@
 package db.mysql;
 
+import alphabet.character.amino.AminoAcid;
+import alphabet.translate.GStreamRibosome;
 import db.GenomeDAO;
 import db.OrfDAO;
 import format.text.LargeFormat;
@@ -9,16 +11,14 @@ import sequence.nucleotide.genome.LargeChromosome;
 import sequence.nucleotide.genome.LargeGenome;
 import sequence.protein.ORF;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Iterator;
-import java.util.Optional;
-import java.util.Spliterator;
-import java.util.Spliterators;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -46,7 +46,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     }
 
     @Override
-    public int saveLargeGenomeForName(LargeGenome genome) throws Exception {
+    public int saveLargeGenome(LargeGenome genome) throws SQLException {
         int id_genome = 0;
         try (PreparedStatement preparedStatement = this.connection
                 .prepareStatement("INSERT INTO `gblaster`.`genomes` ( `name`, `comment`) " +
@@ -64,7 +64,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     }
 
     @Override
-    public boolean genomeForNameExists(String name) throws Exception {
+    public boolean genomeForNameExists(String name) throws SQLException {
         try (PreparedStatement preparedStatement = this.connection
                 .prepareStatement("select id_genomes from `gblaster`.`genomes` where name=?")) {
             preparedStatement.setString(1, name);
@@ -78,18 +78,18 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     }
 
     @Override
-    public int saveChromososmeForGenomeID(int genomeId, Chromosome chromosome) throws Exception {
+    public int saveChromososmeForGenomeID(int genomeId, Chromosome chromosome) throws SQLException {
 
 
         return 0;
     }
 
     @Override
-    public int saveLargeChromososmeForGenomeID(int genomeId, LargeChromosome largeChromosome) throws Exception {
+    public int saveLargeChromososmeForGenomeID(int genomeId, LargeChromosome largeChromosome) throws SQLException, IOException {
         int id_chormosome = 0;
         try (PreparedStatement preparedStatement = this.connection
                 .prepareStatement("INSERT INTO `gblaster`.`chromosomes` (`id_genome`, `name`, `sequence`) VALUES (?, ?, ?);", Statement.RETURN_GENERATED_KEYS);
-             Reader reader = new InputStreamReader(largeChromosome.getSequenceInputstream())) {
+             final Reader reader = new InputStreamReader(largeChromosome.getSequenceInputstream())) {
             preparedStatement.setInt(1, genomeId);
             preparedStatement.setString(2, largeChromosome.getAc());
             preparedStatement.setCharacterStream(3, reader);
@@ -103,20 +103,20 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     }
 
     @Override
-    public Optional<Chromosome> loadCrhomosomeForID(int id) throws Exception {
+    public Optional<Chromosome> loadCrhomosomeForID(int id) throws SQLException {
         return Optional.empty();
     }
 
     @Override
-    public Optional<LargeChromosome> loadLargeCrhomosomeForID(int id, LargeFormat largeFormat) throws Exception {
+    public Optional<LargeChromosome> loadLargeCrhomosomeForID(int id, LargeFormat largeFormat) throws SQLException {
 
         final PreparedStatement preparedStatement = this.connection.prepareStatement("select * from `gblaster`.`chromosomes` where id_chromosomes=?");
         try {
             preparedStatement.setInt(1, id);
             final ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                    return Optional.of(LargeChromosome.formPreprocessedComponents(resultSet.getString(3), resultSet.getBinaryStream(4), largeFormat));
-            } else{
+                return Optional.of(LargeChromosome.formPreprocessedComponents(resultSet.getString(3), resultSet.getBinaryStream(4), largeFormat));
+            } else {
                 return Optional.empty();
             }
         } catch (RuntimeException e) {
@@ -130,7 +130,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     }
 
     @Override
-    public IntStream loadChromosomeIdsForGenomeId(int genomeId) throws Exception {
+    public IntStream loadChromosomeIdsForGenomeId(int genomeId) throws SQLException {
         try (PreparedStatement preparedStatement = this.connection
                 .prepareStatement("select id_chromosomes from `gblaster`.`chromosomes` where id_genome=?")) {
             preparedStatement.setInt(1, genomeId);
@@ -152,7 +152,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
      * @throws Exception
      */
     @Override
-    public IntStream saveLargeChromosomes(int genomeId, Stream<? extends LargeChromosome> chromoStream) throws Exception {
+    public IntStream saveLargeChromosomesForGenomeId(int genomeId, Stream<? extends LargeChromosome> chromoStream) throws SQLException {
         try (PreparedStatement preparedStatement = this.connection
                 .prepareStatement("INSERT INTO `gblaster`.`chromosomes` (`id_genome`, `name`, `sequence`) VALUES (?, ?, ?);", Statement.RETURN_GENERATED_KEYS)) {
 
@@ -185,7 +185,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     }
 
     @Override
-    public Stream<LargeChromosome> loadLargeChromosomesForGemomeID(int genomeId, LargeFormat largeFormat) throws Exception {
+    public Stream<LargeChromosome> loadLargeChromosomesForGemomeID(int genomeId, LargeFormat largeFormat) throws SQLException {
         PreparedStatement preparedStatement = this.connection
                 .prepareStatement("select * from `gblaster`.`chromosomes` where id_genome=?");
         try {
@@ -228,15 +228,15 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     }
 
     @Override
-    public IntStream saveOrfsForChromosomeId(int idChromosome, Stream<? extends ORF> orfStream) throws Exception {
+    public IntStream saveOrfsForChromosomeId(int idChromosome, Stream<? extends ORF> orfStream) throws SQLException {
         try (PreparedStatement preparedStatement = this.connection
-                .prepareStatement("INSERT INTO `gblaster`.`orfs` (`id_chromosome`, `frame`, `name`, `sequence`) VALUES (?, ?, ?, ?);", Statement.RETURN_GENERATED_KEYS)) {
+                .prepareStatement("INSERT INTO `gblaster`.`orfs` (`id_chromosome`, `frame`,`start`,`stop`, `name`, `sequence`) VALUES (?, ?, ?, ?, ?, ?);", Statement.RETURN_GENERATED_KEYS)) {
             orfStream.forEach(orf -> {
                 try {
                     preparedStatement.setInt(1, idChromosome);
                     preparedStatement.setInt(2, orf.getFrame());
-                    preparedStatement.setInt(3,orf.getStart());
-                    preparedStatement.setInt(4,orf.getStop());
+                    preparedStatement.setInt(3, orf.getStart());
+                    preparedStatement.setInt(4, orf.getStop());
                     preparedStatement.setString(5, orf.getAc());
                     preparedStatement.setString(6, orf.getSequence());
                     preparedStatement.addBatch();
@@ -261,7 +261,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     }
 
     @Override
-    public Stream<ORF> loadAllOrfsForGenomeId(int genomeId) throws Exception {
+    public Stream<ORF> loadAllOrfsForGenomeId(int genomeId) throws SQLException {
         PreparedStatement preparedStatement = this.connection
                 .prepareStatement("select * from `gblaster`.`gco_view` where id_genomes=?");
         try {
@@ -285,7 +285,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                 @Override
                 public ORF next() {
                     try {
-                        return ORF.get(resultSet.getString(12),resultSet.getString(11),resultSet.getInt(10),resultSet.getInt(9),resultSet.getInt(8));
+                        return ORF.get(resultSet.getString(12), resultSet.getString(11), resultSet.getInt(10), resultSet.getInt(9), resultSet.getInt(8));
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
                     }
@@ -301,6 +301,47 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                 throw e;
             }
         }
+    }
+
+    @Override
+    public long deployAndTranslateLargeGenome(LargeGenome genome, LargeFormat largeFormat, Map<String, AminoAcid> geneticCode) throws SQLException, IOException {
+        //Save the genome
+        final int genomeId = this.saveLargeGenome(genome);
+        //Save all chromosomes and translate each
+        long numberOfOrfs = 0;
+        try {
+            final IntStream orfIds = this.saveLargeChromosomesForGenomeId(genomeId, genome.stream())
+                    .flatMap(chrId -> {
+                        final Optional<LargeChromosome> largeChromosomeOptional;
+                        try {
+                            largeChromosomeOptional = this.loadLargeCrhomosomeForID(chrId, largeFormat);
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                        if (largeChromosomeOptional.isPresent()) {
+                            try {
+                                return this.saveOrfsForChromosomeId(chrId, GStreamRibosome.newInstance(largeChromosomeOptional.get().getSequenceInputstream(), geneticCode).translate());
+                            } catch (SQLException e) {
+                                throw new RuntimeException(e);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        } else {
+                            return IntStream.empty();
+                        }
+                    });
+            System.out.println(numberOfOrfs = orfIds.parallel().count());
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof SQLException) {
+                throw (SQLException) e.getCause();
+            }
+            if (e.getCause() instanceof IOException) {
+                throw (IOException) e.getCause();
+            }
+            throw e;
+        }
+
+        return numberOfOrfs;
     }
 
     public static GMySQLConnector get(String URL, String user, String password) {
