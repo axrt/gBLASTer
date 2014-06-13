@@ -1,24 +1,33 @@
 package db.mysql;
 
 import db.GenomeDAO;
+import db.OrfDAO;
+import format.text.LargeFormat;
 import sequence.nucleotide.genome.Chromosome;
 import sequence.nucleotide.genome.Genome;
 import sequence.nucleotide.genome.LargeChromosome;
 import sequence.nucleotide.genome.LargeGenome;
+import sequence.protein.ORF;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Iterator;
+import java.util.Optional;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Created by alext on 6/11/14.
  * TODO document class
  */
-public class GMySQLConnector extends MySQLConnector implements GenomeDAO {
+public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO {
 
     public static final String COMMENT_TEMPLATE = "Comment template";
 
@@ -77,43 +86,220 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO {
 
     @Override
     public int saveLargeChromososmeForGenomeID(int genomeId, LargeChromosome largeChromosome) throws Exception {
-        int id_chormosome=0;
+        int id_chormosome = 0;
         try (PreparedStatement preparedStatement = this.connection
-                .prepareStatement("INSERT INTO `gblaster`.`chromosomes` (`id_genome`, `name`, `sequence`) VALUES (?, ?, ?);",Statement.RETURN_GENERATED_KEYS);
+                .prepareStatement("INSERT INTO `gblaster`.`chromosomes` (`id_genome`, `name`, `sequence`) VALUES (?, ?, ?);", Statement.RETURN_GENERATED_KEYS);
              Reader reader = new InputStreamReader(largeChromosome.getSequenceInputstream())) {
             preparedStatement.setInt(1, genomeId);
-            preparedStatement.setString(2,largeChromosome.getAc());
+            preparedStatement.setString(2, largeChromosome.getAc());
             preparedStatement.setCharacterStream(3, reader);
             preparedStatement.executeUpdate();
-            ResultSet resultSet=preparedStatement.getGeneratedKeys();
-            if(resultSet.next()){
-                id_chormosome=resultSet.getInt(1);
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+            if (resultSet.next()) {
+                id_chormosome = resultSet.getInt(1);
             }
         }
         return id_chormosome;
     }
 
     @Override
-    public Chromosome loadCrhomosomeForID(int id) throws Exception {
-        return null;
+    public Optional<Chromosome> loadCrhomosomeForID(int id) throws Exception {
+        return Optional.empty();
     }
 
     @Override
-    public LargeChromosome loadLargeCrhomosomeForID(int id) throws Exception {
-        return null;
+    public Optional<LargeChromosome> loadLargeCrhomosomeForID(int id, LargeFormat largeFormat) throws Exception {
+
+        final PreparedStatement preparedStatement = this.connection.prepareStatement("select * from `gblaster`.`chromosomes` where id_chromosomes=?");
+        try {
+            preparedStatement.setInt(1, id);
+            final ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                    return Optional.of(LargeChromosome.formPreprocessedComponents(resultSet.getString(3), resultSet.getBinaryStream(4), largeFormat));
+            } else{
+                return Optional.empty();
+            }
+        } catch (RuntimeException e) {
+            preparedStatement.close();
+            if (e.getCause() instanceof SQLException) {
+                throw (SQLException) e.getCause();
+            } else {
+                throw e;
+            }
+        }
     }
 
     @Override
-    public IntStream loadChromosomeIdsForGenomeId(int genomeID) throws Exception {
-        try(PreparedStatement preparedStatement=this.connection
-                .prepareStatement("select id_chromosomes from `gblaster`.`chromosomes` where id_genome=?")){
-            preparedStatement.setInt(1,genomeID);
-            final ResultSet resultSet=preparedStatement.executeQuery();
-            final IntStream.Builder builder=IntStream.builder();
-            while(resultSet.next()) {
+    public IntStream loadChromosomeIdsForGenomeId(int genomeId) throws Exception {
+        try (PreparedStatement preparedStatement = this.connection
+                .prepareStatement("select id_chromosomes from `gblaster`.`chromosomes` where id_genome=?")) {
+            preparedStatement.setInt(1, genomeId);
+            final ResultSet resultSet = preparedStatement.executeQuery();
+            final IntStream.Builder builder = IntStream.builder();
+            while (resultSet.next()) {
                 builder.accept(resultSet.getInt(1));
             }
             return builder.build();
+        }
+    }
+
+    /**
+     * Note that the connection should be set to {@code false} autocommit if the database supports transactions
+     *
+     * @param genomeId
+     * @param chromoStream
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public IntStream saveLargeChromosomes(int genomeId, Stream<? extends LargeChromosome> chromoStream) throws Exception {
+        try (PreparedStatement preparedStatement = this.connection
+                .prepareStatement("INSERT INTO `gblaster`.`chromosomes` (`id_genome`, `name`, `sequence`) VALUES (?, ?, ?);", Statement.RETURN_GENERATED_KEYS)) {
+
+            chromoStream.forEach(ch -> {
+                final Reader reader = new InputStreamReader(ch.getSequenceInputstream());
+                try {
+                    preparedStatement.setInt(1, genomeId);
+                    preparedStatement.setInt(1, genomeId);
+                    preparedStatement.setString(2, ch.getAc());
+                    preparedStatement.setCharacterStream(3, reader);
+                    preparedStatement.addBatch();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            preparedStatement.executeBatch();
+            final ResultSet resultSet = preparedStatement.getGeneratedKeys();
+            final IntStream.Builder builder = IntStream.builder();
+            while (resultSet.next()) {
+                builder.accept(resultSet.getInt(1));
+            }
+            return builder.build();
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof SQLException) {
+                throw (SQLException) e.getCause();
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    @Override
+    public Stream<LargeChromosome> loadLargeChromosomesForGemomeID(int genomeId, LargeFormat largeFormat) throws Exception {
+        PreparedStatement preparedStatement = this.connection
+                .prepareStatement("select * from `gblaster`.`chromosomes` where id_genome=?");
+        try {
+            preparedStatement.setInt(1, genomeId);
+            final ResultSet resultSet = preparedStatement.executeQuery();
+            final Iterator<LargeChromosome> iter = new Iterator<LargeChromosome>() {
+                @Override
+                public boolean hasNext() {
+                    try {
+                        if (resultSet.next()) {
+                            return true;
+                        } else {
+                            preparedStatement.close();
+                            return false;
+                        }
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                @Override
+                public LargeChromosome next() {
+                    try {
+                        return LargeChromosome.formPreprocessedComponents(resultSet.getString(3), resultSet.getBinaryStream(4), largeFormat);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            };
+            return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
+                    iter, Spliterator.NONNULL), false);
+        } catch (RuntimeException e) {
+            preparedStatement.close();
+            if (e.getCause() instanceof SQLException) {
+                throw (SQLException) e.getCause();
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    @Override
+    public IntStream saveOrfsForChromosomeId(int idChromosome, Stream<? extends ORF> orfStream) throws Exception {
+        try (PreparedStatement preparedStatement = this.connection
+                .prepareStatement("INSERT INTO `gblaster`.`orfs` (`id_chromosome`, `frame`, `name`, `sequence`) VALUES (?, ?, ?, ?);", Statement.RETURN_GENERATED_KEYS)) {
+            orfStream.forEach(orf -> {
+                try {
+                    preparedStatement.setInt(1, idChromosome);
+                    preparedStatement.setInt(2, orf.getFrame());
+                    preparedStatement.setInt(3,orf.getStart());
+                    preparedStatement.setInt(4,orf.getStop());
+                    preparedStatement.setString(5, orf.getAc());
+                    preparedStatement.setString(6, orf.getSequence());
+                    preparedStatement.addBatch();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            preparedStatement.executeBatch();
+            final ResultSet resultSet = preparedStatement.getGeneratedKeys();
+            final IntStream.Builder builder = IntStream.builder();
+            while (resultSet.next()) {
+                builder.accept(resultSet.getInt(1));
+            }
+            return builder.build();
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof SQLException) {
+                throw (SQLException) e.getCause();
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    @Override
+    public Stream<ORF> loadAllOrfsForGenomeId(int genomeId) throws Exception {
+        PreparedStatement preparedStatement = this.connection
+                .prepareStatement("select * from `gblaster`.`gco_view` where id_genomes=?");
+        try {
+            preparedStatement.setInt(1, genomeId);
+            final ResultSet resultSet = preparedStatement.executeQuery();
+            final Iterator<ORF> iter = new Iterator<ORF>() {
+                @Override
+                public boolean hasNext() {
+                    try {
+                        if (resultSet.next()) {
+                            return true;
+                        } else {
+                            preparedStatement.close();
+                            return false;
+                        }
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                @Override
+                public ORF next() {
+                    try {
+                        return ORF.get(resultSet.getString(12),resultSet.getString(11),resultSet.getInt(10),resultSet.getInt(9),resultSet.getInt(8));
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            };
+            return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
+                    iter, Spliterator.NONNULL), false);
+        } catch (RuntimeException e) {
+            preparedStatement.close();
+            if (e.getCause() instanceof SQLException) {
+                throw (SQLException) e.getCause();
+            } else {
+                throw e;
+            }
         }
     }
 

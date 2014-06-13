@@ -22,6 +22,14 @@ public class ORF extends ProteinSequence<AminoAcid> {
         return frame;
     }
 
+    public int getStart() {
+        return start;
+    }
+
+    public int getStop() {
+        return stop;
+    }
+
     @Override
     public String toString() {
         final StringBuilder stringBuilder=new StringBuilder();

@@ -52,4 +52,8 @@ public class LargeChromosome extends Chromosome {
         }
         return new LargeChromosome(ac, bufferedInputStream, largeFormat);
     }
+
+    public static LargeChromosome formPreprocessedComponents(String ac, InputStream sequence, LargeFormat format){
+        return new LargeChromosome(ac, sequence,format);
+    }
 }

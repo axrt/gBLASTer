@@ -1,9 +1,11 @@
 package db;
 
+import format.text.LargeFormat;
 import sequence.nucleotide.genome.Chromosome;
 import sequence.nucleotide.genome.LargeChromosome;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -15,8 +17,18 @@ public interface ChromosomeDAO {
 
     public int saveChromososmeForGenomeID(int genomeId, Chromosome chromosome) throws Exception;
     public int saveLargeChromososmeForGenomeID(int genomeId, LargeChromosome largeChromosome) throws Exception;
-    public Chromosome loadCrhomosomeForID(int id)throws Exception;
-    public LargeChromosome loadLargeCrhomosomeForID(int id)throws Exception;
-    public IntStream loadChromosomeIdsForGenomeId(int genomeID)throws Exception;
+    public Optional<Chromosome> loadCrhomosomeForID(int id)throws Exception;
+    public Optional<LargeChromosome> loadLargeCrhomosomeForID(int id,LargeFormat largeFormat)throws Exception;
+    public IntStream loadChromosomeIdsForGenomeId(int genomeId)throws Exception;
+
+    /**
+     * Note that the connection should be set to {@code false} autocommit if the database supports transactions
+     * @param genomeId
+     * @param chromoStream
+     * @return
+     * @throws Exception
+     */
+    public IntStream saveLargeChromosomes(int genomeId, Stream<? extends LargeChromosome> chromoStream) throws Exception;
+    public Stream<LargeChromosome> loadLargeChromosomesForGemomeID(int genomeId, LargeFormat largeFormat) throws Exception;
 
 }
