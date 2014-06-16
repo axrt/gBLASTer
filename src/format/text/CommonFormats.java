@@ -103,15 +103,17 @@ public class CommonFormats {
                 public InputStream next() {
                     try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(this.tmpFile))) {
                         byte[] buffer = new byte[1];
-                        int count = 0;
+                        boolean firsLine=true;
                         int read;
                         while ((read = pushbackInputStream.read(buffer)) != -1) {
-                            if (count != 0 && FASTA_START.charAt(0) == (char) buffer[0]) {
+                            if (!firsLine && FASTA_START.charAt(0) == (char) buffer[0]) {
                                 pushbackInputStream.unread(buffer);
                                 break;
                             }
-                            bufferedWriter.write((char) buffer[0]);
-                            count++;
+                            if((char)buffer[0]!='\n') {
+                                bufferedWriter.write((char) buffer[0]);
+                            }
+                            firsLine=false;
                         }
                         if (read == -1) {
                             this.empty = true;

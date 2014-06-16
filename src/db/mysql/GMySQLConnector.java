@@ -89,7 +89,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
         int id_chormosome = 0;
         try (PreparedStatement preparedStatement = this.connection
                 .prepareStatement("INSERT INTO `gblaster`.`chromosomes` (`id_genome`, `name`, `sequence`) VALUES (?, ?, ?);", Statement.RETURN_GENERATED_KEYS);
-             final Reader reader = new InputStreamReader(largeChromosome.getSequenceInputstream())) {
+            Reader reader = new InputStreamReader(largeChromosome.getSequenceInputstream())) {
             preparedStatement.setInt(1, genomeId);
             preparedStatement.setString(2, largeChromosome.getAc());
             preparedStatement.setCharacterStream(3, reader);
