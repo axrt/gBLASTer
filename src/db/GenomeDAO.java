@@ -17,6 +17,5 @@ public interface GenomeDAO extends ChromosomeDAO{
     public int saveGenomeForName(Genome<? extends Chromosome> genome) throws Exception;
     public int saveLargeGenome(LargeGenome genome) throws Exception;
     public boolean genomeForNameExists(String name)throws Exception;
-    public long deployAndTranslateLargeGenome(LargeGenome genome,LargeFormat largeFormat,Map<String,AminoAcid> geneticCode) throws Exception;
 
 }

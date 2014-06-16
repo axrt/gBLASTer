@@ -200,23 +200,4 @@ public class GMySQLConnectorTest {
         }
     }
 
-    @Test
-    public void deployAndTranslateLargeGenome(){
-        final Path pathToFile = Paths.get("/home/alext/Documents/Ocular Project/sequencing/DES/Fasta/1173L.fasta");
-        try {
-
-            final MySQLConnector mySQLConnector = GMySQLConnector.get("jdbc:mysql://localhost", "gblaster", "gblaster");
-            mySQLConnector.connectToDatabase();
-            final GenomeDAO gd = (GenomeDAO) mySQLConnector;
-            final LargeGenome chromosomes = LargeGenome.grasp("test", new FileInputStream(pathToFile.toFile()), CommonFormats.LARGE_FASTA, pathToFile.getParent());
-            mySQLConnector.getConnection().setAutoCommit(true);
-            gd.deployAndTranslateLargeGenome(chromosomes,CommonFormats.LARGE_FASTA,GeneticCode.STANDARD);
-            mySQLConnector.getConnection().setAutoCommit(false);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }

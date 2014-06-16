@@ -32,7 +32,7 @@ public class LargeGenome extends Genome<LargeChromosome> {
 
     @Override
     public Stream<LargeChromosome> stream() {
-        return this.largeFormat.iterateRecords(this.genome, tmpFolder.resolve(".".concat(this.name).concat(".tmp.gen")))
+        return this.largeFormat.iterateRecords(this.genome, tmpFolder.resolve(this.name.concat(".tmp.gen")))
                 .map(is -> {
                     try {
                         return LargeChromosome.fromRecord(is, this.largeFormat);

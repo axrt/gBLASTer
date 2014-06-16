@@ -303,47 +303,6 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
         }
     }
 
-    @Override
-    public long deployAndTranslateLargeGenome(LargeGenome genome, LargeFormat largeFormat, Map<String, AminoAcid> geneticCode) throws SQLException, IOException {
-        //Save the genome
-        final int genomeId = this.saveLargeGenome(genome);
-        //Save all chromosomes and translate each
-        long numberOfOrfs = 0;
-        try {
-            final IntStream orfIds = this.saveLargeChromosomesForGenomeId(genomeId, genome.stream())
-                    .flatMap(chrId -> {
-                        final Optional<LargeChromosome> largeChromosomeOptional;
-                        try {
-                            largeChromosomeOptional = this.loadLargeCrhomosomeForID(chrId, largeFormat);
-                        } catch (SQLException e) {
-                            throw new RuntimeException(e);
-                        }
-                        if (largeChromosomeOptional.isPresent()) {
-                            try {
-                                return this.saveOrfsForChromosomeId(chrId, GStreamRibosome.newInstance(largeChromosomeOptional.get().getSequenceInputstream(), geneticCode).translate());
-                            } catch (SQLException e) {
-                                throw new RuntimeException(e);
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                        } else {
-                            return IntStream.empty();
-                        }
-                    });
-            System.out.println(numberOfOrfs = orfIds.parallel().count());
-        } catch (RuntimeException e) {
-            if (e.getCause() instanceof SQLException) {
-                throw (SQLException) e.getCause();
-            }
-            if (e.getCause() instanceof IOException) {
-                throw (IOException) e.getCause();
-            }
-            throw e;
-        }
-
-        return numberOfOrfs;
-    }
-
     public static GMySQLConnector get(String URL, String user, String password) {
         return new GMySQLConnector(URL, user, password);
     }
