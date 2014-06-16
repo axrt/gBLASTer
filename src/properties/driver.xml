@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+
+<!DOCTYPE gBlasterProperties PUBLIC 'PUBLIC:-//gBlaster/Properties//EN' 'driver.dtd'>
+<gBlasterProperties>
+    <DBConnection url="localhost" login="gblaster" password="gblaster"/>
+    <BlastProperties>
+        <PathToMakeBlastDb path="/bin/makeblastdb"/>
+        <PathToBlastP path="/bin/blastp"/>
+        <Expect value="1"/>
+        <MinORFLength min="100"></MinORFLength>
+        <MaxORFLength max="10000"></MaxORFLength>
+    </BlastProperties>
+    <Genome>
+        <Name name="test"></Name>
+        <PathToFile path=""></PathToFile>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="test"></Name>
+        <PathToFile path=""></PathToFile>
+        <GeneticTable type="altered">
+            <AlterCodon codon="TAG" aminoacid="Q"/>
+        </GeneticTable>
+
+    </Genome>
+</gBlasterProperties>
