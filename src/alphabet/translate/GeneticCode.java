@@ -5,8 +5,10 @@ import alphabet.character.Character;
 import alphabet.character.amino.AminoAcid;
 import alphabet.protein.AminoAcidAlphabet;
 
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by alext on 6/5/14.
@@ -150,4 +152,7 @@ public class GeneticCode<A extends AminoAcid> extends HashMap<String,A> {
         return this.name;
     }
 
+    public static GeneticCode<AminoAcid> altered(String name){
+        return new GeneticCode<>(STANDARD,name);
+    }
 }

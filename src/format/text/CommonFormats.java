@@ -1,5 +1,6 @@
 package format.text;
 
+import sequence.protein.ORF;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.*;
@@ -27,6 +28,22 @@ public class CommonFormats {
     private static class Fasta implements Format {
         public static final int MAX_LENGTH = 100;
         public static final String FASTA_START = ">";
+
+        @Override
+        public String formatORF(ORF toFormat) {
+            final StringBuilder stringBuilder=new StringBuilder();
+            stringBuilder.append(FASTA_START);
+            stringBuilder.append(toFormat.getId());
+            stringBuilder.append('|');
+            stringBuilder.append(toFormat.getFrame());
+            stringBuilder.append('|');
+            stringBuilder.append(toFormat.getStart());
+            stringBuilder.append('|');
+            stringBuilder.append(toFormat.getStop());
+            stringBuilder.append('\n');
+            stringBuilder.append(toFormat.getSequence());
+            return stringBuilder.toString();
+        }
 
         @Override
         public boolean checkFormatting(String toCheck) {
@@ -131,6 +148,7 @@ public class CommonFormats {
                     }
                 }
             };
+
             return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
                     iter, Spliterator.NONNULL), false);
         }

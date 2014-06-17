@@ -7,6 +7,7 @@ import alphabet.character.amino.AminoAcid;
  * TODO document class
  */
 public class ORF extends ProteinSequence<AminoAcid> {
+    private int id;
     private final int start;
     private final int stop;
     private final int frame;
@@ -16,6 +17,7 @@ public class ORF extends ProteinSequence<AminoAcid> {
         this.start = start;
         this.stop = stop;
         this.frame = frame;
+        this.id=0;
     }
 
     public int getFrame() {
@@ -28,6 +30,14 @@ public class ORF extends ProteinSequence<AminoAcid> {
 
     public int getStop() {
         return stop;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
     }
 
     @Override

@@ -199,5 +199,23 @@ public class GMySQLConnectorTest {
             e.printStackTrace();
         }
     }
+    //@Test
+    public void genomeIdByNameTest(){
+
+        try {
+
+            final MySQLConnector mySQLConnector = GMySQLConnector.get("jdbc:mysql://localhost", "gblaster", "gblaster");
+            mySQLConnector.connectToDatabase();
+            final GenomeDAO gd = (GenomeDAO) mySQLConnector;
+            TestSetup.assertEquals(gd.genomeIdByName("random"),0);
+            System.out.println(gd.genomeIdByName("testname"));
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 
 }

@@ -1,7 +1,5 @@
 package db.mysql;
 
-import alphabet.character.amino.AminoAcid;
-import alphabet.translate.GStreamRibosome;
 import db.GenomeDAO;
 import db.OrfDAO;
 import format.text.LargeFormat;
@@ -18,7 +16,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.Iterator;
+import java.util.Optional;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -89,7 +90,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
         int id_chormosome = 0;
         try (PreparedStatement preparedStatement = this.connection
                 .prepareStatement("INSERT INTO `gblaster`.`chromosomes` (`id_genome`, `name`, `sequence`) VALUES (?, ?, ?);", Statement.RETURN_GENERATED_KEYS);
-            Reader reader = new InputStreamReader(largeChromosome.getSequenceInputstream())) {
+             Reader reader = new InputStreamReader(largeChromosome.getSequenceInputstream())) {
             preparedStatement.setInt(1, genomeId);
             preparedStatement.setString(2, largeChromosome.getAc());
             preparedStatement.setCharacterStream(3, reader);
@@ -285,7 +286,9 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                 @Override
                 public ORF next() {
                     try {
-                        return ORF.get(resultSet.getString(12), resultSet.getString(11), resultSet.getInt(10), resultSet.getInt(9), resultSet.getInt(8));
+                        final ORF orf=ORF.get(resultSet.getString(12), resultSet.getString(11), resultSet.getInt(10), resultSet.getInt(9), resultSet.getInt(8));
+                        orf.setId(resultSet.getInt(7));
+                        return orf;
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
                     }
@@ -300,6 +303,26 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
             } else {
                 throw e;
             }
+        }
+    }
+
+    /**
+     *
+     * @param name
+     * @return 0 in case could not find a genome, any other int - in case one could be found
+     * @throws Exception
+     */
+    @Override
+    public int genomeIdByName(String name) throws Exception {
+
+        try (PreparedStatement preparedStatement = this.connection.prepareStatement("select id_genomes from `gblaster`.`genomes` where name=?")) {
+
+            preparedStatement.setString(1,name);
+            final ResultSet resultSet=preparedStatement.executeQuery();
+            if(resultSet.next()){
+                return resultSet.getInt(1);
+            }
+            return 0;
         }
     }
 

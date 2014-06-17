@@ -25,7 +25,7 @@ public final class PropertiesLoader {
         throw new AssertionError("Non-instantiable");
     }
 
-    public GBlasterProperties load(InputStream inputStream) throws SAXException, JAXBException {
+    public static GBlasterProperties load(InputStream inputStream) throws SAXException, JAXBException {
 
         final JAXBContext jc = JAXBContext.newInstance(GBlasterProperties.class);
         final Unmarshaller u = jc.createUnmarshaller();
