@@ -29,7 +29,7 @@ public final class Deployer {
     }
 
 
-    public static <G extends LargeGenome> IntStream chromosomeIds(
+    public static <G extends LargeGenome> IntStream deployAndGetchromosomeIds(
             GenomeDAO genomeDAO, properties.jaxb.Genome genome,
             LargeFormat format, Path toTmpFolder,
             NucleotideAlphabet nucleotideAlphabet) throws Exception {

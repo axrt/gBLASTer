@@ -104,14 +104,20 @@ public class CommonFormats {
                     try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(this.tmpFile))) {
                         byte[] buffer = new byte[1];
                         boolean firsLine=true;
+                        boolean inAc=true;
                         int read;
                         while ((read = pushbackInputStream.read(buffer)) != -1) {
                             if (!firsLine && FASTA_START.charAt(0) == (char) buffer[0]) {
                                 pushbackInputStream.unread(buffer);
                                 break;
                             }
-                            if((char)buffer[0]!='\n') {
+                            if(inAc){
                                 bufferedWriter.write((char) buffer[0]);
+                            }else if((char)buffer[0]!='\n'){
+                                bufferedWriter.write((char) buffer[0]);
+                            }
+                            if((char)buffer[0]=='\n'){
+                                inAc=false;
                             }
                             firsLine=false;
                         }

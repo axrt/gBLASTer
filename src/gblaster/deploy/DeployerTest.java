@@ -2,18 +2,14 @@ package gblaster.deploy;
 
 import alphabet.nucleotide.NucleotideAlphabet;
 import db.GenomeDAO;
-import db.OrfDAO;
 import db.mysql.GMySQLConnector;
 import db.mysql.MySQLConnector;
 import format.text.CommonFormats;
-import format.text.LargeFormat;
 import org.junit.Test;
 import properties.jaxb.Genome;
 import properties.jaxb.Name;
 import properties.jaxb.PathToFile;
-import sequence.nucleotide.genome.LargeGenome;
 
-import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
@@ -38,7 +34,7 @@ public class DeployerTest {
             genome.getName().setName("testname");
             genome.setPathToFile(new PathToFile());
             genome.getPathToFile().setPath(pathToFile.toFile().getPath());
-            Deployer.chromosomeIds(gd, genome, CommonFormats.LARGE_FASTA, Paths.get("/home/alext/Downloads/tmp"), NucleotideAlphabet.get())
+            Deployer.deployAndGetchromosomeIds(gd, genome, CommonFormats.LARGE_FASTA, Paths.get("/home/alext/Downloads/tmp"), NucleotideAlphabet.get())
                     .forEach(System.out::println);
 
         } catch (SQLException e) {
