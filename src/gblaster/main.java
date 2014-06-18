@@ -46,6 +46,9 @@ public class main {
     final static Path toMakeBlastDb = Paths.get("/bin/makeblastdb");
     final static Path toBlastP = Paths.get("/bin/blastp");
     final static int maxThreads = 12;
+    final static int orfUnloadBalancer = Integer.MIN_VALUE;
+    final static int orfBatchSize = 1000;
+    final static int largeChromosomeBatchSize = 1;
     final static ExecutorService executorService = Executors.newFixedThreadPool(maxThreads);
 
     /**
@@ -86,14 +89,16 @@ public class main {
             final NucleotideAlphabet nucleotideAlphabet = NucleotideAlphabet.get();
 
             //7.For each genome: deploy and translate
+            final int minORFLenght=Integer.valueOf(gBlasterProperties.getBlastProperties().getMinORFLength().getMin());
+            final int maxORFLenght=Integer.valueOf(gBlasterProperties.getBlastProperties().getMaxORFLength().getMax());
             try {
                 gBlasterProperties.getGenome().stream().forEach(g -> {
 
                     try {
                         System.out.println("Deploying Genome ".concat(g.getName().getName()));
-                        final IntStream chromosomeIdStream = Deployer.deployAndGetchromosomeIds(genomeDAO, g, largeFormat, tmpFolder, nucleotideAlphabet);
+                        final IntStream chromosomeIdStream = Deployer.deployAndGetchromosomeIds(genomeDAO, g, largeFormat, tmpFolder, nucleotideAlphabet,largeChromosomeBatchSize);
                         System.out.println("Translating ORFs for Genome ".concat(g.getName().getName()));
-                        Deployer.translateAndGetORFStreamForGenomeId(chromosomeIdStream, genomeDAO, orfDAO, genomeGeneticCodeMap.get(g), largeFormat);
+                        Deployer.translateAndGetORFStreamForGenomeId(chromosomeIdStream, genomeDAO, orfDAO, genomeGeneticCodeMap.get(g), largeFormat, orfBatchSize);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -107,7 +112,7 @@ public class main {
                 gBlasterProperties.getGenome().stream().forEach(g -> {
                     try {
                         System.out.println("Unloading ORFs for Genome ".concat(g.getName().getName()));
-                        orfFileMap.put(g, Deployer.unloadORFsForGenomeToFile(g.getName().getName(), orfDAO, genomeDAO, largeFormat, orfFolder));
+                        orfFileMap.put(g, Deployer.unloadORFsForGenomeToFile(g.getName().getName(), orfDAO, genomeDAO, largeFormat,minORFLenght,maxORFLenght, orfFolder,orfUnloadBalancer));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -202,8 +207,11 @@ public class main {
             public Integer call() throws Exception {
                 int blastsSaved = 0;
                 while (!buffer.isDone()) {
+
                     final Iteration iteration = buffer.take();
-                    if (iteration.getIterationHits().getHit() != null && !iteration.getIterationHits().getHit().isEmpty()) {
+                    if(iteration==IterationBlockingBuffer.DONE){
+                        break;
+                    }else if (iteration.getIterationHits().getHit() != null && !iteration.getIterationHits().getHit().isEmpty()) {
                         blastDAO.saveBlastResult(iteration);
                         blastsSaved++;
                     }

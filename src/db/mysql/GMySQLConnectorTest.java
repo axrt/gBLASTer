@@ -124,7 +124,7 @@ public class GMySQLConnectorTest {
             final GenomeDAO gd = (GenomeDAO) mySQLConnector;
             final LargeGenome chromosomes = LargeGenome.grasp("test", new FileInputStream(pathToFile.toFile()), CommonFormats.LARGE_FASTA, pathToFile.getParent());
             mySQLConnector.getConnection().setAutoCommit(false);
-            gd.saveLargeChromosomesForGenomeId(2, chromosomes.stream()).forEach(System.out::println);
+            gd.saveLargeChromosomesForGenomeId(2, chromosomes.stream(),10).forEach(System.out::println);
             mySQLConnector.getConnection().setAutoCommit(true);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -170,7 +170,7 @@ public class GMySQLConnectorTest {
                                             lch -> {
                                                 try {
                                                     od.saveOrfsForChromosomeId(id, GStreamRibosome.newInstance(lch.getSequenceInputstream(), GeneticCode.STANDARD)
-                                                            .translate()).forEach(System.out::println);
+                                                            .translate(),1000).forEach(System.out::println);
                                                 } catch (Exception e) {
                                                     throw new RuntimeException(e);
                                                 }
@@ -199,7 +199,7 @@ public class GMySQLConnectorTest {
             mySQLConnector.connectToDatabase();
             final GenomeDAO gd = (GenomeDAO) mySQLConnector;
             final OrfDAO od = (OrfDAO) mySQLConnector;
-            od.loadAllOrfsForGenomeId(2).forEach(orf->System.out.println(orf.getAc()));
+            od.loadAllOrfsForGenomeId(2,1000,0,100000).forEach(orf->System.out.println(orf.getAc()));
 
         } catch (SQLException e) {
             e.printStackTrace();

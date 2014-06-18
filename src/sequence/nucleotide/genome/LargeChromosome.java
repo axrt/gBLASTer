@@ -36,7 +36,7 @@ public class LargeChromosome extends Chromosome implements AutoCloseable{
 
     public static LargeChromosome fromRecord(InputStream inputStream, LargeFormat largeFormat) throws IOException {
         final BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream, 1000);
-        int zero = 1000;
+        int zero = 10000000;
         bufferedInputStream.mark(zero);
         if (!largeFormat.checkFormatting(bufferedInputStream)) {
             throw new IllegalArgumentException("Bad record format!");

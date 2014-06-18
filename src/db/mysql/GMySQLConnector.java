@@ -154,10 +154,10 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
      * @throws Exception
      */
     @Override
-    public IntStream saveLargeChromosomesForGenomeId(int genomeId, Stream<? extends LargeChromosome> chromoStream) throws SQLException {
+    public IntStream saveLargeChromosomesForGenomeId(int genomeId, Stream<? extends LargeChromosome> chromoStream, int batchSize) throws SQLException {
         try (PreparedStatement preparedStatement = this.connection
                 .prepareStatement("INSERT INTO `gblaster`.`chromosomes` (`id_genome`, `name`, `sequence`) VALUES (?, ?, ?);", Statement.RETURN_GENERATED_KEYS)) {
-
+            final int[] counter = {0};
             chromoStream.forEach(ch -> {
                 final Reader reader = new InputStreamReader(ch.getSequenceInputstream());
                 try {
@@ -166,6 +166,11 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                     preparedStatement.setString(2, ch.getAc());
                     preparedStatement.setCharacterStream(3, reader);
                     preparedStatement.addBatch();
+                    counter[0]++;
+                    if (counter[0] > batchSize) {
+                        counter[0] = 0;
+                        preparedStatement.executeBatch();
+                    }
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
@@ -230,9 +235,11 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     }
 
     @Override
-    public IntStream saveOrfsForChromosomeId(int idChromosome, Stream<? extends ORF> orfStream) throws SQLException {
+    public IntStream saveOrfsForChromosomeId(int idChromosome, Stream<? extends ORF> orfStream, int batchSize) throws SQLException {
+
         try (PreparedStatement preparedStatement = this.connection
-                .prepareStatement("INSERT INTO `gblaster`.`orfs` (`id_chromosome`, `frame`,`start`,`stop`, `name`, `sequence`) VALUES (?, ?, ?, ?, ?, ?);", Statement.RETURN_GENERATED_KEYS)) {
+                .prepareStatement("INSERT INTO `gblaster`.`orfs` (`id_chromosome`, `frame`,`start`,`stop`, `name`, `sequence`,`length`) VALUES (?, ?, ?, ?, ?, ?,?);", Statement.RETURN_GENERATED_KEYS)) {
+            final int[] countHolder = {0};
             orfStream.forEach(orf -> {
                 try {
                     preparedStatement.setInt(1, idChromosome);
@@ -241,7 +248,13 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                     preparedStatement.setInt(4, orf.getStop());
                     preparedStatement.setString(5, orf.getAc());
                     preparedStatement.setString(6, orf.getSequence());
+                    preparedStatement.setInt(7, orf.getSequence().length());
                     preparedStatement.addBatch();
+                    countHolder[0]++;
+                    if (countHolder[0] > batchSize) {
+                        countHolder[0] = 0;
+                        preparedStatement.executeBatch();
+                    }
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
@@ -263,9 +276,13 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     }
 
     @Override
-    public Stream<ORF> loadAllOrfsForGenomeId(int genomeId) throws SQLException {
+    public Stream<ORF> loadAllOrfsForGenomeId(int genomeId, int balancer,int minLength, int maxLength) throws SQLException {
         PreparedStatement preparedStatement = this.connection
-                .prepareStatement("select * from `gblaster`.`gco_view` where id_genomes=?");
+                .prepareStatement("select * from `gblaster`.`gco_view` where id_genomes=? and orf_length>="
+                        +minLength
+                        +" and orf_length<="+maxLength
+                        ,ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY);
+        preparedStatement.setFetchSize(balancer);
         try {
             preparedStatement.setInt(1, genomeId);
             final ResultSet resultSet = preparedStatement.executeQuery();
@@ -328,7 +345,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
 
     @Override
     public int saveBlastResult(Iteration iteration) throws Exception {
-        int result=0;
+        int result = 0;
         try (PreparedStatement preparedStatement = this.connection.prepareStatement("INSERT INTO `gblaster`.`blasts`\n" +
                 "(`orfs_id`,\n" +
                 "`hitorf_id`,\n" +
@@ -336,21 +353,21 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                 "VALUES\n" +
                 "(?,\n" +
                 "?,\n" +
-                "?);\n",Statement.RETURN_GENERATED_KEYS);
-        ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream()) {
+                "?);\n", Statement.RETURN_GENERATED_KEYS);
+             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             final int orfs_id = Integer.valueOf(iteration.getIterationQueryDef().split("\\|")[0]);
             final int hitorf_id = Integer.valueOf(iteration.getIterationHits().getHit().get(0).getHitDef().split("\\|")[0]);
             preparedStatement.setInt(1, orfs_id);
             preparedStatement.setInt(2, hitorf_id);
-            BlastHelper.marshalBlast(iteration,byteArrayOutputStream);
-            try(InputStream byteArrayInputStream=new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-            Reader reader=new BufferedReader(new InputStreamReader(byteArrayInputStream))){
-                preparedStatement.setCharacterStream(3,reader);
+            BlastHelper.marshalBlast(iteration, byteArrayOutputStream);
+            try (InputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+                 Reader reader = new BufferedReader(new InputStreamReader(byteArrayInputStream))) {
+                preparedStatement.setCharacterStream(3, reader);
                 preparedStatement.executeUpdate();
             }
-            final ResultSet resultSet=preparedStatement.getGeneratedKeys();
-            if(resultSet.next()){
-                result= resultSet.getInt(1);
+            final ResultSet resultSet = preparedStatement.getGeneratedKeys();
+            if (resultSet.next()) {
+                result = resultSet.getInt(1);
             }
         }
         return result;

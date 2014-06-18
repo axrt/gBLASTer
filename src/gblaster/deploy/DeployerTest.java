@@ -34,7 +34,7 @@ public class DeployerTest {
             genome.getName().setName("testname");
             genome.setPathToFile(new PathToFile());
             genome.getPathToFile().setPath(pathToFile.toFile().getPath());
-            Deployer.deployAndGetchromosomeIds(gd, genome, CommonFormats.LARGE_FASTA, Paths.get("/home/alext/Downloads/tmp"), NucleotideAlphabet.get())
+            Deployer.deployAndGetchromosomeIds(gd, genome, CommonFormats.LARGE_FASTA, Paths.get("/home/alext/Downloads/tmp"), NucleotideAlphabet.get(),10)
                     .forEach(System.out::println);
 
         } catch (SQLException e) {

@@ -39,7 +39,9 @@ public final class Deployer {
     public static IntStream deployAndGetchromosomeIds(
             GenomeDAO genomeDAO, properties.jaxb.Genome genome,
             LargeFormat format, Path toTmpFolder,
-            NucleotideAlphabet nucleotideAlphabet) throws Exception {
+            NucleotideAlphabet nucleotideAlphabet,
+            int batchSize
+    ) throws Exception {
 
         final File genomeFile = new File(genome.getPathToFile().getPath());
         try (FileInputStream fileInputStream = new FileInputStream(genomeFile)) {
@@ -47,7 +49,7 @@ public final class Deployer {
             final LargeGenome largeGenome = LargeGenome.grasp(genome.getName().getName(), fileInputStream, format, toTmpFolder);
             final int genomeId = genomeDAO.saveLargeGenome(largeGenome);
             final Stream<LargeChromosome> largeChromosomeStream = largeGenome.stream();
-            final IntStream intStream = genomeDAO.saveLargeChromosomesForGenomeId(genomeId, largeChromosomeStream);
+            final IntStream intStream = genomeDAO.saveLargeChromosomesForGenomeId(genomeId, largeChromosomeStream,batchSize);
             //Calculate the RCs
             final Stream<LargeChromosome> largeChromosomes = genomeDAO.loadLargeChromosomesForGemomeID(genomeId, format);
             final Stream<LargeChromosome> largeRCChromosomes = largeChromosomes.map(lch -> {
@@ -70,7 +72,7 @@ public final class Deployer {
                     throw new UncheckedIOException(e);
                 }
             });
-            final IntStream rcIntStream = genomeDAO.saveLargeChromosomesForGenomeId(genomeId, largeRCChromosomes);
+            final IntStream rcIntStream = genomeDAO.saveLargeChromosomesForGenomeId(genomeId, largeRCChromosomes,batchSize);
             return IntStream.concat(intStream, rcIntStream);
         }
     }
@@ -80,7 +82,8 @@ public final class Deployer {
             ChromosomeDAO chromosomeDAO,
             OrfDAO orfDAO,
             GeneticCode<AminoAcid> geneticCode,
-            LargeFormat chromosomeFormat
+            LargeFormat chromosomeFormat,
+            int batchSize
     ) throws Exception {
 
         chromosomeIds.forEach(chid -> {
@@ -89,7 +92,7 @@ public final class Deployer {
                 if (largeChromosomeOptional.isPresent()) {
                     final LargeChromosome largeChromosome = largeChromosomeOptional.get();
                     final GStreamRibosome gStreamRibosome = GStreamRibosome.newInstance(largeChromosome.getSequenceInputstream(), geneticCode);
-                    orfDAO.saveOrfsForChromosomeId(chid, gStreamRibosome.translate());
+                    orfDAO.saveOrfsForChromosomeId(chid, gStreamRibosome.translate(),batchSize);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -110,7 +113,7 @@ public final class Deployer {
         return genomeGeneticCodeMap;
     }
 
-    public static File unloadORFsForGenomeToFile(String genomeName, OrfDAO orfDAO, GenomeDAO genomeDAO,Format format, Path dir) throws Exception {
+    public static File unloadORFsForGenomeToFile(String genomeName, OrfDAO orfDAO, GenomeDAO genomeDAO,Format format,int minLength,int maxLength, Path dir,int balancer) throws Exception {
 
         final File toUnload = dir.resolve(genomeName).toFile();
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(toUnload))) {
@@ -118,7 +121,8 @@ public final class Deployer {
             if (genomeId == 0) {
                 throw new Exception("No genome for name: ".concat(genomeName));
             }
-            orfDAO.loadAllOrfsForGenomeId(genomeId).forEach(orf->{
+            orfDAO.loadAllOrfsForGenomeId(genomeId,balancer,minLength,maxLength)
+                    .forEach(orf->{
                 try {
                     bufferedWriter.write(format.formatORF(orf));
                     bufferedWriter.newLine();

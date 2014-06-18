@@ -15,16 +15,13 @@ and open the template in the editor.
         <MaxORFLength max="10000"></MaxORFLength>
     </BlastProperties>
     <Genome>
-        <Name name="test1"/>
-        <PathToFile path="/home/alext/Downloads/tmp/559L.fasta"/>
+        <Name name="ecoli"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/ecoli.fasta"/>
         <GeneticTable type="standard"/>
     </Genome>
     <Genome>
-        <Name name="test2"/>
-        <PathToFile path="/home/alext/Downloads/tmp/1173L.fasta"/>
-        <GeneticTable type="altered">
-            <AlterCodon codon="TAG" aminoacid="Q"/>
-        </GeneticTable>
-
+        <Name name="human_mito"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/hmito.fasta"/>
+        <GeneticTable type="standard"/>
     </Genome>
 </gBlasterProperties>

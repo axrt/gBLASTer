@@ -27,7 +27,7 @@ public interface ChromosomeDAO {
      * @return
      * @throws Exception
      */
-    public IntStream saveLargeChromosomesForGenomeId(int genomeId, Stream<? extends LargeChromosome> chromoStream) throws Exception;
+    public IntStream saveLargeChromosomesForGenomeId(int genomeId, Stream<? extends LargeChromosome> chromoStream, int counter) throws Exception;
     public Stream<LargeChromosome> loadLargeChromosomesForGemomeID(int genomeId, LargeFormat largeFormat) throws Exception;
 
 }
