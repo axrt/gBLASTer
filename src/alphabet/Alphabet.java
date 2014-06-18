@@ -1,6 +1,5 @@
 package alphabet;
 
-import alphabet.character.*;
 import alphabet.character.Character;
 
 /**

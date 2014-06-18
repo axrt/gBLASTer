@@ -1,7 +1,5 @@
 package alphabet.character.nucleotide;
 
-import alphabet.character.*;
-
 /**
  * Created by alext on 5/23/14.
  * TODO document class

@@ -6,6 +6,7 @@ import alphabet.translate.GeneticCode;
 import base.buffer.IterationBlockingBuffer;
 import blast.db.MakeBlastDB;
 import blast.output.BlastOutput;
+import blast.output.Iteration;
 import db.BlastDAO;
 import db.GenomeDAO;
 import db.OrfDAO;
@@ -26,10 +27,7 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -45,8 +43,8 @@ public class main {
     final static Path tmpFolder = home.resolve("tmp");
     final static Path orfFolder = home.resolve("orfs");
     final static Path blastdbFolder = home.resolve("blastdb");
-    final static Path toMakeBlastDb = home.resolve("/bin/makeblastdb");
-    final static Path toBlastP = home.resolve("/bin/blastp");
+    final static Path toMakeBlastDb = Paths.get("/bin/makeblastdb");
+    final static Path toBlastP = Paths.get("/bin/blastp");
     final static int maxThreads = 12;
     final static ExecutorService executorService = Executors.newFixedThreadPool(maxThreads);
 
@@ -143,7 +141,27 @@ public class main {
                 } else throw e;
             }
             mySQLConnector.getConnection().commit();
-            pairBlast(gBlasterProperties.getGenome().get(0), gBlasterProperties.getGenome().get(1), 20, blastDAO, gBlasterProperties.getBlastProperties());
+
+            final Callable<Object> fwdRun = new Callable<Object>() {
+                @Override
+                public Object call() throws Exception {
+                    pairBlast(gBlasterProperties.getGenome().get(0), gBlasterProperties.getGenome().get(1), 20, blastDAO, gBlasterProperties.getBlastProperties(),maxThreads/2);
+                    return new Object();
+                }
+            };
+            final Callable<Object> rwdRun = new Callable<Object>() {
+                @Override
+                public Object call() throws Exception {
+                    pairBlast(gBlasterProperties.getGenome().get(1), gBlasterProperties.getGenome().get(0), 20, blastDAO, gBlasterProperties.getBlastProperties(),maxThreads/2);
+                    return new Object();
+                }
+            };
+            final List<Future<Object>> futures=new ArrayList<>();
+            futures.add(executorService.submit(fwdRun));
+            futures.add(executorService.submit(rwdRun));
+            for(Future<Object>f:futures){
+                f.get();
+            }
             //Shutdown
             executorService.shutdown();
             mySQLConnector.getConnection().setAutoCommit(true);
@@ -167,14 +185,14 @@ public class main {
 
     }
 
-    public static void pairBlast(Genome query, Genome base, int bufferCapasity, BlastDAO blastDAO, BlastProperties blastProperties) throws ExecutionException, InterruptedException {
+    public static void pairBlast(Genome query, Genome base, int bufferCapasity, BlastDAO blastDAO, BlastProperties blastProperties, int numThreads) throws ExecutionException, InterruptedException {
 
         final Path queryFile = orfFolder.resolve(query.getName().getName());
         final Path db = blastdbFolder.resolve(base.getName().getName());
 
         final GBlast.GBlastPBuilder gBlastPBuilder = new GBlast.GBlastPBuilder(toBlastP, queryFile, db.toFile().getPath());
         final double evalue = Double.parseDouble(blastProperties.getExpect().getValue());
-        final GBlast gBlast = gBlastPBuilder.evalue(Optional.of(evalue)).num_threads(Optional.of(maxThreads)).maxTargetSeqs(Optional.of(1)).build();
+        final GBlast gBlast = gBlastPBuilder.evalue(Optional.of(evalue)).num_threads(Optional.of(numThreads)).maxTargetSeqs(Optional.of(1)).build();
 
         final IterationBlockingBuffer buffer = IterationBlockingBuffer.get(bufferCapasity);
         gBlast.addListener(buffer);
@@ -184,10 +202,11 @@ public class main {
             public Integer call() throws Exception {
                 int blastsSaved = 0;
                 while (!buffer.isDone()) {
-
-                    blastDAO.saveBlastResult(buffer.take());
-                    blastsSaved++;
-                    System.out.println(blastsSaved);
+                    final Iteration iteration = buffer.take();
+                    if (iteration.getIterationHits().getHit() != null && !iteration.getIterationHits().getHit().isEmpty()) {
+                        blastDAO.saveBlastResult(iteration);
+                        blastsSaved++;
+                    }
                 }
 
                 return blastsSaved;
@@ -199,6 +218,7 @@ public class main {
 
         blastFuture.get();
         buffer.release();
+        System.out.println("Buffer for ".concat(query.getName().getName()).concat(" was released."));
 
         System.out.println("Blast results saved to database: " + saverFuture.get());
     }

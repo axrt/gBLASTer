@@ -4,7 +4,10 @@ import format.text.CommonFormats;
 import org.junit.Test;
 import sequence.nucleotide.genome.LargeChromosome;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PushbackInputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 

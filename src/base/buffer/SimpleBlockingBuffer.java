@@ -33,5 +33,5 @@ public abstract class SimpleBlockingBuffer<E> extends ArrayBlockingQueue<E> {
     /**
      * Should allow to finish the job and set boolean done to true
      */
-    public abstract void release();
+    public abstract void release() throws InterruptedException;
 }

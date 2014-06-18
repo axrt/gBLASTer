@@ -1,12 +1,8 @@
 package db;
 
-import alphabet.character.amino.AminoAcid;
-import format.text.LargeFormat;
 import sequence.nucleotide.genome.Chromosome;
 import sequence.nucleotide.genome.Genome;
 import sequence.nucleotide.genome.LargeGenome;
-
-import java.util.Map;
 
 /**
  * Created by alext on 6/4/14.

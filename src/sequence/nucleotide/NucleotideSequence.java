@@ -3,9 +3,6 @@ package sequence.nucleotide;
 import alphabet.character.nucleotide.Nucleotide;
 import sequence.Sequence;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by alext on 5/23/14.
  * TODO document class

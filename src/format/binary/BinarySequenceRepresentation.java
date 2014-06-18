@@ -1,8 +1,8 @@
 package format.binary;
 
 import alphabet.character.Character;
-import sequence.Sequence;
 import format.SequenceRepresentation;
+import sequence.Sequence;
 
 import java.util.List;
 

@@ -1,7 +1,5 @@
 package alphabet.character.amino;
 
-import alphabet.character.*;
-
 /**
  * Created by alext on 5/28/14.
  * TODO document class

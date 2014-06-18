@@ -6,7 +6,6 @@ import blast.blast.BlastHelper;
 import blast.output.BlastOutput;
 import blast.output.Iteration;
 import db.BlastDAO;
-import db.ChromosomeDAO;
 import db.GenomeDAO;
 import db.OrfDAO;
 import format.text.CommonFormats;

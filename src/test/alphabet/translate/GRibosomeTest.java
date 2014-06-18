@@ -6,18 +6,15 @@ import alphabet.translate.GRibosome;
 import alphabet.translate.GStreamRibosome;
 import alphabet.translate.GeneticCode;
 import alphabet.translate.Ribosome;
-import com.sun.xml.internal.messaging.saaj.util.ByteInputStream;
 import junit.extensions.TestSetup;
 import org.junit.Test;
 import sequence.nucleotide.NucleotideSequence;
 import sequence.protein.ORF;
 
 import java.io.ByteArrayInputStream;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 

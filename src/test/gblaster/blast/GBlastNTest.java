@@ -4,14 +4,16 @@ import base.buffer.SimpleBlockingBuffer;
 import blast.blast.AbstractBlast;
 import blast.output.BlastOutput;
 import blast.output.Iteration;
-
 import gblaster.blast.GBlast;
 import org.junit.Test;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Created by alext on 5/28/14.

@@ -1,6 +1,5 @@
 package db;
 
-import blast.output.Iteration;
 import format.text.LargeFormat;
 import sequence.nucleotide.genome.Chromosome;
 import sequence.nucleotide.genome.LargeChromosome;

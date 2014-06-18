@@ -1,7 +1,5 @@
 package format.text;
 
-import alphabet.character.*;
-import sequence.Sequence;
 import sequence.protein.ORF;
 
 /**

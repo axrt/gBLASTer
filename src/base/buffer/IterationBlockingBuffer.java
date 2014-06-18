@@ -32,8 +32,9 @@ public class IterationBlockingBuffer extends SimpleBlockingBuffer<Iteration> imp
     }
 
     @Override
-    public synchronized void release() {
+    public synchronized void release() throws InterruptedException {
         this.done = true;
+        this.put(null);
         notifyAll();
     }
 

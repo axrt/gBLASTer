@@ -6,19 +6,17 @@ import blast.output.Iteration;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.stream.StreamSource;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Created by alext on 6/4/14.
@@ -31,6 +29,7 @@ public class GBlast extends AbstractBlast<Iteration> {
     protected GBlast(BlastBuilder builder) {
         super();
         this.command = builder.getCommand();
+        System.out.println(this.command.stream().collect(Collectors.joining(" ")));
     }
 
     @Override
@@ -55,7 +54,7 @@ public class GBlast extends AbstractBlast<Iteration> {
                 }
                 xsr.next();
             }
-            bufferedReader.lines().forEach(l -> System.out.println("BLAST ERR:>".concat(l)));
+            bufferedReader.lines().forEach(l -> System.out.println("BLAST ERR:> ".concat(l)));
         }
 
         return Optional.empty();

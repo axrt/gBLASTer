@@ -2,7 +2,6 @@ package alphabet.translate;
 
 import alphabet.character.amino.AminoAcid;
 import alphabet.character.nucleotide.Nucleotide;
-import alphabet.nucleotide.NucleotideAlphabet;
 import alphabet.protein.AminoAcidAlphabet;
 import sequence.Sequence;
 import sequence.protein.ORF;

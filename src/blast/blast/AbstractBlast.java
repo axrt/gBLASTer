@@ -9,9 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static blast.blast.BlastHelper.*;
-import static blast.blast.BlastHelper.OUTFMT_VALS.COMMA_SEP_VALS;
-import static blast.blast.BlastHelper.OUTFMT_VALS.TABULAR;
-import static blast.blast.BlastHelper.OUTFMT_VALS.TABULAR_WITH_COMMENT_LINES;
+import static blast.blast.BlastHelper.OUTFMT_VALS.*;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -95,7 +93,7 @@ public abstract class AbstractBlast<E> implements Callable<Optional<BlastOutput>
             return command;
         }
         public BlastBuilder<E,T> num_threads(Optional<Integer> value) {
-            value.ifPresent(v -> this.optionalParams.put(NUM_THREADS, v.toString()));
+            value.ifPresent(v -> this.optionalParams.put(NUM_THREADS, String.valueOf(v.intValue())));
             return this;
         }
         public abstract T build();
