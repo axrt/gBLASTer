@@ -34,7 +34,7 @@ public class GBlast extends AbstractBlast<Iteration> {
     }
 
     @Override
-    public Optional<BlastOutput> call() throws IOException, XMLStreamException, JAXBException {
+    public Optional<BlastOutput> call() throws Exception {
         final ProcessBuilder processBuilder = new ProcessBuilder(this.command);
         final Process p = processBuilder.start();
         try (InputStream inputStream = p.getInputStream();
@@ -74,8 +74,18 @@ public class GBlast extends AbstractBlast<Iteration> {
     }
 
     @Override
-    public synchronized int notifyListeners(BlastEvent<Iteration> event) {
-        return this.listeners.stream().mapToInt((l) -> l.listen(event)).sum();
+    public synchronized int notifyListeners(BlastEvent<Iteration> event) throws Exception {
+        try {
+            return this.listeners.stream().mapToInt((l) -> {
+                try {
+                    return l.listen(event);
+                } catch (Exception ie) {
+                    throw new RuntimeException(ie);
+                }
+            }).sum();
+        }catch (RuntimeException e){
+            throw (Exception)e.getCause();
+        }
     }
 
     public static class GBlastPBuilder extends BlastPBuilder<Iteration,GBlast> {

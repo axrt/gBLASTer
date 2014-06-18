@@ -1,5 +1,9 @@
 package db.mysql;
 
+import blast.blast.BlastHelper;
+import blast.output.Iteration;
+import db.BlastDAO;
+import db.ChromosomeDAO;
 import db.GenomeDAO;
 import db.OrfDAO;
 import format.text.LargeFormat;
@@ -9,9 +13,7 @@ import sequence.nucleotide.genome.LargeChromosome;
 import sequence.nucleotide.genome.LargeGenome;
 import sequence.protein.ORF;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,7 +30,7 @@ import java.util.stream.StreamSupport;
  * Created by alext on 6/11/14.
  * TODO document class
  */
-public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO {
+public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO, BlastDAO {
 
     public static final String COMMENT_TEMPLATE = "Comment template";
 
@@ -286,7 +288,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                 @Override
                 public ORF next() {
                     try {
-                        final ORF orf=ORF.get(resultSet.getString(12), resultSet.getString(11), resultSet.getInt(10), resultSet.getInt(9), resultSet.getInt(8));
+                        final ORF orf = ORF.get(resultSet.getString(12), resultSet.getString(11), resultSet.getInt(10), resultSet.getInt(9), resultSet.getInt(8));
                         orf.setId(resultSet.getInt(7));
                         return orf;
                     } catch (SQLException e) {
@@ -307,7 +309,6 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     }
 
     /**
-     *
      * @param name
      * @return 0 in case could not find a genome, any other int - in case one could be found
      * @throws Exception
@@ -317,13 +318,43 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
 
         try (PreparedStatement preparedStatement = this.connection.prepareStatement("select id_genomes from `gblaster`.`genomes` where name=?")) {
 
-            preparedStatement.setString(1,name);
-            final ResultSet resultSet=preparedStatement.executeQuery();
-            if(resultSet.next()){
+            preparedStatement.setString(1, name);
+            final ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
                 return resultSet.getInt(1);
             }
             return 0;
         }
+    }
+
+    @Override
+    public int saveBlastResult(Iteration iteration) throws Exception {
+        int result=0;
+        try (PreparedStatement preparedStatement = this.connection.prepareStatement("INSERT INTO `gblaster`.`blasts`\n" +
+                "(`orfs_id`,\n" +
+                "`hitorf_id`,\n" +
+                "`report`)\n" +
+                "VALUES\n" +
+                "(?,\n" +
+                "?,\n" +
+                "?);\n",Statement.RETURN_GENERATED_KEYS);
+        ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream()) {
+            final int orfs_id = Integer.valueOf(iteration.getIterationQueryDef().split("\\|")[0]);
+            final int hitorf_id = Integer.valueOf(iteration.getIterationHits().getHit().get(0).getHitDef().split("\\|")[0]);
+            preparedStatement.setInt(1, orfs_id);
+            preparedStatement.setInt(2, hitorf_id);
+            BlastHelper.marshalBlast(iteration,byteArrayOutputStream);
+            try(InputStream byteArrayInputStream=new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+            Reader reader=new BufferedReader(new InputStreamReader(byteArrayInputStream))){
+                preparedStatement.setCharacterStream(3,reader);
+                preparedStatement.executeUpdate();
+            }
+            final ResultSet resultSet=preparedStatement.getGeneratedKeys();
+            if(resultSet.next()){
+                result= resultSet.getInt(1);
+            }
+        }
+        return result;
     }
 
     public static GMySQLConnector get(String URL, String user, String password) {

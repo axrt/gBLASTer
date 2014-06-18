@@ -3,15 +3,21 @@ package gblaster;
 import alphabet.character.amino.AminoAcid;
 import alphabet.nucleotide.NucleotideAlphabet;
 import alphabet.translate.GeneticCode;
+import base.buffer.IterationBlockingBuffer;
+import blast.db.MakeBlastDB;
+import blast.output.BlastOutput;
+import db.BlastDAO;
 import db.GenomeDAO;
 import db.OrfDAO;
 import db.mysql.GMySQLConnector;
 import db.mysql.MySQLConnector;
 import format.text.CommonFormats;
 import format.text.LargeFormat;
+import gblaster.blast.GBlast;
 import gblaster.deploy.Deployer;
 import org.xml.sax.SAXException;
 import properties.PropertiesLoader;
+import properties.jaxb.BlastProperties;
 import properties.jaxb.GBlasterProperties;
 import properties.jaxb.Genome;
 
@@ -20,7 +26,12 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -28,6 +39,17 @@ import java.util.stream.IntStream;
  * TODO document class
  */
 public class main {
+
+    final static File propertiesFile = new File("/home/alext/Developer/gBLASTer/src/properties/driver.xml");
+    final static Path home = Paths.get("/home/alext/Documents/gBlaster");
+    final static Path tmpFolder = home.resolve("tmp");
+    final static Path orfFolder = home.resolve("orfs");
+    final static Path blastdbFolder = home.resolve("blastdb");
+    final static Path toMakeBlastDb = home.resolve("/bin/makeblastdb");
+    final static Path toBlastP = home.resolve("/bin/blastp");
+    final static int maxThreads = 12;
+    final static ExecutorService executorService = Executors.newFixedThreadPool(maxThreads);
+
     /**
      * So far this is just a runscript
      *
@@ -37,10 +59,6 @@ public class main {
 
         //Load properties and map folders
         final GBlasterProperties gBlasterProperties;
-        final File propertiesFile = new File("/home/alext/Developer/gBLASTer/src/properties/driver.xml");
-        final Path home = Paths.get("/home/alext/Documents/gBlaster");
-        final Path tmpFolder = home.resolve("tmp");
-        final Path orfFolder = home.resolve("orfs");
 
 
         try (InputStream inputStream = new FileInputStream(propertiesFile)) {
@@ -54,13 +72,14 @@ public class main {
             //3.Connect to database
             final MySQLConnector mySQLConnector = GMySQLConnector.get("jdbc:mysql://localhost", "gblaster", "gblaster");
 
-                mySQLConnector.connectToDatabase();
-                mySQLConnector.getConnection().setAutoCommit(false);
+            mySQLConnector.connectToDatabase();
+            mySQLConnector.getConnection().setAutoCommit(false);
 
 
             //4.Define DAOs
             final GenomeDAO genomeDAO = (GenomeDAO) mySQLConnector;
             final OrfDAO orfDAO = (OrfDAO) mySQLConnector;
+            final BlastDAO blastDAO = (BlastDAO) mySQLConnector;
 
             //5.Define large format
             final LargeFormat largeFormat = CommonFormats.LARGE_FASTA;
@@ -83,25 +102,51 @@ public class main {
 
 
                 });
-                mySQLConnector.getConnection().setAutoCommit(true);
+                mySQLConnector.getConnection().commit();
 
-            //8.For each genome unload ORFs
+                //8.For each genome unload ORFs
+                final Map<Genome, File> orfFileMap = new HashMap<>();
                 gBlasterProperties.getGenome().stream().forEach(g -> {
                     try {
                         System.out.println("Unloading ORFs for Genome ".concat(g.getName().getName()));
-                        Deployer.unloadORFsForGenomeToFile(g.getName().getName(), orfDAO, genomeDAO, largeFormat, orfFolder);
+                        orfFileMap.put(g, Deployer.unloadORFsForGenomeToFile(g.getName().getName(), orfDAO, genomeDAO, largeFormat, orfFolder));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 });
 
+                //9.Deploy all bastdbs for all genomes
+                final List<Future<Optional<File>>> makeBlastDbFutures = gBlasterProperties.getGenome().stream().map(g -> {
+                    final MakeBlastDB.MakeBlastDBBuilder makeBlastDBBuilder = new MakeBlastDB.MakeBlastDBBuilder(g.getName().getName());
+                    System.out.println("Deploying blast database for Genome ".concat(g.getName().getName()));
+                    final MakeBlastDB makeBlastDb = makeBlastDBBuilder
+                            .pathToMakeBlastDb(toMakeBlastDb)
+                            .pathToDbFolder(blastdbFolder)
+                            .pathToSequenceFile(orfFileMap.get(g).toPath())
+                            .type(MakeBlastDB.DBType.PROT)
+                            .build();
+                    return executorService.submit(makeBlastDb);
+                }).collect(Collectors.toList());
+                makeBlastDbFutures.stream().forEach(f -> {
+                    try {
+                        f.get();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    } catch (ExecutionException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
 
             } catch (RuntimeException e) {
                 if (e.getCause() instanceof IOException) {
                     throw (IOException) e.getCause();
                 } else throw e;
             }
-
+            mySQLConnector.getConnection().commit();
+            pairBlast(gBlasterProperties.getGenome().get(0), gBlasterProperties.getGenome().get(1), 20, blastDAO, gBlasterProperties.getBlastProperties());
+            //Shutdown
+            executorService.shutdown();
+            mySQLConnector.getConnection().setAutoCommit(true);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -113,8 +158,48 @@ public class main {
             e.printStackTrace();
         } catch (SQLException e) {
             e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
         }
 
 
+    }
+
+    public static void pairBlast(Genome query, Genome base, int bufferCapasity, BlastDAO blastDAO, BlastProperties blastProperties) throws ExecutionException, InterruptedException {
+
+        final Path queryFile = orfFolder.resolve(query.getName().getName());
+        final Path db = blastdbFolder.resolve(base.getName().getName());
+
+        final GBlast.GBlastPBuilder gBlastPBuilder = new GBlast.GBlastPBuilder(toBlastP, queryFile, db.toFile().getPath());
+        final double evalue = Double.parseDouble(blastProperties.getExpect().getValue());
+        final GBlast gBlast = gBlastPBuilder.evalue(Optional.of(evalue)).num_threads(Optional.of(maxThreads)).maxTargetSeqs(Optional.of(1)).build();
+
+        final IterationBlockingBuffer buffer = IterationBlockingBuffer.get(bufferCapasity);
+        gBlast.addListener(buffer);
+        final Future<Optional<BlastOutput>> blastFuture = executorService.submit(gBlast);
+        final Callable<Integer> saver = new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                int blastsSaved = 0;
+                while (!buffer.isDone()) {
+
+                    blastDAO.saveBlastResult(buffer.take());
+                    blastsSaved++;
+                    System.out.println(blastsSaved);
+                }
+
+                return blastsSaved;
+            }
+        };
+
+
+        final Future<Integer> saverFuture = executorService.submit(saver);
+
+        blastFuture.get();
+        buffer.release();
+
+        System.out.println("Blast results saved to database: " + saverFuture.get());
     }
 }

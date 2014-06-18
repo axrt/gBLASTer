@@ -1,16 +1,20 @@
 package blast.blast;
 
 import blast.output.BlastOutput;
+import blast.output.Iteration;
 import org.xml.sax.*;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * Created by alext on 5/27/14.
@@ -308,5 +312,14 @@ public final class BlastHelper {
         final InputSource input = new InputSource(in);
         final Source source = new SAXSource(xmlreader, input);
         return (BlastOutput) u.unmarshal(source);
+    }
+
+    public static void marshalBlast (Iteration iteration, OutputStream outputStream) throws JAXBException {
+
+        final JAXBContext jaxbContext = JAXBContext.newInstance(Iteration.class);
+        final Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+        jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+        jaxbMarshaller.marshal(iteration, outputStream);
+
     }
 }

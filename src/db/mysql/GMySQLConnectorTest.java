@@ -2,15 +2,24 @@ package db.mysql;
 
 import alphabet.translate.GStreamRibosome;
 import alphabet.translate.GeneticCode;
+import blast.blast.BlastHelper;
+import blast.output.BlastOutput;
+import blast.output.Iteration;
+import db.BlastDAO;
+import db.ChromosomeDAO;
 import db.GenomeDAO;
 import db.OrfDAO;
 import format.text.CommonFormats;
 import junit.extensions.TestSetup;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 import sequence.nucleotide.genome.LargeGenome;
 
+import javax.xml.bind.JAXBException;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
@@ -216,6 +225,35 @@ public class GMySQLConnectorTest {
             e.printStackTrace();
         }
 
+    }
+
+    @Test
+    public void saveBlastResultsTest(){
+        final Path toFile= Paths.get("/home/alext/Downloads/tmp/out_13619607277eef4ff4-f7ff-4cf5-bb68-f984d5687b15");
+        try(InputStream inputStream=new FileInputStream(toFile.toFile())){
+
+            final BlastOutput blastOutput= BlastHelper.catchBLASTOutput(inputStream);
+            final Iteration it=blastOutput.getBlastOutputIterations().getIteration().get(0);
+            final MySQLConnector mySQLConnector = GMySQLConnector.get("jdbc:mysql://localhost", "gblaster", "gblaster");
+            mySQLConnector.connectToDatabase();
+            final BlastDAO blastDAO=(BlastDAO)mySQLConnector;
+            blastDAO.saveBlastResult(it);
+
+
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }
