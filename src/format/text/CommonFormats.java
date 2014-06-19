@@ -68,10 +68,22 @@ public class CommonFormats {
     public static class LargeFasta extends Fasta implements LargeFormat {
         @Override
         public boolean checkFormatting(InputStream toCheck) throws IOException {
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(toCheck));
-            final String line = bufferedReader.readLine();
-            if (line != null && line.startsWith(FASTA_START) && bufferedReader.readLine() != null) {
-                return true;
+            final byte[]buffer=new byte[1];
+            toCheck.read(buffer);
+            if(buffer[0]==-1){
+                return false;
+            }
+            final char firstCharacter=(char)buffer[0];
+            if (firstCharacter!=FASTA_START.charAt(0)) {
+                return false;
+            }
+            while(toCheck.read(buffer)>-1){
+                if((char)buffer[0]=='\n'){
+                    toCheck.read(buffer);
+                    if(buffer[0]!=-1){
+                        return true;
+                    }
+                }
             }
             return false;
         }

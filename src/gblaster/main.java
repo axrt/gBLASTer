@@ -207,8 +207,7 @@ public class main {
             public Object call() throws Exception {
                 pairBlast(pair[0], pair[1], blastBufferSize, blastDAO, blastProperties, maxThreadsOnBlast);
                 synchronized (System.out.getClass()) {
-                    System.out.println("Blasts to run: " + countDown);
-                    countDown--;
+                    System.out.println("Blasts to run: " + countDown--);
                 }
                 return new Object();
             }
