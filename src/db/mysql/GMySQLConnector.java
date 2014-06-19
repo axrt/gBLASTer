@@ -373,6 +373,27 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
         return result;
     }
 
+    @Override
+    public boolean genomeHasBeenBlastedOver(properties.jaxb.Genome query, properties.jaxb.Genome target) throws Exception {
+        try(PreparedStatement preparedStatement=
+                    this.connection.prepareStatement(
+                            "select count(*) from gblaster.gco_view as `query` " +
+                                    "inner join gblaster.blasts as `blasts` on query.id_orfs=blasts.orfs_id " +
+                                    "inner join gblaster.gco_view as `target` on blasts.hitorf_id=target.id_orfs " +
+                                    "where query.genome_name=? and target.genome_name=?")){
+            preparedStatement.setString(1,query.getName().getName());
+            preparedStatement.setString(2,target.getName().getName());
+            final ResultSet resultSet=preparedStatement.executeQuery();
+            resultSet.next();
+            final int count=resultSet.getInt(1);
+            if(count>0){
+                return true;
+            } else{
+                return false;
+            }
+        }
+    }
+
     public static GMySQLConnector get(String URL, String user, String password) {
         return new GMySQLConnector(URL, user, password);
     }

@@ -95,16 +95,20 @@ public class main {
                 gBlasterProperties.getGenome().stream().forEach(g -> {
 
                     try {
-                        System.out.println("Deploying Genome ".concat(g.getName().getName()));
-                        final IntStream chromosomeIdStream = Deployer.deployAndGetchromosomeIds(genomeDAO, g, largeFormat, tmpFolder, nucleotideAlphabet,largeChromosomeBatchSize);
-                        System.out.println("Translating ORFs for Genome ".concat(g.getName().getName()));
-                        Deployer.translateAndGetORFStreamForGenomeId(chromosomeIdStream, genomeDAO, orfDAO, genomeGeneticCodeMap.get(g), largeFormat, orfBatchSize);
+                        if(!genomeDAO.genomeForNameExists(g.getName().getName())) {
+                            System.out.println("Deploying Genome ".concat(g.getName().getName()));
+                            final IntStream chromosomeIdStream = Deployer.deployAndGetchromosomeIds(genomeDAO, g, largeFormat, tmpFolder, nucleotideAlphabet, largeChromosomeBatchSize);
+                            System.out.println("Translating ORFs for Genome ".concat(g.getName().getName()));
+                            Deployer.translateAndGetORFStreamForGenomeId(chromosomeIdStream, genomeDAO, orfDAO, genomeGeneticCodeMap.get(g), largeFormat, orfBatchSize);
+                        }else{
+                            System.out.println("Genome "+g.getName().getName()+" has already been processed.");
+                        }
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
-
-
                 });
+
+                //If this commit has taken place, that means, that the genome, its chromosomes and the orfs for this genome have been processed
                 mySQLConnector.getConnection().commit();
 
                 //8.For each genome unload ORFs
@@ -145,12 +149,12 @@ public class main {
                     throw (IOException) e.getCause();
                 } else throw e;
             }
-            mySQLConnector.getConnection().commit();
 
             final Callable<Object> fwdRun = new Callable<Object>() {
                 @Override
                 public Object call() throws Exception {
                     pairBlast(gBlasterProperties.getGenome().get(0), gBlasterProperties.getGenome().get(1), 20, blastDAO, gBlasterProperties.getBlastProperties(),maxThreads/2);
+                    mySQLConnector.getConnection().commit();
                     return new Object();
                 }
             };
@@ -158,6 +162,7 @@ public class main {
                 @Override
                 public Object call() throws Exception {
                     pairBlast(gBlasterProperties.getGenome().get(1), gBlasterProperties.getGenome().get(0), 20, blastDAO, gBlasterProperties.getBlastProperties(),maxThreads/2);
+                    mySQLConnector.getConnection().commit();
                     return new Object();
                 }
             };
@@ -169,7 +174,6 @@ public class main {
             }
             //Shutdown
             executorService.shutdown();
-            mySQLConnector.getConnection().setAutoCommit(true);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -188,6 +192,21 @@ public class main {
         }
 
 
+    }
+
+
+    public static Genome[][] matchPairs(List<? extends Genome> genomes){
+        final Genome[][]pairs=new Genome[genomes.size()^2-genomes.size()][2];
+        int number=0;
+        for(int i=0;i<genomes.size();i++){
+            for(int j=0;j<genomes.size();j++){
+                if(i!=j){
+                   pairs[number][0]=genomes.get(i);
+                   pairs[number++][1]=genomes.get(j);
+                }
+            }
+        }
+        return pairs;
     }
 
     public static void pairBlast(Genome query, Genome base, int bufferCapasity, BlastDAO blastDAO, BlastProperties blastProperties, int numThreads) throws ExecutionException, InterruptedException {

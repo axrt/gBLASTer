@@ -116,6 +116,10 @@ public final class Deployer {
     public static File unloadORFsForGenomeToFile(String genomeName, OrfDAO orfDAO, GenomeDAO genomeDAO,Format format,int minLength,int maxLength, Path dir,int balancer) throws Exception {
 
         final File toUnload = dir.resolve(genomeName).toFile();
+        //Check if the file exists and if so - get rid of it
+        if(toUnload.exists()){
+            toUnload.delete();
+        }
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(toUnload))) {
             final int genomeId = genomeDAO.genomeIdByName(genomeName);
             if (genomeId == 0) {
@@ -132,6 +136,8 @@ public final class Deployer {
             });
 
         } catch (RuntimeException e){
+            //First thing - delete the file
+            toUnload.delete();
             if(e.getCause() instanceof IOException){
                 throw (IOException) e.getCause();
             }

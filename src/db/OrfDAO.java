@@ -1,5 +1,6 @@
 package db;
 
+import properties.jaxb.Genome;
 import sequence.protein.ORF;
 
 import java.util.stream.IntStream;
@@ -13,4 +14,5 @@ public interface OrfDAO {
 
     public IntStream saveOrfsForChromosomeId(int idChromosome,Stream<? extends ORF> orfStream, int batchSize) throws Exception;
     public Stream<ORF> loadAllOrfsForGenomeId(int genomeId,int balancer,int minLength,int maxLength) throws Exception;
+
 }

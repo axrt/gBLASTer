@@ -12,6 +12,8 @@ import format.text.CommonFormats;
 import junit.extensions.TestSetup;
 import org.junit.Test;
 import org.xml.sax.SAXException;
+import properties.jaxb.Genome;
+import properties.jaxb.Name;
 import sequence.nucleotide.genome.LargeGenome;
 
 import javax.xml.bind.JAXBException;
@@ -124,7 +126,7 @@ public class GMySQLConnectorTest {
             final GenomeDAO gd = (GenomeDAO) mySQLConnector;
             final LargeGenome chromosomes = LargeGenome.grasp("test", new FileInputStream(pathToFile.toFile()), CommonFormats.LARGE_FASTA, pathToFile.getParent());
             mySQLConnector.getConnection().setAutoCommit(false);
-            gd.saveLargeChromosomesForGenomeId(2, chromosomes.stream(),10).forEach(System.out::println);
+            gd.saveLargeChromosomesForGenomeId(2, chromosomes.stream(), 10).forEach(System.out::println);
             mySQLConnector.getConnection().setAutoCommit(true);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -170,7 +172,7 @@ public class GMySQLConnectorTest {
                                             lch -> {
                                                 try {
                                                     od.saveOrfsForChromosomeId(id, GStreamRibosome.newInstance(lch.getSequenceInputstream(), GeneticCode.STANDARD)
-                                                            .translate(),1000).forEach(System.out::println);
+                                                            .translate(), 1000).forEach(System.out::println);
                                                 } catch (Exception e) {
                                                     throw new RuntimeException(e);
                                                 }
@@ -191,7 +193,7 @@ public class GMySQLConnectorTest {
     }
 
     //@Test
-    public void loadAllOrfsForGenomeIdTest(){
+    public void loadAllOrfsForGenomeIdTest() {
         final Path pathToFile = Paths.get("/home/alext/Documents/Ocular Project/sequencing/DES/Fasta/1173L.fasta");
         try {
 
@@ -199,7 +201,7 @@ public class GMySQLConnectorTest {
             mySQLConnector.connectToDatabase();
             final GenomeDAO gd = (GenomeDAO) mySQLConnector;
             final OrfDAO od = (OrfDAO) mySQLConnector;
-            od.loadAllOrfsForGenomeId(2,1000,0,100000).forEach(orf->System.out.println(orf.getAc()));
+            od.loadAllOrfsForGenomeId(2, 1000, 0, 100000).forEach(orf -> System.out.println(orf.getAc()));
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -207,15 +209,16 @@ public class GMySQLConnectorTest {
             e.printStackTrace();
         }
     }
+
     //@Test
-    public void genomeIdByNameTest(){
+    public void genomeIdByNameTest() {
 
         try {
 
             final MySQLConnector mySQLConnector = GMySQLConnector.get("jdbc:mysql://localhost", "gblaster", "gblaster");
             mySQLConnector.connectToDatabase();
             final GenomeDAO gd = (GenomeDAO) mySQLConnector;
-            TestSetup.assertEquals(gd.genomeIdByName("random"),0);
+            TestSetup.assertEquals(gd.genomeIdByName("random"), 0);
             System.out.println(gd.genomeIdByName("testname"));
 
         } catch (SQLException e) {
@@ -226,18 +229,17 @@ public class GMySQLConnectorTest {
 
     }
 
-    @Test
-    public void saveBlastResultsTest(){
-        final Path toFile= Paths.get("/home/alext/Downloads/tmp/out_13619607277eef4ff4-f7ff-4cf5-bb68-f984d5687b15");
-        try(InputStream inputStream=new FileInputStream(toFile.toFile())){
+    //@Test
+    public void saveBlastResultsTest() {
+        final Path toFile = Paths.get("/home/alext/Downloads/tmp/out_13619607277eef4ff4-f7ff-4cf5-bb68-f984d5687b15");
+        try (InputStream inputStream = new FileInputStream(toFile.toFile())) {
 
-            final BlastOutput blastOutput= BlastHelper.catchBLASTOutput(inputStream);
-            final Iteration it=blastOutput.getBlastOutputIterations().getIteration().get(0);
+            final BlastOutput blastOutput = BlastHelper.catchBLASTOutput(inputStream);
+            final Iteration it = blastOutput.getBlastOutputIterations().getIteration().get(0);
             final MySQLConnector mySQLConnector = GMySQLConnector.get("jdbc:mysql://localhost", "gblaster", "gblaster");
             mySQLConnector.connectToDatabase();
-            final BlastDAO blastDAO=(BlastDAO)mySQLConnector;
+            final BlastDAO blastDAO = (BlastDAO) mySQLConnector;
             blastDAO.saveBlastResult(it);
-
 
 
         } catch (FileNotFoundException e) {
@@ -248,6 +250,30 @@ public class GMySQLConnectorTest {
             e.printStackTrace();
         } catch (JAXBException e) {
             e.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    //@Test
+    public void genomeHasBeenBlastedOverTest() {
+        final Genome query = new Genome();
+        query.setName(new Name());
+        query.getName().setName("ecoli");
+        final Genome target = new Genome();
+        target.setName(new Name());
+        target.getName().setName("human_mito");
+        final Genome mock = new Genome();
+        mock.setName(new Name());
+        mock.getName().setName("mock");
+        final MySQLConnector mySQLConnector = GMySQLConnector.get("jdbc:mysql://localhost", "gblaster", "gblaster");
+        try {
+            mySQLConnector.connectToDatabase();
+            final BlastDAO blastDAO = (BlastDAO) mySQLConnector;
+            TestSetup.assertEquals(blastDAO.genomeHasBeenBlastedOver(query,target),true);
+            TestSetup.assertEquals(blastDAO.genomeHasBeenBlastedOver(query,mock),false);
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (Exception e) {
