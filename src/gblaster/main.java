@@ -45,11 +45,16 @@ public class main {
     final static Path blastdbFolder = home.resolve("blastdb");
     final static Path toMakeBlastDb = Paths.get("/bin/makeblastdb");
     final static Path toBlastP = Paths.get("/bin/blastp");
-    final static int maxThreads = 12;
+    final static int maxThreads = 6;
     final static int orfUnloadBalancer = Integer.MIN_VALUE;
     final static int orfBatchSize = 1000;
+    final static int blastBufferSize = 50;
+    final static int blastThreadsPerRun = 2;
     final static int largeChromosomeBatchSize = 1;
-    final static ExecutorService executorService = Executors.newFixedThreadPool(maxThreads);
+    final static ExecutorService blastExecutorService = Executors.newFixedThreadPool(maxThreads);
+    final static ExecutorService supportExecutorService = Executors.newFixedThreadPool(maxThreads);
+    final static ExecutorService fullspeedExecutorService = Executors.newFixedThreadPool(maxThreads * 2);
+    static int countDown;
 
     /**
      * So far this is just a runscript
@@ -89,19 +94,19 @@ public class main {
             final NucleotideAlphabet nucleotideAlphabet = NucleotideAlphabet.get();
 
             //7.For each genome: deploy and translate
-            final int minORFLenght=Integer.valueOf(gBlasterProperties.getBlastProperties().getMinORFLength().getMin());
-            final int maxORFLenght=Integer.valueOf(gBlasterProperties.getBlastProperties().getMaxORFLength().getMax());
+            final int minORFLenght = Integer.valueOf(gBlasterProperties.getBlastProperties().getMinORFLength().getMin());
+            final int maxORFLenght = Integer.valueOf(gBlasterProperties.getBlastProperties().getMaxORFLength().getMax());
             try {
                 gBlasterProperties.getGenome().stream().forEach(g -> {
 
                     try {
-                        if(!genomeDAO.genomeForNameExists(g.getName().getName())) {
+                        if (!genomeDAO.genomeForNameExists(g.getName().getName())) {
                             System.out.println("Deploying Genome ".concat(g.getName().getName()));
                             final IntStream chromosomeIdStream = Deployer.deployAndGetchromosomeIds(genomeDAO, g, largeFormat, tmpFolder, nucleotideAlphabet, largeChromosomeBatchSize);
                             System.out.println("Translating ORFs for Genome ".concat(g.getName().getName()));
                             Deployer.translateAndGetORFStreamForGenomeId(chromosomeIdStream, genomeDAO, orfDAO, genomeGeneticCodeMap.get(g), largeFormat, orfBatchSize);
-                        }else{
-                            System.out.println("Genome "+g.getName().getName()+" has already been processed.");
+                        } else {
+                            System.out.println("Genome " + g.getName().getName() + " has already been processed.");
                         }
                     } catch (Exception e) {
                         throw new RuntimeException(e);
@@ -112,11 +117,12 @@ public class main {
                 mySQLConnector.getConnection().commit();
 
                 //8.For each genome unload ORFs
+
                 final Map<Genome, File> orfFileMap = new HashMap<>();
                 gBlasterProperties.getGenome().stream().forEach(g -> {
                     try {
                         System.out.println("Unloading ORFs for Genome ".concat(g.getName().getName()));
-                        orfFileMap.put(g, Deployer.unloadORFsForGenomeToFile(g.getName().getName(), orfDAO, genomeDAO, largeFormat,minORFLenght,maxORFLenght, orfFolder,orfUnloadBalancer));
+                        orfFileMap.put(g, Deployer.unloadORFsForGenomeToFile(g.getName().getName(), orfDAO, genomeDAO, largeFormat, minORFLenght, maxORFLenght, orfFolder, orfUnloadBalancer));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -132,7 +138,7 @@ public class main {
                             .pathToSequenceFile(orfFileMap.get(g).toPath())
                             .type(MakeBlastDB.DBType.PROT)
                             .build();
-                    return executorService.submit(makeBlastDb);
+                    return fullspeedExecutorService.submit(makeBlastDb);
                 }).collect(Collectors.toList());
                 makeBlastDbFutures.stream().forEach(f -> {
                     try {
@@ -150,31 +156,30 @@ public class main {
                 } else throw e;
             }
 
-            final Callable<Object> fwdRun = new Callable<Object>() {
-                @Override
-                public Object call() throws Exception {
-                    pairBlast(gBlasterProperties.getGenome().get(0), gBlasterProperties.getGenome().get(1), 20, blastDAO, gBlasterProperties.getBlastProperties(),maxThreads/2);
-                    mySQLConnector.getConnection().commit();
-                    return new Object();
-                }
-            };
-            final Callable<Object> rwdRun = new Callable<Object>() {
-                @Override
-                public Object call() throws Exception {
-                    pairBlast(gBlasterProperties.getGenome().get(1), gBlasterProperties.getGenome().get(0), 20, blastDAO, gBlasterProperties.getBlastProperties(),maxThreads/2);
-                    mySQLConnector.getConnection().commit();
-                    return new Object();
-                }
-            };
-            final List<Future<Object>> futures=new ArrayList<>();
-            futures.add(executorService.submit(fwdRun));
-            futures.add(executorService.submit(rwdRun));
-            for(Future<Object>f:futures){
-                f.get();
-            }
-            //Shutdown
-            executorService.shutdown();
+            //10. Form pairs of genomes to blast against each other
+            final Genome[][] pairs = matchPairs(gBlasterProperties.getGenome());
+            System.out.println("Blasts to run: " + pairs.length);
+            countDown = pairs.length;
 
+            //11. Create and submit all blasts
+            final List<Future<Object>> blastFutures = new ArrayList<>();
+            for (Genome[] pair : pairs) {
+                if (!blastDAO.genomeHasBeenBlastedOver(pair[0], pair[1])) {
+                    blastFutures.add(blastExecutorService.submit(wrapInCallable(pair, blastDAO, blastBufferSize, gBlasterProperties.getBlastProperties(), blastThreadsPerRun)));
+                } else {
+                    System.out.println("Genome "+pair[0].getName().getName()+" has already been blasted over "+pair[1].getName().getName()+".");
+                    countDown--;
+                }
+            }
+            for (Future<Object> future : blastFutures) {
+                future.get();
+                mySQLConnector.getConnection().commit();
+            }
+
+            //Shutdown
+            blastExecutorService.shutdown();
+            supportExecutorService.shutdown();
+            fullspeedExecutorService.shutdown();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -189,20 +194,36 @@ public class main {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
 
     }
 
+    public static Callable<Object> wrapInCallable(Genome[] pair, BlastDAO blastDAO, int blastBufferSize, BlastProperties blastProperties, int maxThreadsOnBlast) {
+        final Callable<Object> pairRun = new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                pairBlast(pair[0], pair[1], blastBufferSize, blastDAO, blastProperties, maxThreadsOnBlast);
+                synchronized (System.out.getClass()) {
+                    System.out.println("Blasts to run: " + countDown);
+                    countDown--;
+                }
+                return new Object();
+            }
+        };
+        return pairRun;
+    }
 
-    public static Genome[][] matchPairs(List<? extends Genome> genomes){
-        final Genome[][]pairs=new Genome[genomes.size()^2-genomes.size()][2];
-        int number=0;
-        for(int i=0;i<genomes.size();i++){
-            for(int j=0;j<genomes.size();j++){
-                if(i!=j){
-                   pairs[number][0]=genomes.get(i);
-                   pairs[number++][1]=genomes.get(j);
+    public static Genome[][] matchPairs(List<? extends Genome> genomes) {
+        final Genome[][] pairs = new Genome[genomes.size() ^ 2 - genomes.size()][2];
+        int number = 0;
+        for (int i = 0; i < genomes.size(); i++) {
+            for (int j = 0; j < genomes.size(); j++) {
+                if (i != j) {
+                    pairs[number][0] = genomes.get(i);
+                    pairs[number++][1] = genomes.get(j);
                 }
             }
         }
@@ -220,7 +241,7 @@ public class main {
 
         final IterationBlockingBuffer buffer = IterationBlockingBuffer.get(bufferCapasity);
         gBlast.addListener(buffer);
-        final Future<Optional<BlastOutput>> blastFuture = executorService.submit(gBlast);
+        final Future<Optional<BlastOutput>> blastFuture = blastExecutorService.submit(gBlast);
         final Callable<Integer> saver = new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
@@ -228,9 +249,9 @@ public class main {
                 while (!buffer.isDone()) {
 
                     final Iteration iteration = buffer.take();
-                    if(iteration==IterationBlockingBuffer.DONE){
+                    if (iteration == IterationBlockingBuffer.DONE) {
                         break;
-                    }else if (iteration.getIterationHits().getHit() != null && !iteration.getIterationHits().getHit().isEmpty()) {
+                    } else if (iteration.getIterationHits().getHit() != null && !iteration.getIterationHits().getHit().isEmpty()) {
                         blastDAO.saveBlastResult(iteration);
                         blastsSaved++;
                     }
@@ -241,7 +262,7 @@ public class main {
         };
 
 
-        final Future<Integer> saverFuture = executorService.submit(saver);
+        final Future<Integer> saverFuture = supportExecutorService.submit(saver);
 
         blastFuture.get();
         buffer.release();
