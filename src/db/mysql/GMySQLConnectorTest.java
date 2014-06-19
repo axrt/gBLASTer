@@ -281,4 +281,46 @@ public class GMySQLConnectorTest {
         }
     }
 
+    //@Test
+    public void calculateOrfsForGenomeNameTest(){
+        final MySQLConnector mySQLConnector = GMySQLConnector.get("jdbc:mysql://localhost", "gblaster", "gblaster");
+        try {
+            mySQLConnector.connectToDatabase();
+            final OrfDAO orfDAO = (OrfDAO) mySQLConnector;
+            System.out.println(orfDAO.calculateOrfsForGenomeName("human_mito",100,10000));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    //@Test
+    public void getBBHforGenomePairTest(){
+        final MySQLConnector mySQLConnector = GMySQLConnector.get("jdbc:mysql://localhost", "gblaster", "gblaster");
+        try {
+            mySQLConnector.connectToDatabase();
+            final BlastDAO blastDAO = (BlastDAO) mySQLConnector;
+            final Genome one = new Genome();
+            one.setName(new Name());
+            one.getName().setName("ecoli");
+            final Genome two = new Genome();
+            two.setName(new Name());
+            two.getName().setName("human_mito");
+            final Genome mock = new Genome();
+            mock.setName(new Name());
+
+            blastDAO.getBBHforGenomePair(one,two,Integer.MIN_VALUE).forEach(bbh->{
+                System.out.println(bbh.getForwardHit().getIteration());
+                System.out.println(bbh.getReverseHit().getIteration());
+            });
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

@@ -17,6 +17,7 @@ import javax.xml.transform.sax.SAXSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Optional;
 
 /**
  * Created by alext on 5/27/14.
@@ -58,11 +59,13 @@ public final class BlastHelper {
         private BLASTN_TASK_VALS(String commandOption) {
             this.commandOption = commandOption;
         }
+
         @Override
         public String toString() {
             return this.commandOption;
         }
     }
+
     public static enum BLASTP_TASK_VALS {
         BLASTP("blastp"), BLASTP_SHORT("blastp-short"), DELTABLAST("deltablast");
         private String commandOption;
@@ -70,6 +73,7 @@ public final class BlastHelper {
         private BLASTP_TASK_VALS(String commandOption) {
             this.commandOption = commandOption;
         }
+
         @Override
         public String toString() {
             return this.commandOption;
@@ -111,10 +115,12 @@ public final class BlastHelper {
         BINARY_ASN1,
         COMMA_SEP_VALS,
         BLAST_ARCHIVE_ASN1;
+
         @Override
         public String toString() {
             return String.valueOf(this.ordinal());
         }
+
         /**
          * Options 6, 7, and 10 can be additionally configured to produce
          * a custom format specified by space delimited format specifiers.
@@ -316,7 +322,38 @@ public final class BlastHelper {
         return (BlastOutput) u.unmarshal(source);
     }
 
-    public static void marshalBlast (Iteration iteration, OutputStream outputStream) throws JAXBException {
+    public static Optional<Iteration> unmarshallSingleIteraton(InputStream inputStream) throws JAXBException, SAXException {
+        final JAXBContext jc = JAXBContext.newInstance(Iteration.class);
+        final Unmarshaller u = jc.createUnmarshaller();
+        final XMLReader xmlreader = XMLReaderFactory.createXMLReader();
+        xmlreader.setFeature("http://xml.org/sax/features/namespaces", true);
+        xmlreader.setFeature("http://xml.org/sax/features/namespace-prefixes",
+                true);
+        xmlreader.setEntityResolver(new EntityResolver() {
+
+            @Override
+            public InputSource resolveEntity(String publicId, String systemId)
+                    throws SAXException, IOException {
+                String file = null;
+                if (systemId.contains("NCBI_BlastOutput.dtd")) {
+                    file = "NCBI_BlastOutput.dtd";
+                }
+                if (systemId.contains("NCBI_Entity.mod.dtd")) {
+                    file = "NCBI_Entity.mod.dtd";
+                }
+                if (systemId.contains("NCBI_BlastOutput.mod.dtd")) {
+                    file = "NCBI_BlastOutput.mod.dtd";
+                }
+                return new InputSource(BlastOutput.class
+                        .getResourceAsStream(file));
+            }
+        });
+        final InputSource input = new InputSource(inputStream);
+        final Source source = new SAXSource(xmlreader, input);
+        return Optional.of((Iteration) u.unmarshal(source));
+    }
+
+    public static void marshallIteration(Iteration iteration, OutputStream outputStream) throws JAXBException {
 
         final JAXBContext jaxbContext = JAXBContext.newInstance(Iteration.class);
         final Marshaller jaxbMarshaller = jaxbContext.createMarshaller();

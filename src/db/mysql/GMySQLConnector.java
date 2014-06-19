@@ -1,17 +1,22 @@
 package db.mysql;
 
+import analisys.bbh.BidirectionalBlastHit;
+import analisys.bbh.BlastHit;
 import blast.blast.BlastHelper;
 import blast.output.Iteration;
 import db.BlastDAO;
 import db.GenomeDAO;
 import db.OrfDAO;
 import format.text.LargeFormat;
+import org.xml.sax.SAXException;
 import sequence.nucleotide.genome.Chromosome;
 import sequence.nucleotide.genome.Genome;
 import sequence.nucleotide.genome.LargeChromosome;
 import sequence.nucleotide.genome.LargeGenome;
 import sequence.protein.ORF;
 
+import javax.xml.bind.JAXBException;
+import javax.xml.stream.XMLStreamException;
 import java.io.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -276,15 +281,17 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     }
 
     @Override
-    public Stream<ORF> loadAllOrfsForGenomeId(int genomeId, int balancer,int minLength, int maxLength) throws SQLException {
+    public Stream<ORF> loadAllOrfsForGenomeId(int genomeId, int balancer, int minLength, int maxLength) throws SQLException {
         PreparedStatement preparedStatement = this.connection
-                .prepareStatement("select * from `gblaster`.`gco_view` where id_genomes=? and orf_length>="
-                        +minLength
-                        +" and orf_length<="+maxLength
-                        ,ResultSet.TYPE_FORWARD_ONLY,ResultSet.CONCUR_READ_ONLY);
+                .prepareStatement("select * from `gblaster`.`gco_view` where id_genomes=?"
+                        + " and orf_length>=?"
+                        + " and orf_length<=?"
+                        , ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         preparedStatement.setFetchSize(balancer);
         try {
             preparedStatement.setInt(1, genomeId);
+            preparedStatement.setInt(2, minLength);
+            preparedStatement.setInt(3, maxLength);
             final ResultSet resultSet = preparedStatement.executeQuery();
             final Iterator<ORF> iter = new Iterator<ORF>() {
                 @Override
@@ -359,7 +366,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
             final int hitorf_id = Integer.valueOf(iteration.getIterationHits().getHit().get(0).getHitDef().split("\\|")[0]);
             preparedStatement.setInt(1, orfs_id);
             preparedStatement.setInt(2, hitorf_id);
-            BlastHelper.marshalBlast(iteration, byteArrayOutputStream);
+            BlastHelper.marshallIteration(iteration, byteArrayOutputStream);
             try (InputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
                  Reader reader = new BufferedReader(new InputStreamReader(byteArrayInputStream))) {
                 preparedStatement.setCharacterStream(3, reader);
@@ -375,22 +382,119 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
 
     @Override
     public boolean genomeHasBeenBlastedOver(properties.jaxb.Genome query, properties.jaxb.Genome target) throws Exception {
-        try(PreparedStatement preparedStatement=
-                    this.connection.prepareStatement(
-                            "select count(*) from gblaster.gco_view as `query` " +
-                                    "inner join gblaster.blasts as `blasts` on query.id_orfs=blasts.orfs_id " +
-                                    "inner join gblaster.gco_view as `target` on blasts.hitorf_id=target.id_orfs " +
-                                    "where query.genome_name=? and target.genome_name=?")){
-            preparedStatement.setString(1,query.getName().getName());
-            preparedStatement.setString(2,target.getName().getName());
-            final ResultSet resultSet=preparedStatement.executeQuery();
+        try (PreparedStatement preparedStatement =
+                     this.connection.prepareStatement(
+                             "select count(*) from gblaster.gco_view as `query` " +
+                                     "inner join gblaster.blasts as `blasts` on query.id_orfs=blasts.orfs_id " +
+                                     "inner join gblaster.gco_view as `target` on blasts.hitorf_id=target.id_orfs " +
+                                     "where query.genome_name=? and target.genome_name=?"
+                     )) {
+            preparedStatement.setString(1, query.getName().getName());
+            preparedStatement.setString(2, target.getName().getName());
+            final ResultSet resultSet = preparedStatement.executeQuery();
             resultSet.next();
-            final int count=resultSet.getInt(1);
-            if(count>0){
+            final int count = resultSet.getInt(1);
+            if (count > 0) {
                 return true;
-            } else{
+            } else {
                 return false;
             }
+        }
+    }
+
+    @Override
+    public long calculateOrfsForGenomeName(String genomeName, int minLength, int maxLength) throws Exception {
+        try (PreparedStatement preparedStatement = this.connection
+                .prepareStatement("select count(*) from `gblaster`.`gco_view` where genome_name=?"
+                                + " and orf_length>=?"
+                                + " and orf_length<=?"
+                )) {
+            preparedStatement.setString(1, genomeName);
+            preparedStatement.setInt(2, minLength);
+            preparedStatement.setInt(3, maxLength);
+            final ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+            return resultSet.getInt(1);
+        }
+    }
+
+    @Override
+    public Stream<BidirectionalBlastHit> getBBHforGenomePair(properties.jaxb.Genome one, properties.jaxb.Genome two,int balancer) throws Exception {
+        try {
+            PreparedStatement preparedStatement = this.connection.prepareStatement(
+                    "SELECT " +
+                            "`A.id_blasts`," +
+                            "`A.orfs_id`," +
+                            "`A.hitorf_id`," +
+                            "`A.report`," +
+                            "`B.id_blasts`," +
+                            "`B.orfs_id`," +
+                            "`B.hitorf_id`," +
+                            "`B.report`" +
+                            "FROM gblaster.bbh_view " +
+                            "inner join gblaster.gco_view as L on `A.orfs_id` = L.id_orfs " +
+                            "inner join gblaster.gco_view as R on `B.orfs_id`=R.id_orfs " +
+                            "where L.genome_name=? and R.genome_name=?"
+                    , ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY
+            );
+            preparedStatement.setFetchSize(balancer);
+            preparedStatement.setString(1, one.getName().getName());
+            preparedStatement.setString(2, two.getName().getName());
+            final ResultSet resultSet = preparedStatement.executeQuery();
+            Iterator<BidirectionalBlastHit> iter = new Iterator<BidirectionalBlastHit>() {
+                @Override
+                public boolean hasNext() {
+                    try {
+                        if (resultSet.next()) {
+                            return true;
+                        } else {
+                            preparedStatement.close();
+                            return false;
+                        }
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                @Override
+                public BidirectionalBlastHit next() {
+                    try {
+                        final Optional<Iteration> oneIteration = BlastHelper.unmarshallSingleIteraton(resultSet.getBinaryStream(4));
+                        final BlastHit blastHitOne;
+                        if (oneIteration.isPresent()) {
+                            blastHitOne = BlastHit.get(
+                                    resultSet.getInt(1), resultSet.getInt(2), resultSet.getInt(3), oneIteration.get());
+                        } else {
+                            throw new Exception("No Iteration was returned from db for genome " + one.getName().getName());
+                        }
+
+                        final Optional<Iteration> twoIteration = BlastHelper.unmarshallSingleIteraton(resultSet.getBinaryStream(8));
+                        final BlastHit blastHitTwo;
+                        if (oneIteration.isPresent()) {
+                            blastHitTwo = BlastHit.get(
+                                    resultSet.getInt(5), resultSet.getInt(6), resultSet.getInt(7), oneIteration.get());
+                        } else {
+                            throw new Exception("No Iteration was returned from db for genome " + two.getName().getName());
+                        }
+
+                        return new BidirectionalBlastHit(blastHitOne,blastHitTwo);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    } catch (SAXException e) {
+                        throw new RuntimeException(e);
+                    } catch (JAXBException e) {
+                        throw new RuntimeException(e);
+                    } catch (XMLStreamException e) {
+                        throw new RuntimeException(e);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            };
+            return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
+                    iter, Spliterator.NONNULL), false);
+        }catch (RuntimeException e){
+            throw (Exception)e.getCause();
         }
     }
 

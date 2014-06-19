@@ -4,6 +4,8 @@ import alphabet.character.amino.AminoAcid;
 import alphabet.nucleotide.NucleotideAlphabet;
 import alphabet.translate.GeneticCode;
 import base.buffer.IterationBlockingBuffer;
+import base.progress.Progress;
+import blast.blast.AbstractBlast;
 import blast.db.MakeBlastDB;
 import blast.output.BlastOutput;
 import blast.output.Iteration;
@@ -46,14 +48,14 @@ public class main {
     final static Path toMakeBlastDb = Paths.get("/bin/makeblastdb");
     final static Path toBlastP = Paths.get("/bin/blastp");
     final static int maxThreads = 6;
+    final static ExecutorService blastExecutorService = Executors.newFixedThreadPool(maxThreads);
+    final static ExecutorService supportExecutorService = Executors.newFixedThreadPool(maxThreads);
+    final static ExecutorService fullspeedExecutorService = Executors.newFixedThreadPool(maxThreads * 2);
     final static int orfUnloadBalancer = Integer.MIN_VALUE;
     final static int orfBatchSize = 1000;
     final static int blastBufferSize = 50;
     final static int blastThreadsPerRun = 2;
     final static int largeChromosomeBatchSize = 1;
-    final static ExecutorService blastExecutorService = Executors.newFixedThreadPool(maxThreads);
-    final static ExecutorService supportExecutorService = Executors.newFixedThreadPool(maxThreads);
-    final static ExecutorService fullspeedExecutorService = Executors.newFixedThreadPool(maxThreads * 2);
     static int countDown;
 
     /**
@@ -165,9 +167,9 @@ public class main {
             final List<Future<Object>> blastFutures = new ArrayList<>();
             for (Genome[] pair : pairs) {
                 if (!blastDAO.genomeHasBeenBlastedOver(pair[0], pair[1])) {
-                    blastFutures.add(blastExecutorService.submit(wrapInCallable(pair, blastDAO, blastBufferSize, gBlasterProperties.getBlastProperties(), blastThreadsPerRun)));
+                    blastFutures.add(blastExecutorService.submit(wrapInCallable(pair, orfDAO, blastDAO, blastBufferSize, gBlasterProperties.getBlastProperties(), blastThreadsPerRun)));
                 } else {
-                    System.out.println("Genome "+pair[0].getName().getName()+" has already been blasted over "+pair[1].getName().getName()+".");
+                    System.out.println("Genome " + pair[0].getName().getName() + " has already been blasted over " + pair[1].getName().getName() + ".");
                     countDown--;
                 }
             }
@@ -201,13 +203,13 @@ public class main {
 
     }
 
-    public static Callable<Object> wrapInCallable(Genome[] pair, BlastDAO blastDAO, int blastBufferSize, BlastProperties blastProperties, int maxThreadsOnBlast) {
+    public static Callable<Object> wrapInCallable(Genome[] pair, OrfDAO orfDAO, BlastDAO blastDAO, int blastBufferSize, BlastProperties blastProperties, int maxThreadsOnBlast) {
         final Callable<Object> pairRun = new Callable<Object>() {
             @Override
             public Object call() throws Exception {
-                pairBlast(pair[0], pair[1], blastBufferSize, blastDAO, blastProperties, maxThreadsOnBlast);
+                pairBlast(pair[0], pair[1], blastBufferSize, orfDAO, blastDAO, blastProperties, maxThreadsOnBlast);
                 synchronized (System.out.getClass()) {
-                    System.out.println("Blasts to run: " + countDown--);
+                    System.out.println("Blasts to run: " + --countDown);
                 }
                 return new Object();
             }
@@ -229,10 +231,10 @@ public class main {
         return pairs;
     }
 
-    public static void pairBlast(Genome query, Genome base, int bufferCapasity, BlastDAO blastDAO, BlastProperties blastProperties, int numThreads) throws ExecutionException, InterruptedException {
+    public static void pairBlast(Genome query, Genome target, int bufferCapasity, OrfDAO orfDAO, BlastDAO blastDAO, BlastProperties blastProperties, int numThreads) throws Exception {
 
         final Path queryFile = orfFolder.resolve(query.getName().getName());
-        final Path db = blastdbFolder.resolve(base.getName().getName());
+        final Path db = blastdbFolder.resolve(target.getName().getName());
 
         final GBlast.GBlastPBuilder gBlastPBuilder = new GBlast.GBlastPBuilder(toBlastP, queryFile, db.toFile().getPath());
         final double evalue = Double.parseDouble(blastProperties.getExpect().getValue());
@@ -240,6 +242,29 @@ public class main {
 
         final IterationBlockingBuffer buffer = IterationBlockingBuffer.get(bufferCapasity);
         gBlast.addListener(buffer);
+
+        final long iteratonsToGo = orfDAO.calculateOrfsForGenomeName(query.getName().getName()
+                , Integer.parseInt(blastProperties.getMinORFLength().getMin())
+                , Integer.parseInt(blastProperties.getMaxORFLength().getMax()));
+        final long logFrequency;
+        if(iteratonsToGo<10){
+            logFrequency=5;
+        }else{
+            logFrequency=iteratonsToGo/10;
+        }
+
+        gBlast.addListener(new AbstractBlast.BlastEventListner<Iteration>() {
+            long count = 0;
+            @Override
+            public int listen(AbstractBlast.BlastEvent<Iteration> event) throws Exception {
+                count++;
+                if (count % logFrequency == 0) {
+                    Progress.updateProgressCuncurrent(query.getName().getName().concat("<->").concat(target.getName().getName()), ((double) count/ iteratonsToGo)*100);
+                }
+                return 0;
+            }
+        });
+
         final Future<Optional<BlastOutput>> blastFuture = blastExecutorService.submit(gBlast);
         final Callable<Integer> saver = new Callable<Integer>() {
             @Override
@@ -266,7 +291,6 @@ public class main {
         blastFuture.get();
         buffer.release();
         System.out.println("Buffer for ".concat(query.getName().getName()).concat(" was released."));
-
         System.out.println("Blast results saved to database: " + saverFuture.get());
     }
 }

@@ -28,7 +28,7 @@ public class BlastHelperTest {
 
             final BlastOutput blastOutput= BlastHelper.catchBLASTOutput(inputStream);
             final Iteration it=blastOutput.getBlastOutputIterations().getIteration().get(0);
-            BlastHelper.marshalBlast(it,System.out);
+            BlastHelper.marshallIteration(it, System.out);
 
 
 
