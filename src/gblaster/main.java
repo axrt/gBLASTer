@@ -28,6 +28,7 @@ import javax.xml.bind.JAXBException;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -47,15 +48,16 @@ public class main {
     final static Path blastdbFolder = home.resolve("blastdb");
     final static Path toMakeBlastDb = Paths.get("/bin/makeblastdb");
     final static Path toBlastP = Paths.get("/bin/blastp");
-    final static int maxThreads = 6;
+    final static int maxThreads = 11;
     final static ExecutorService blastExecutorService = Executors.newFixedThreadPool(maxThreads);
-    final static ExecutorService supportExecutorService = Executors.newFixedThreadPool(maxThreads);
-    final static ExecutorService fullspeedExecutorService = Executors.newFixedThreadPool(maxThreads * 2);
-    final static int orfUnloadBalancer = Integer.MIN_VALUE;
-    final static int orfBatchSize = 1000;
+    final static ExecutorService helperExecutorService = Executors.newFixedThreadPool(maxThreads);
+    final static ExecutorService blastDriverExecutorService = Executors.newFixedThreadPool(maxThreads);
+    final static int orfUnloadBalancer =Integer.MIN_VALUE;
+    final static int orfBatchSize = 100;
     final static int blastBufferSize = 50;
-    final static int blastThreadsPerRun = 2;
+    final static int blastThreadsPerRun = 1;
     final static int largeChromosomeBatchSize = 1;
+    final static int minimumOrfLength=50;
     static int countDown;
 
     /**
@@ -78,7 +80,7 @@ public class main {
             final Map<Genome, GeneticCode<AminoAcid>> genomeGeneticCodeMap = Deployer.mapGenomesToGeneticCode(gBlasterProperties.getGenome().stream());
 
             //3.Connect to database
-            final MySQLConnector mySQLConnector = GMySQLConnector.get("jdbc:mysql://localhost", "gblaster", "gblaster");
+            final MySQLConnector mySQLConnector = GMySQLConnector.get("jdbc:mysql://localhost:3306?netTimeoutForStreamingResults=60&useCursorFetch=true", "gblaster", "gblaster");
 
             mySQLConnector.connectToDatabase();
             mySQLConnector.getConnection().setAutoCommit(false);
@@ -106,7 +108,7 @@ public class main {
                             System.out.println("Deploying Genome ".concat(g.getName().getName()));
                             final IntStream chromosomeIdStream = Deployer.deployAndGetchromosomeIds(genomeDAO, g, largeFormat, tmpFolder, nucleotideAlphabet, largeChromosomeBatchSize);
                             System.out.println("Translating ORFs for Genome ".concat(g.getName().getName()));
-                            Deployer.translateAndGetORFStreamForGenomeId(chromosomeIdStream, genomeDAO, orfDAO, genomeGeneticCodeMap.get(g), largeFormat, orfBatchSize);
+                            Deployer.translateAndGetORFStreamForGenomeId(chromosomeIdStream, genomeDAO, orfDAO, genomeGeneticCodeMap.get(g), largeFormat, orfBatchSize,minimumOrfLength);
                         } else {
                             System.out.println("Genome " + g.getName().getName() + " has already been processed.");
                         }
@@ -123,15 +125,24 @@ public class main {
                 final Map<Genome, File> orfFileMap = new HashMap<>();
                 gBlasterProperties.getGenome().stream().forEach(g -> {
                     try {
-                        System.out.println("Unloading ORFs for Genome ".concat(g.getName().getName()));
-                        orfFileMap.put(g, Deployer.unloadORFsForGenomeToFile(g.getName().getName(), orfDAO, genomeDAO, largeFormat, minORFLenght, maxORFLenght, orfFolder, orfUnloadBalancer));
+                        if (!orfFolder.resolve(g.getName().getName()).toFile().exists()) {
+                            System.out.println("Unloading ORFs for Genome ".concat(g.getName().getName()));
+                            orfFileMap.put(g, Deployer.unloadORFsForGenomeToFile(g.getName().getName(), orfDAO, genomeDAO, largeFormat, minORFLenght, maxORFLenght, orfFolder, orfUnloadBalancer));
+                        }else{
+                            System.out.println("ORFs for Genome ".concat(g.getName().getName())+" have already been unloaded");
+                            orfFileMap.put(g,orfFolder.resolve(g.getName().getName()).toFile());
+                        }
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 });
+                //9.Deploy all blastdbs for all genomes
+                final List<Future<Optional<File>>> makeBlastDbFutures = gBlasterProperties.getGenome().stream()
+                        .filter(g->{
+                            return !blastdbFolder.resolve(g.getName().getName().concat(".phr")).toFile().exists();
+                        })
+                        .map(g -> {
 
-                //9.Deploy all bastdbs for all genomes
-                final List<Future<Optional<File>>> makeBlastDbFutures = gBlasterProperties.getGenome().stream().map(g -> {
                     final MakeBlastDB.MakeBlastDBBuilder makeBlastDBBuilder = new MakeBlastDB.MakeBlastDBBuilder(g.getName().getName());
                     System.out.println("Deploying blast database for Genome ".concat(g.getName().getName()));
                     final MakeBlastDB makeBlastDb = makeBlastDBBuilder
@@ -140,7 +151,7 @@ public class main {
                             .pathToSequenceFile(orfFileMap.get(g).toPath())
                             .type(MakeBlastDB.DBType.PROT)
                             .build();
-                    return fullspeedExecutorService.submit(makeBlastDb);
+                    return blastDriverExecutorService.submit(makeBlastDb);
                 }).collect(Collectors.toList());
                 makeBlastDbFutures.stream().forEach(f -> {
                     try {
@@ -167,7 +178,7 @@ public class main {
             final List<Future<Object>> blastFutures = new ArrayList<>();
             for (Genome[] pair : pairs) {
                 if (!blastDAO.genomeHasBeenBlastedOver(pair[0], pair[1])) {
-                    blastFutures.add(blastExecutorService.submit(wrapInCallable(pair, orfDAO, blastDAO, blastBufferSize, gBlasterProperties.getBlastProperties(), blastThreadsPerRun)));
+                    blastFutures.add(blastDriverExecutorService.submit(wrapInCallable(pair, orfDAO, blastDAO, blastBufferSize, gBlasterProperties.getBlastProperties(), blastThreadsPerRun)));
                 } else {
                     System.out.println("Genome " + pair[0].getName().getName() + " has already been blasted over " + pair[1].getName().getName() + ".");
                     countDown--;
@@ -175,13 +186,12 @@ public class main {
             }
             for (Future<Object> future : blastFutures) {
                 future.get();
-                mySQLConnector.getConnection().commit();
             }
 
             //Shutdown
             blastExecutorService.shutdown();
-            supportExecutorService.shutdown();
-            fullspeedExecutorService.shutdown();
+            blastDriverExecutorService.shutdown();
+            helperExecutorService.shutdown();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -218,7 +228,7 @@ public class main {
     }
 
     public static Genome[][] matchPairs(List<? extends Genome> genomes) {
-        final Genome[][] pairs = new Genome[genomes.size() ^ 2 - genomes.size()][2];
+        final Genome[][] pairs = new Genome[genomes.size() * genomes.size() - genomes.size()][2];
         int number = 0;
         for (int i = 0; i < genomes.size(); i++) {
             for (int j = 0; j < genomes.size(); j++) {
@@ -243,29 +253,31 @@ public class main {
         final IterationBlockingBuffer buffer = IterationBlockingBuffer.get(bufferCapasity);
         gBlast.addListener(buffer);
 
-        final long iteratonsToGo = orfDAO.calculateOrfsForGenomeName(query.getName().getName()
+        final long iterationsToGo = orfDAO.calculateOrfsForGenomeName(query.getName().getName()
                 , Integer.parseInt(blastProperties.getMinORFLength().getMin())
                 , Integer.parseInt(blastProperties.getMaxORFLength().getMax()));
         final long logFrequency;
-        if(iteratonsToGo<10){
-            logFrequency=5;
-        }else{
-            logFrequency=iteratonsToGo/10;
+        if (iterationsToGo < 10) {
+            logFrequency = 5;
+        } else {
+            logFrequency = iterationsToGo / 10;
         }
 
         gBlast.addListener(new AbstractBlast.BlastEventListner<Iteration>() {
             long count = 0;
+
             @Override
             public int listen(AbstractBlast.BlastEvent<Iteration> event) throws Exception {
                 count++;
                 if (count % logFrequency == 0) {
-                    Progress.updateProgressCuncurrent(query.getName().getName().concat("<->").concat(target.getName().getName()), ((double) count/ iteratonsToGo)*100);
+                    Progress.updateProgressCuncurrent(query.getName().getName().concat("<->").concat(target.getName().getName()), ((double) count / iterationsToGo) * 100);
                 }
                 return 0;
             }
         });
 
         final Future<Optional<BlastOutput>> blastFuture = blastExecutorService.submit(gBlast);
+
         final Callable<Integer> saver = new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
@@ -286,11 +298,16 @@ public class main {
         };
 
 
-        final Future<Integer> saverFuture = supportExecutorService.submit(saver);
+        final Future<Integer> saverFuture = helperExecutorService.submit(saver);
 
         blastFuture.get();
         buffer.release();
-        System.out.println("Buffer for ".concat(query.getName().getName()).concat(" was released."));
-        System.out.println("Blast results saved to database: " + saverFuture.get());
+        synchronized (System.out.getClass()) {
+            System.out.println("Buffer for ".concat(query.getName().getName()).concat(" was released."));
+        }
+        blastDAO.commit();
+        synchronized (System.out.getClass()) {
+            System.out.println("Blast results saved to database: " + saverFuture.get());
+        }
     }
 }

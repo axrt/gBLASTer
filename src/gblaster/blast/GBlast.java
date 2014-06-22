@@ -54,10 +54,15 @@ public class GBlast extends AbstractBlast<Iteration> {
                 }
                 xsr.next();
             }
-            bufferedReader.lines().forEach(l -> System.out.println("BLAST ERR:> ".concat(l)));
-        }
 
-        return Optional.empty();
+            bufferedReader.lines().forEach(l -> {
+                synchronized (System.out.getClass()) {
+                    System.out.println("BLAST ERR:> ".concat(l));
+                }
+            });
+
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -82,25 +87,27 @@ public class GBlast extends AbstractBlast<Iteration> {
                     throw new RuntimeException(ie);
                 }
             }).sum();
-        }catch (RuntimeException e){
-            throw (Exception)e.getCause();
+        } catch (RuntimeException e) {
+            throw (Exception) e.getCause();
         }
     }
 
-    public static class GBlastPBuilder extends BlastPBuilder<Iteration,GBlast> {
+    public static class GBlastPBuilder extends BlastPBuilder<Iteration, GBlast> {
         public GBlastPBuilder(Path pathToBlast, Path queryFile, String database) {
             super(pathToBlast, queryFile, database);
         }
+
         @Override
         public GBlast build() {
             return new GBlast(this);
         }
     }
 
-    public static class GBlastNBuilder extends BlastNBuilder<Iteration,GBlast> {
+    public static class GBlastNBuilder extends BlastNBuilder<Iteration, GBlast> {
         public GBlastNBuilder(Path pathToBlast, Path queryFile, String database) {
             super(pathToBlast, queryFile, database);
         }
+
         @Override
         public GBlast build() {
             return new GBlast(this);

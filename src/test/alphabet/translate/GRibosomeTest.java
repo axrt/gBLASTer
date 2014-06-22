@@ -11,7 +11,7 @@ import org.junit.Test;
 import sequence.nucleotide.NucleotideSequence;
 import sequence.protein.ORF;
 
-import java.io.ByteArrayInputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.Date;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  */
 public class GRibosomeTest {
 
-    @Test
+    //@Test
     public void test(){
 
         final Random random=new Random();
@@ -123,4 +123,19 @@ public class GRibosomeTest {
         new GRibosomeTest().test();
     }
 
+    @Test
+    public void realTest(){
+       try(BufferedReader bufferedReader=new BufferedReader(new FileReader(new File("/home/alext/Downloads/arabidopsis.txt")));
+       InputStream inputStream =new FileInputStream(new File("/home/alext/Downloads/arabidopsis.txt"))){
+           final NucleotideSequence<Nucleotide> nucleotideNucleotideSequence=NucleotideSequence.get(bufferedReader.lines().skip(1).collect(Collectors.joining()), "test");
+           final GRibosome ribosome = GRibosome.newInstance(nucleotideNucleotideSequence, GeneticCode.STANDARD);
+           final GStreamRibosome gStreamRibosome=GStreamRibosome.newInstance(inputStream,GeneticCode.STANDARD);
+          System.out.println(ribosome.translate().filter(orf->orf.getSequence().length()>50).filter(orf->!orf.getSequence().contains("STOP")).count());
+           //System.out.println(gStreamRibosome.translate().count());
+       } catch (FileNotFoundException e) {
+           e.printStackTrace();
+       } catch (IOException e) {
+           e.printStackTrace();
+       }
+    }
 }

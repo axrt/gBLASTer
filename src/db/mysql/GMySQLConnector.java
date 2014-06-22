@@ -161,7 +161,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     @Override
     public IntStream saveLargeChromosomesForGenomeId(int genomeId, Stream<? extends LargeChromosome> chromoStream, int batchSize) throws SQLException {
         try (PreparedStatement preparedStatement = this.connection
-                .prepareStatement("INSERT INTO `gblaster`.`chromosomes` (`id_genome`, `name`, `sequence`) VALUES (?, ?, ?);", Statement.RETURN_GENERATED_KEYS)) {
+                .prepareStatement("INSERT INTO `gblaster`.`chromosomes` (`id_genome`, `name`, `sequence`) VALUES (?, ?, ?);")) {
             final int[] counter = {0};
             chromoStream.forEach(ch -> {
                 final Reader reader = new InputStreamReader(ch.getSequenceInputstream());
@@ -181,7 +181,10 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                 }
             });
             preparedStatement.executeBatch();
-            final ResultSet resultSet = preparedStatement.getGeneratedKeys();
+        }
+        try(PreparedStatement preparedStatement=this.connection.prepareStatement("select id_chromosomes from `gblaster`.`chromosomes` where id_genome=?")){
+            preparedStatement.setInt(1,genomeId);
+            final ResultSet resultSet = preparedStatement.executeQuery();
             final IntStream.Builder builder = IntStream.builder();
             while (resultSet.next()) {
                 builder.accept(resultSet.getInt(1));
@@ -239,7 +242,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
         }
     }
 
-    @Override
+    @Override //TODO correct keys!!!!!!!!
     public IntStream saveOrfsForChromosomeId(int idChromosome, Stream<? extends ORF> orfStream, int batchSize) throws SQLException {
 
         try (PreparedStatement preparedStatement = this.connection
@@ -282,25 +285,29 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
 
     @Override
     public Stream<ORF> loadAllOrfsForGenomeId(int genomeId, int balancer, int minLength, int maxLength) throws SQLException {
-        PreparedStatement preparedStatement = this.connection
-                .prepareStatement("select * from `gblaster`.`gco_view` where id_genomes=?"
-                        + " and orf_length>=?"
-                        + " and orf_length<=?"
-                        , ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-        preparedStatement.setFetchSize(balancer);
+        final PreparedStatement statement = this.connection
+                .prepareStatement("select orf_sequence, orf_name, start, stop, frame, id_orfs, orf_length from gblaster.orfs_by_genome_view where id_genomes=?"
+                                + " and orf_length>=?"
+                                + " and orf_length<=?",
+                        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY
+                );
+        statement.setFetchSize(balancer);
+
         try {
-            preparedStatement.setInt(1, genomeId);
-            preparedStatement.setInt(2, minLength);
-            preparedStatement.setInt(3, maxLength);
-            final ResultSet resultSet = preparedStatement.executeQuery();
+            statement.setInt(1, genomeId);
+            statement.setInt(2, minLength);
+            statement.setInt(3, maxLength);
+            final ResultSet resultSet = statement.executeQuery();
+            System.out.println("next requested");
             final Iterator<ORF> iter = new Iterator<ORF>() {
                 @Override
                 public boolean hasNext() {
                     try {
                         if (resultSet.next()) {
+
                             return true;
                         } else {
-                            preparedStatement.close();
+                            statement.close();
                             return false;
                         }
                     } catch (SQLException e) {
@@ -311,7 +318,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                 @Override
                 public ORF next() {
                     try {
-                        final ORF orf = ORF.get(resultSet.getString(12), resultSet.getString(11), resultSet.getInt(10), resultSet.getInt(9), resultSet.getInt(8));
+                        final ORF orf = ORF.get(resultSet.getString(1), resultSet.getString(2), resultSet.getInt(3), resultSet.getInt(4), resultSet.getInt(5));
                         orf.setId(resultSet.getInt(7));
                         return orf;
                     } catch (SQLException e) {
@@ -322,7 +329,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
             return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
                     iter, Spliterator.NONNULL), false);
         } catch (RuntimeException e) {
-            preparedStatement.close();
+            statement.close();
             if (e.getCause() instanceof SQLException) {
                 throw (SQLException) e.getCause();
             } else {
@@ -437,10 +444,12 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                             "where L.genome_name=? and R.genome_name=?"
                     , ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY
             );
+
             preparedStatement.setFetchSize(balancer);
             preparedStatement.setString(1, one.getName().getName());
             preparedStatement.setString(2, two.getName().getName());
             final ResultSet resultSet = preparedStatement.executeQuery();
+
             Iterator<BidirectionalBlastHit> iter = new Iterator<BidirectionalBlastHit>() {
                 @Override
                 public boolean hasNext() {
@@ -496,6 +505,11 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
         }catch (RuntimeException e){
             throw (Exception)e.getCause();
         }
+    }
+
+    @Override
+    public void commit() throws Exception {
+        this.connection.commit();
     }
 
     public static GMySQLConnector get(String URL, String user, String password) {

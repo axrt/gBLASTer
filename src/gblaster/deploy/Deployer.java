@@ -72,8 +72,8 @@ public final class Deployer {
                     throw new UncheckedIOException(e);
                 }
             });
-            final IntStream rcIntStream = genomeDAO.saveLargeChromosomesForGenomeId(genomeId, largeRCChromosomes,batchSize);
-            return IntStream.concat(intStream, rcIntStream);
+            final IntStream stream = genomeDAO.saveLargeChromosomesForGenomeId(genomeId, largeRCChromosomes,batchSize);
+            return stream;
         }
     }
 
@@ -83,7 +83,8 @@ public final class Deployer {
             OrfDAO orfDAO,
             GeneticCode<AminoAcid> geneticCode,
             LargeFormat chromosomeFormat,
-            int batchSize
+            int batchSize,
+            int minOrfSize
     ) throws Exception {
 
         chromosomeIds.forEach(chid -> {
@@ -91,8 +92,9 @@ public final class Deployer {
                 final Optional<LargeChromosome> largeChromosomeOptional = chromosomeDAO.loadLargeCrhomosomeForID(chid, chromosomeFormat);
                 if (largeChromosomeOptional.isPresent()) {
                     final LargeChromosome largeChromosome = largeChromosomeOptional.get();
+                    System.out.println("chid> "+chid);
                     final GStreamRibosome gStreamRibosome = GStreamRibosome.newInstance(largeChromosome.getSequenceInputstream(), geneticCode);
-                    orfDAO.saveOrfsForChromosomeId(chid, gStreamRibosome.translate(),batchSize);
+                    orfDAO.saveOrfsForChromosomeId(chid, gStreamRibosome.translate().filter(orf->orf.getSequence().length()>minOrfSize),batchSize);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -116,10 +118,6 @@ public final class Deployer {
     public static File unloadORFsForGenomeToFile(String genomeName, OrfDAO orfDAO, GenomeDAO genomeDAO,Format format,int minLength,int maxLength, Path dir,int balancer) throws Exception {
 
         final File toUnload = dir.resolve(genomeName).toFile();
-        //Check if the file exists and if so - get rid of it
-        if(toUnload.exists()){
-            toUnload.delete();
-        }
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(toUnload))) {
             final int genomeId = genomeDAO.genomeIdByName(genomeName);
             if (genomeId == 0) {
@@ -137,7 +135,7 @@ public final class Deployer {
 
         } catch (RuntimeException e){
             //First thing - delete the file
-            toUnload.delete();
+             toUnload.delete();
             if(e.getCause() instanceof IOException){
                 throw (IOException) e.getCause();
             }

@@ -15,4 +15,5 @@ public interface BlastDAO  {
     public int saveBlastResult(Iteration iteration) throws Exception;
     public boolean genomeHasBeenBlastedOver(Genome query,Genome target) throws Exception;
     public Stream<BidirectionalBlastHit> getBBHforGenomePair(Genome one,Genome two,int balancer) throws Exception;
+    public void commit()throws Exception;
 }

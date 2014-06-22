@@ -10,18 +10,58 @@ and open the template in the editor.
     <BlastProperties>
         <PathToMakeBlastDb path="/bin/makeblastdb"/>
         <PathToBlastP path="/bin/blastp"/>
-        <Expect value="1"/>
+        <Expect value="10"/>
         <MinORFLength min="100"></MinORFLength>
         <MaxORFLength max="10000"></MaxORFLength>
     </BlastProperties>
     <Genome>
-        <Name name="ecoli"/>
-        <PathToFile path="/home/alext/Documents/gBlaster/genomes/ecoli.fasta"/>
+        <Name name="Escherichia_coli_str_K_12_substr_MG1655_complete_genome"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/e_coli.fasta"/>
         <GeneticTable type="standard"/>
     </Genome>
     <Genome>
-        <Name name="human_mito"/>
-        <PathToFile path="/home/alext/Documents/gBlaster/genomes/hmito.fasta"/>
+        <Name name="Bacillus_subtilis_subsp_subtilis_str_168_chromosome_complete_genome"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/b_subtilis_168.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Wolbachia_endosymbiont_of_Drosophila_simulans_wHa_complete_genome"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/wolbachia_wha.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Wolbachia_endosymbiont_of_Culex_quinquefasciatus_Pel_chromosome_complete_genome"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/wolbachia_pel.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Sphingomonas_wittichii_RW1_chromosome_complete_genome"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/s_wittichii.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Drosophila_simulans"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/drosophila_simulans.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Culex_pipiens"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/culex_pipiens.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Arabidopsis_thaliana"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/arabidopsis_thaliana.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Ostreococcus_tauri"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/ostreococcus_tauri.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Caenorhabditis_Elegans_Bristol_N2"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/caenorhabditis_elegans_bristol_n2.fasta"/>
         <GeneticTable type="standard"/>
     </Genome>
 </gBlasterProperties>
