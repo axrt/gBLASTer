@@ -389,23 +389,24 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
 
     @Override
     public boolean genomeHasBeenBlastedOver(properties.jaxb.Genome query, properties.jaxb.Genome target) throws Exception {
+        final int query_genome_id=this.genomeIdByName(query.getName().getName());
+        final int target_genome_id=this.genomeIdByName(target.getName().getName());
         try (PreparedStatement preparedStatement =
                      this.connection.prepareStatement(
-                             "select count(*) from gblaster.gco_view as `query` " +
-                                     "inner join gblaster.blasts as `blasts` on query.id_orfs=blasts.orfs_id " +
-                                     "inner join gblaster.gco_view as `target` on blasts.hitorf_id=target.id_orfs " +
-                                     "where query.genome_name=? and target.genome_name=?"
+                             "select id_blasts from gblaster.orfs lo inner join gblaster.blasts on lo.id_orfs=orfs_id "+
+                             "inner join gblaster.orfs ro on ro.id_orfs=hitorf_id "+
+                             "inner join gblaster.chromosomes lc on lc.id_chromosomes=lo.id_chromosome "+
+                             "inner join gblaster.chromosomes rc on rc.id_chromosomes=ro.id_chromosome "+
+                             "inner join gblaster.genomes lg on lg.id_genomes=lc.id_genome "+
+                             "inner join gblaster.genomes rg on rg.id_genomes=rc.id_genome "+
+                             "where lg.id_genomes=? and "+
+                             "rg.id_genomes=? "+
+                             "limit 1"
                      )) {
-            preparedStatement.setString(1, query.getName().getName());
-            preparedStatement.setString(2, target.getName().getName());
+            preparedStatement.setInt(1, query_genome_id);
+            preparedStatement.setInt(2, target_genome_id);
             final ResultSet resultSet = preparedStatement.executeQuery();
-            resultSet.next();
-            final int count = resultSet.getInt(1);
-            if (count > 0) {
-                return true;
-            } else {
-                return false;
-            }
+            return resultSet.next();
         }
     }
 

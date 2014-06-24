@@ -50,8 +50,8 @@ public class main {
     final static Path toBlastP = Paths.get("/bin/blastp");
     final static int maxThreads = 11;
     final static ExecutorService blastExecutorService = Executors.newFixedThreadPool(maxThreads);
-    final static ExecutorService helperExecutorService = Executors.newFixedThreadPool(maxThreads);
-    final static ExecutorService blastDriverExecutorService = Executors.newFixedThreadPool(maxThreads);
+    final static ExecutorService helperExecutorService = Executors.newCachedThreadPool();
+    final static ExecutorService blastDriverExecutorService = Executors.newCachedThreadPool();
     final static int orfUnloadBalancer =Integer.MIN_VALUE;
     final static int orfBatchSize = 100;
     final static int blastBufferSize = 50;
@@ -175,14 +175,18 @@ public class main {
             countDown = pairs.length;
 
             //11. Create and submit all blasts
-            final List<Future<Object>> blastFutures = new ArrayList<>();
+            final List<Callable<Object>> preparedBlasts=new ArrayList<>();
             for (Genome[] pair : pairs) {
                 if (!blastDAO.genomeHasBeenBlastedOver(pair[0], pair[1])) {
-                    blastFutures.add(blastDriverExecutorService.submit(wrapInCallable(pair, orfDAO, blastDAO, blastBufferSize, gBlasterProperties.getBlastProperties(), blastThreadsPerRun)));
+                    preparedBlasts.add(wrapInCallable(pair, orfDAO, blastDAO, blastBufferSize, gBlasterProperties.getBlastProperties(), blastThreadsPerRun));
                 } else {
                     System.out.println("Genome " + pair[0].getName().getName() + " has already been blasted over " + pair[1].getName().getName() + ".");
                     countDown--;
                 }
+            }
+            final List<Future<Object>> blastFutures = new ArrayList<>();
+            for(Callable<Object> co:preparedBlasts){
+                blastFutures.add(blastDriverExecutorService.submit(co));
             }
             for (Future<Object> future : blastFutures) {
                 future.get();

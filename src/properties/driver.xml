@@ -64,4 +64,9 @@ and open the template in the editor.
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/caenorhabditis_elegans_bristol_n2.fasta"/>
         <GeneticTable type="standard"/>
     </Genome>
+    <Genome>
+        <Name name="Saccharomyces_Cerevisiae_S288c"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/saccharomyces_cerevisiae_s288c.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
 </gBlasterProperties>
