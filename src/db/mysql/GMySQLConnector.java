@@ -334,7 +334,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                 public ORF next() {
                     try {
                         final ORF orf = ORF.get(resultSet.getString(1), resultSet.getString(2), resultSet.getInt(3), resultSet.getInt(4), resultSet.getInt(5));
-                        orf.setId(resultSet.getInt(6));
+                        orf.setId(resultSet.getLong(6));
                         return orf;
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
@@ -384,10 +384,10 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                 "?,\n" +
                 "?);\n", Statement.RETURN_GENERATED_KEYS);
              ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-            final int orfs_id = Integer.valueOf(iteration.getIterationQueryDef().split("\\|")[0]);
-            final int hitorf_id = Integer.valueOf(iteration.getIterationHits().getHit().get(0).getHitDef().split("\\|")[0]);
-            preparedStatement.setInt(1, orfs_id);
-            preparedStatement.setInt(2, hitorf_id);
+            final long orfs_id = Long.valueOf(iteration.getIterationQueryDef().split("\\|")[0]);
+            final long hitorf_id = Long.valueOf(iteration.getIterationHits().getHit().get(0).getHitDef().split("\\|")[0]);
+            preparedStatement.setLong(1, orfs_id);
+            preparedStatement.setLong(2, hitorf_id);
             BlastHelper.marshallIteration(iteration, byteArrayOutputStream);
             try (InputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
                  Reader reader = new BufferedReader(new InputStreamReader(byteArrayInputStream))) {
@@ -543,10 +543,10 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
             iterations.forEach(iter -> {
                 try {
                     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                    final int orfs_id = Integer.valueOf(iter.getIterationQueryDef().split("\\|")[0]);
-                    final int hitorf_id = Integer.valueOf(iter.getIterationHits().getHit().get(0).getHitDef().split("\\|")[0]);
-                    preparedStatement.setInt(1, orfs_id);
-                    preparedStatement.setInt(2, hitorf_id);
+                    final long orfs_id = Long.valueOf(iter.getIterationQueryDef().split("\\|")[0]);
+                    final long hitorf_id = Long.valueOf(iter.getIterationHits().getHit().get(0).getHitDef().split("\\|")[0]);
+                    preparedStatement.setLong(1, orfs_id);
+                    preparedStatement.setLong(2, hitorf_id);
                     BlastHelper.marshallIteration(iter, byteArrayOutputStream);
                     final InputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
                     final Reader reader = new BufferedReader(new InputStreamReader(byteArrayInputStream));

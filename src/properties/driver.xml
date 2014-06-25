@@ -24,7 +24,7 @@ and open the template in the editor.
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/b_subtilis_168.fasta"/>
         <GeneticTable type="standard"/>
     </Genome>
-    <!--Genome>
+    <Genome>
         <Name name="Wolbachia_endosymbiont_of_Drosophila_simulans_wHa_complete_genome"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/wolbachia_wha.fasta"/>
         <GeneticTable type="standard"/>
@@ -49,7 +49,7 @@ and open the template in the editor.
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/culex_pipiens.fasta"/>
         <GeneticTable type="standard"/>
     </Genome>
-    <Genome>
+    <!--Genome>
         <Name name="Arabidopsis_thaliana"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/arabidopsis_thaliana.fasta"/>
         <GeneticTable type="standard"/>
