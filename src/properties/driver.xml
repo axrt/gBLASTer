@@ -24,7 +24,7 @@ and open the template in the editor.
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/b_subtilis_168.fasta"/>
         <GeneticTable type="standard"/>
     </Genome>
-    <Genome>
+    <!--Genome>
         <Name name="Wolbachia_endosymbiont_of_Drosophila_simulans_wHa_complete_genome"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/wolbachia_wha.fasta"/>
         <GeneticTable type="standard"/>
@@ -69,4 +69,19 @@ and open the template in the editor.
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/saccharomyces_cerevisiae_s288c.fasta"/>
         <GeneticTable type="standard"/>
     </Genome>
+    <Genome>
+        <Name name="Cryptosporidium_Parvum"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/cryptosporidium_parvum.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Schizosaccharomyces_Pombe_972h"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/schizosaccharomyces_pombe_972h.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Thalassiosira_pseudonana_CCMP1335"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/thalassiosira_pseudonana_CCMP1335.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome-->
 </gBlasterProperties>

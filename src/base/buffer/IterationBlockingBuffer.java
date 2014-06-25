@@ -13,14 +13,22 @@ public class IterationBlockingBuffer extends SimpleBlockingBuffer<Iteration> imp
 
     public static final Iteration DONE=new Iteration();
 
+    protected String name;
+
     protected IterationBlockingBuffer(int capacity) {
         super(capacity);
+    }
+    protected IterationBlockingBuffer(String name,int capacity) {
+        super(capacity); this.name=name;
     }
 
     @Override
     public int listen(AbstractBlast.BlastEvent<Iteration> event) throws InterruptedException {
         if (event.getEvent().isPresent()) {
             this.put(event.getEvent().get());
+            if(this.remainingCapacity()==0){
+                System.out.println("buffer ".concat(this.name)+" is full;");
+            }
             return 0;
         }
         return -1;
@@ -45,5 +53,8 @@ public class IterationBlockingBuffer extends SimpleBlockingBuffer<Iteration> imp
 
     public static IterationBlockingBuffer get(int capasity) {
         return new IterationBlockingBuffer(capasity);
+    }
+    public static IterationBlockingBuffer get(String name,int capasity) {
+        return new IterationBlockingBuffer(name,capasity);
     }
 }

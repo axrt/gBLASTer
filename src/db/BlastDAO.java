@@ -4,6 +4,7 @@ import analisys.bbh.BidirectionalBlastHit;
 import blast.output.Iteration;
 import properties.jaxb.Genome;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 /**
@@ -15,5 +16,5 @@ public interface BlastDAO  {
     public int saveBlastResult(Iteration iteration) throws Exception;
     public boolean genomeHasBeenBlastedOver(Genome query,Genome target) throws Exception;
     public Stream<BidirectionalBlastHit> getBBHforGenomePair(Genome one,Genome two,int balancer) throws Exception;
-    public void commit()throws Exception;
+    public boolean saveBlastResultBatch(Stream<Iteration>iterations)throws Exception;
 }

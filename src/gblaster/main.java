@@ -54,7 +54,7 @@ public class main {
     final static ExecutorService blastDriverExecutorService = Executors.newCachedThreadPool();
     final static int orfUnloadBalancer =Integer.MIN_VALUE;
     final static int orfBatchSize = 100;
-    final static int blastBufferSize = 50;
+    final static int blastBufferSize = 100;
     final static int blastThreadsPerRun = 1;
     final static int largeChromosomeBatchSize = 1;
     final static int minimumOrfLength=50;
@@ -117,8 +117,6 @@ public class main {
                     }
                 });
 
-                //If this commit has taken place, that means, that the genome, its chromosomes and the orfs for this genome have been processed
-                mySQLConnector.getConnection().commit();
 
                 //8.For each genome unload ORFs
 
@@ -184,6 +182,7 @@ public class main {
                     countDown--;
                 }
             }
+           // mySQLConnector.getConnection().setAutoCommit(true);
             final List<Future<Object>> blastFutures = new ArrayList<>();
             for(Callable<Object> co:preparedBlasts){
                 blastFutures.add(blastDriverExecutorService.submit(co));
@@ -254,7 +253,7 @@ public class main {
         final double evalue = Double.parseDouble(blastProperties.getExpect().getValue());
         final GBlast gBlast = gBlastPBuilder.evalue(Optional.of(evalue)).num_threads(Optional.of(numThreads)).maxTargetSeqs(Optional.of(1)).build();
 
-        final IterationBlockingBuffer buffer = IterationBlockingBuffer.get(bufferCapasity);
+        final IterationBlockingBuffer buffer = IterationBlockingBuffer.get(query.getName().getName()+" <-> " + target.getName().getName(),bufferCapasity);
         gBlast.addListener(buffer);
 
         final long iterationsToGo = orfDAO.calculateOrfsForGenomeName(query.getName().getName()
@@ -286,17 +285,28 @@ public class main {
             @Override
             public Integer call() throws Exception {
                 int blastsSaved = 0;
+                int totalBlasts=0;
+                List<Iteration>iterationsToSave=new ArrayList<>(blastBufferSize-1);
                 while (!buffer.isDone()) {
 
                     final Iteration iteration = buffer.take();
                     if (iteration == IterationBlockingBuffer.DONE) {
+                        blastsSaved+=iterationsToSave.size();
+                        blastDAO.saveBlastResultBatch(iterationsToSave.stream());
                         break;
                     } else if (iteration.getIterationHits().getHit() != null && !iteration.getIterationHits().getHit().isEmpty()) {
-                        blastDAO.saveBlastResult(iteration);
-                        blastsSaved++;
+                        iterationsToSave.add(iteration);
+                        if(iterationsToSave.size()==blastBufferSize-1){
+                            blastDAO.saveBlastResultBatch(iterationsToSave.stream());
+                            blastsSaved+=iterationsToSave.size();
+                            iterationsToSave.clear();
+                        }
                     }
+                    totalBlasts++;
                 }
-
+                synchronized (System.out){
+                    System.out.println("Total number of blasts: "+totalBlasts+" done for "+query.getName().getName()+" <->"+target.getName().getName());
+                }
                 return blastsSaved;
             }
         };
@@ -309,7 +319,6 @@ public class main {
         synchronized (System.out.getClass()) {
             System.out.println("Buffer for ".concat(query.getName().getName()).concat(" was released."));
         }
-        blastDAO.commit();
         synchronized (System.out.getClass()) {
             System.out.println("Blast results saved to database: " + saverFuture.get());
         }

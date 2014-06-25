@@ -2,6 +2,7 @@ package db.mysql;
 
 import db.connect.Connector;
 
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 //TODO document
@@ -15,7 +16,7 @@ public class MySQLConnector extends Connector {
      * The  driver, com.mysql.jdbc.Driver for MySQL database connection
      */
     protected static final String MYSQL_DRIVER = "com.mysql.jdbc.Driver";
-
+    //protected final
     /**
      * @param URL      {@link String} of the database
      * @param user     {@link String} user name for the database

@@ -8,6 +8,7 @@ import db.BlastDAO;
 import db.GenomeDAO;
 import db.OrfDAO;
 import format.text.LargeFormat;
+import org.apache.commons.dbcp.BasicDataSource;
 import org.xml.sax.SAXException;
 import sequence.nucleotide.genome.Chromosome;
 import sequence.nucleotide.genome.Genome;
@@ -18,10 +19,7 @@ import sequence.protein.ORF;
 import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Spliterator;
@@ -37,6 +35,7 @@ import java.util.stream.StreamSupport;
 public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO, BlastDAO {
 
     public static final String COMMENT_TEMPLATE = "Comment template";
+    protected final BasicDataSource connectionPool;
 
     /**
      * @param URL      {@link String} of the database
@@ -45,6 +44,11 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
      */
     protected GMySQLConnector(String URL, String user, String password) {
         super(URL, user, password);
+        this.connectionPool = new BasicDataSource();
+        this.connectionPool.setDriverClassName(MYSQL_DRIVER);
+        this.connectionPool.setUrl(URL);
+        this.connectionPool.setUsername(user);
+        this.connectionPool.setPassword(password);
     }
 
     @Override
@@ -61,6 +65,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
             preparedStatement.setString(1, genome.getName());
             preparedStatement.setString(2, COMMENT_TEMPLATE);
             preparedStatement.executeUpdate();
+            this.connection.commit();
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
             if (resultSet.next()) {
                 id_genome = resultSet.getInt(1);
@@ -97,14 +102,19 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
         try (PreparedStatement preparedStatement = this.connection
                 .prepareStatement("INSERT INTO `gblaster`.`chromosomes` (`id_genome`, `name`, `sequence`) VALUES (?, ?, ?);", Statement.RETURN_GENERATED_KEYS);
              Reader reader = new InputStreamReader(largeChromosome.getSequenceInputstream())) {
+
             preparedStatement.setInt(1, genomeId);
             preparedStatement.setString(2, largeChromosome.getAc());
             preparedStatement.setCharacterStream(3, reader);
             preparedStatement.executeUpdate();
+            this.connection.commit();
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
             if (resultSet.next()) {
                 id_chormosome = resultSet.getInt(1);
             }
+        } catch (SQLException | IOException e) {
+            this.connection.rollback();
+            throw e;
         }
         return id_chormosome;
     }
@@ -160,6 +170,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
      */
     @Override
     public IntStream saveLargeChromosomesForGenomeId(int genomeId, Stream<? extends LargeChromosome> chromoStream, int batchSize) throws SQLException {
+
         try (PreparedStatement preparedStatement = this.connection
                 .prepareStatement("INSERT INTO `gblaster`.`chromosomes` (`id_genome`, `name`, `sequence`) VALUES (?, ?, ?);")) {
             final int[] counter = {0};
@@ -175,15 +186,17 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                     if (counter[0] > batchSize) {
                         counter[0] = 0;
                         preparedStatement.executeBatch();
+                        this.connection.commit();
                     }
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
             });
             preparedStatement.executeBatch();
+            this.connection.commit();
         }
-        try(PreparedStatement preparedStatement=this.connection.prepareStatement("select id_chromosomes from `gblaster`.`chromosomes` where id_genome=?")){
-            preparedStatement.setInt(1,genomeId);
+        try (PreparedStatement preparedStatement = this.connection.prepareStatement("select id_chromosomes from `gblaster`.`chromosomes` where id_genome=?")) {
+            preparedStatement.setInt(1, genomeId);
             final ResultSet resultSet = preparedStatement.executeQuery();
             final IntStream.Builder builder = IntStream.builder();
             while (resultSet.next()) {
@@ -262,12 +275,14 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                     if (countHolder[0] > batchSize) {
                         countHolder[0] = 0;
                         preparedStatement.executeBatch();
+                        this.connection.commit();
                     }
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
             });
             preparedStatement.executeBatch();
+            this.connection.commit();
             final ResultSet resultSet = preparedStatement.getGeneratedKeys();
             final IntStream.Builder builder = IntStream.builder();
             while (resultSet.next()) {
@@ -286,7 +301,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     @Override
     public Stream<ORF> loadAllOrfsForGenomeId(int genomeId, int balancer, int minLength, int maxLength) throws SQLException {
         final PreparedStatement statement = this.connection
-                .prepareStatement("select orf_sequence, orf_name, start, stop, frame, id_orfs, orf_length from gblaster.orfs_by_genome_view where id_genomes=?"
+                .prepareStatement("select orf_sequence, orf_name, start, stop, frame, id_orfs from gblaster.orfs_by_genome_view where id_genomes=?"
                                 + " and orf_length>=?"
                                 + " and orf_length<=?",
                         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY
@@ -319,7 +334,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                 public ORF next() {
                     try {
                         final ORF orf = ORF.get(resultSet.getString(1), resultSet.getString(2), resultSet.getInt(3), resultSet.getInt(4), resultSet.getInt(5));
-                        orf.setId(resultSet.getInt(7));
+                        orf.setId(resultSet.getInt(6));
                         return orf;
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
@@ -378,6 +393,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                  Reader reader = new BufferedReader(new InputStreamReader(byteArrayInputStream))) {
                 preparedStatement.setCharacterStream(3, reader);
                 preparedStatement.executeUpdate();
+                this.connection.commit();
             }
             final ResultSet resultSet = preparedStatement.getGeneratedKeys();
             if (resultSet.next()) {
@@ -389,23 +405,25 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
 
     @Override
     public boolean genomeHasBeenBlastedOver(properties.jaxb.Genome query, properties.jaxb.Genome target) throws Exception {
-        final int query_genome_id=this.genomeIdByName(query.getName().getName());
-        final int target_genome_id=this.genomeIdByName(target.getName().getName());
-        try (PreparedStatement preparedStatement =
-                     this.connection.prepareStatement(
-                             "select id_blasts from gblaster.orfs lo inner join gblaster.blasts on lo.id_orfs=orfs_id "+
-                             "inner join gblaster.orfs ro on ro.id_orfs=hitorf_id "+
-                             "inner join gblaster.chromosomes lc on lc.id_chromosomes=lo.id_chromosome "+
-                             "inner join gblaster.chromosomes rc on rc.id_chromosomes=ro.id_chromosome "+
-                             "inner join gblaster.genomes lg on lg.id_genomes=lc.id_genome "+
-                             "inner join gblaster.genomes rg on rg.id_genomes=rc.id_genome "+
-                             "where lg.id_genomes=? and "+
-                             "rg.id_genomes=? "+
-                             "limit 1"
+        System.out.println(query.getName().getName() + " -> " + target.getName().getName());
+        final int query_genome_id = this.genomeIdByName(query.getName().getName());
+        final int target_genome_id = this.genomeIdByName(target.getName().getName());
+
+        try (Statement statement =
+                     this.connection.createStatement(
                      )) {
-            preparedStatement.setInt(1, query_genome_id);
-            preparedStatement.setInt(2, target_genome_id);
-            final ResultSet resultSet = preparedStatement.executeQuery();
+
+            final ResultSet resultSet = statement.executeQuery(
+                    "select id_blasts from gblaster.orfs lo inner join gblaster.blasts on lo.id_orfs=orfs_id " +
+                            "inner join gblaster.orfs ro on ro.id_orfs=hitorf_id " +
+                            "inner join gblaster.chromosomes lc on lc.id_chromosomes=lo.id_chromosome " +
+                            "inner join gblaster.chromosomes rc on rc.id_chromosomes=ro.id_chromosome " +
+                            "inner join gblaster.genomes lg on lg.id_genomes=lc.id_genome " +
+                            "inner join gblaster.genomes rg on rg.id_genomes=rc.id_genome " +
+                            "where lg.id_genomes=" + query_genome_id + " and " +
+                            "rg.id_genomes=" + target_genome_id +
+                            " limit 1"
+            );
             return resultSet.next();
         }
     }
@@ -427,7 +445,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     }
 
     @Override
-    public Stream<BidirectionalBlastHit> getBBHforGenomePair(properties.jaxb.Genome one, properties.jaxb.Genome two,int balancer) throws Exception {
+    public Stream<BidirectionalBlastHit> getBBHforGenomePair(properties.jaxb.Genome one, properties.jaxb.Genome two, int balancer) throws Exception {
         try {
             PreparedStatement preparedStatement = this.connection.prepareStatement(
                     "SELECT " +
@@ -487,7 +505,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                             throw new Exception("No Iteration was returned from db for genome " + two.getName().getName());
                         }
 
-                        return new BidirectionalBlastHit(blastHitOne,blastHitTwo);
+                        return new BidirectionalBlastHit(blastHitOne, blastHitTwo);
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
                     } catch (SAXException e) {
@@ -503,14 +521,49 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
             };
             return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
                     iter, Spliterator.NONNULL), false);
-        }catch (RuntimeException e){
-            throw (Exception)e.getCause();
+        } catch (RuntimeException e) {
+            throw (Exception) e.getCause();
         }
     }
 
     @Override
-    public void commit() throws Exception {
-        this.connection.commit();
+    public boolean saveBlastResultBatch(Stream<Iteration> iterations) throws Exception {
+        try (Connection pooledConnection = this.connectionPool.getConnection();
+             PreparedStatement preparedStatement = pooledConnection.prepareStatement(
+                "INSERT INTO `gblaster`.`blasts`\n" +
+                        "(`orfs_id`,\n" +
+                        "`hitorf_id`,\n" +
+                        "`report`)\n" +
+                        "VALUES\n" +
+                        "(?,\n" +
+                        "?,\n" +
+                        "?);\n"
+        )) {
+            pooledConnection.setAutoCommit(false);
+            iterations.forEach(iter -> {
+                try {
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                    final int orfs_id = Integer.valueOf(iter.getIterationQueryDef().split("\\|")[0]);
+                    final int hitorf_id = Integer.valueOf(iter.getIterationHits().getHit().get(0).getHitDef().split("\\|")[0]);
+                    preparedStatement.setInt(1, orfs_id);
+                    preparedStatement.setInt(2, hitorf_id);
+                    BlastHelper.marshallIteration(iter, byteArrayOutputStream);
+                    final InputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+                    final Reader reader = new BufferedReader(new InputStreamReader(byteArrayInputStream));
+                    preparedStatement.setCharacterStream(3, reader);
+                    preparedStatement.addBatch();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+            });
+            preparedStatement.executeBatch();
+            pooledConnection.setAutoCommit(true);
+        } catch (RuntimeException e){
+           throw (Exception)e.getCause();
+        }
+
+        return true;
     }
 
     public static GMySQLConnector get(String URL, String user, String password) {
