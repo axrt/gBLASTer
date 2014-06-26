@@ -566,6 +566,19 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
         return true;
     }
 
+    @Override
+    public long reportORFBaseSize(properties.jaxb.Genome genome) throws Exception {
+        try(PreparedStatement preparedStatement=this.connection.prepareStatement("select count(id_orfs) from gblaster.gco_view where genome_name=?")){
+            preparedStatement.setString(1,genome.getName().getName());
+            final ResultSet resultSet=preparedStatement.executeQuery();
+            if(resultSet.next()){
+                return resultSet.getLong(1);
+            } else{
+                return 0;
+            }
+        }
+    }
+
     public static GMySQLConnector get(String URL, String user, String password) {
         return new GMySQLConnector(URL, user, password);
     }

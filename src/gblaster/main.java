@@ -28,7 +28,6 @@ import javax.xml.bind.JAXBException;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -52,12 +51,12 @@ public class main {
     final static ExecutorService blastExecutorService = Executors.newFixedThreadPool(maxThreads);
     final static ExecutorService helperExecutorService = Executors.newCachedThreadPool();
     final static ExecutorService blastDriverExecutorService = Executors.newCachedThreadPool();
-    final static int orfUnloadBalancer =Integer.MIN_VALUE;
+    final static int orfUnloadBalancer = Integer.MIN_VALUE;
     final static int orfBatchSize = 100;
     final static int blastBufferSize = 100;
     final static int blastThreadsPerRun = 1;
     final static int largeChromosomeBatchSize = 1;
-    final static int minimumOrfLength=50;
+    final static int minimumOrfLength = 50;
     static int countDown;
 
     /**
@@ -108,7 +107,7 @@ public class main {
                             System.out.println("Deploying Genome ".concat(g.getName().getName()));
                             final IntStream chromosomeIdStream = Deployer.deployAndGetchromosomeIds(genomeDAO, g, largeFormat, tmpFolder, nucleotideAlphabet, largeChromosomeBatchSize);
                             System.out.println("Translating ORFs for Genome ".concat(g.getName().getName()));
-                            Deployer.translateAndGetORFStreamForGenomeId(chromosomeIdStream, genomeDAO, orfDAO, genomeGeneticCodeMap.get(g), largeFormat, orfBatchSize,minimumOrfLength);
+                            Deployer.translateAndGetORFStreamForGenomeId(chromosomeIdStream, genomeDAO, orfDAO, genomeGeneticCodeMap.get(g), largeFormat, orfBatchSize, minimumOrfLength);
                         } else {
                             System.out.println("Genome " + g.getName().getName() + " has already been processed.");
                         }
@@ -126,9 +125,9 @@ public class main {
                         if (!orfFolder.resolve(g.getName().getName()).toFile().exists()) {
                             System.out.println("Unloading ORFs for Genome ".concat(g.getName().getName()));
                             orfFileMap.put(g, Deployer.unloadORFsForGenomeToFile(g.getName().getName(), orfDAO, genomeDAO, largeFormat, minORFLenght, maxORFLenght, orfFolder, orfUnloadBalancer));
-                        }else{
-                            System.out.println("ORFs for Genome ".concat(g.getName().getName())+" have already been unloaded");
-                            orfFileMap.put(g,orfFolder.resolve(g.getName().getName()).toFile());
+                        } else {
+                            System.out.println("ORFs for Genome ".concat(g.getName().getName()) + " have already been unloaded");
+                            orfFileMap.put(g, orfFolder.resolve(g.getName().getName()).toFile());
                         }
                     } catch (Exception e) {
                         throw new RuntimeException(e);
@@ -136,21 +135,21 @@ public class main {
                 });
                 //9.Deploy all blastdbs for all genomes
                 final List<Future<Optional<File>>> makeBlastDbFutures = gBlasterProperties.getGenome().stream()
-                        .filter(g->{
+                        .filter(g -> {
                             return !blastdbFolder.resolve(g.getName().getName().concat(".phr")).toFile().exists();
                         })
                         .map(g -> {
 
-                    final MakeBlastDB.MakeBlastDBBuilder makeBlastDBBuilder = new MakeBlastDB.MakeBlastDBBuilder(g.getName().getName());
-                    System.out.println("Deploying blast database for Genome ".concat(g.getName().getName()));
-                    final MakeBlastDB makeBlastDb = makeBlastDBBuilder
-                            .pathToMakeBlastDb(toMakeBlastDb)
-                            .pathToDbFolder(blastdbFolder)
-                            .pathToSequenceFile(orfFileMap.get(g).toPath())
-                            .type(MakeBlastDB.DBType.PROT)
-                            .build();
-                    return blastDriverExecutorService.submit(makeBlastDb);
-                }).collect(Collectors.toList());
+                            final MakeBlastDB.MakeBlastDBBuilder makeBlastDBBuilder = new MakeBlastDB.MakeBlastDBBuilder(g.getName().getName());
+                            System.out.println("Deploying blast database for Genome ".concat(g.getName().getName()));
+                            final MakeBlastDB makeBlastDb = makeBlastDBBuilder
+                                    .pathToMakeBlastDb(toMakeBlastDb)
+                                    .pathToDbFolder(blastdbFolder)
+                                    .pathToSequenceFile(orfFileMap.get(g).toPath())
+                                    .type(MakeBlastDB.DBType.PROT)
+                                    .build();
+                            return blastDriverExecutorService.submit(makeBlastDb);
+                        }).collect(Collectors.toList());
                 makeBlastDbFutures.stream().forEach(f -> {
                     try {
                         f.get();
@@ -168,12 +167,12 @@ public class main {
             }
 
             //10. Form pairs of genomes to blast against each other
-            final Genome[][] pairs = matchPairs(gBlasterProperties.getGenome());
+            final Genome[][] pairs = matchPairs(gBlasterProperties.getGenome(), orfDAO);
             System.out.println("Blasts to run: " + pairs.length);
             countDown = pairs.length;
 
             //11. Create and submit all blasts
-            final List<Callable<Object>> preparedBlasts=new ArrayList<>();
+            final List<Callable<Object>> preparedBlasts = new ArrayList<>();
             for (Genome[] pair : pairs) {
                 if (!blastDAO.genomeHasBeenBlastedOver(pair[0], pair[1])) {
                     preparedBlasts.add(wrapInCallable(pair, orfDAO, blastDAO, blastBufferSize, gBlasterProperties.getBlastProperties(), blastThreadsPerRun));
@@ -182,9 +181,9 @@ public class main {
                     countDown--;
                 }
             }
-           // mySQLConnector.getConnection().setAutoCommit(true);
+            // mySQLConnector.getConnection().setAutoCommit(true);
             final List<Future<Object>> blastFutures = new ArrayList<>();
-            for(Callable<Object> co:preparedBlasts){
+            for (Callable<Object> co : preparedBlasts) {
                 blastFutures.add(blastDriverExecutorService.submit(co));
             }
             for (Future<Object> future : blastFutures) {
@@ -230,7 +229,7 @@ public class main {
         return pairRun;
     }
 
-    public static Genome[][] matchPairs(List<? extends Genome> genomes) {
+    public static Genome[][] matchPairs(List<? extends Genome> genomes, OrfDAO orfDAO) throws Exception {
         final Genome[][] pairs = new Genome[genomes.size() * genomes.size() - genomes.size()][2];
         int number = 0;
         for (int i = 0; i < genomes.size(); i++) {
@@ -241,7 +240,38 @@ public class main {
                 }
             }
         }
-        return pairs;
+        List<Genome[]> toSort = Arrays.asList(pairs);
+        final Set<Genome[]> genomeSet = toSort.stream().collect(Collectors.toSet());
+        final Map<Genome[], Integer> genomeMap = new HashMap<>();
+        genomeSet.stream().forEach(gen -> {
+            try {
+                final int num = (int) (orfDAO.reportORFBaseSize(gen[0]) + orfDAO.reportORFBaseSize(gen[1]));
+                genomeMap.put(gen,num);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        try {
+            toSort = toSort.stream().sorted(new Comparator<Genome[]>() {
+                @Override
+                public int compare(Genome[] o1, Genome[] o2) {
+
+                    final int first = genomeMap.get(o1);
+                    final int second = genomeMap.get(o2);
+                    if (first == second) {
+                        return 0;
+                    }
+                    if (first > second) {
+                        return -1;
+                    }
+                    return 1;
+
+                }
+            }).collect(Collectors.toList());
+        } catch (RuntimeException e) {
+            throw (Exception) e.getCause();
+        }
+        return toSort.toArray(pairs);
     }
 
     public static void pairBlast(Genome query, Genome target, int bufferCapasity, OrfDAO orfDAO, BlastDAO blastDAO, BlastProperties blastProperties, int numThreads) throws Exception {
@@ -253,7 +283,7 @@ public class main {
         final double evalue = Double.parseDouble(blastProperties.getExpect().getValue());
         final GBlast gBlast = gBlastPBuilder.evalue(Optional.of(evalue)).num_threads(Optional.of(numThreads)).maxTargetSeqs(Optional.of(1)).build();
 
-        final IterationBlockingBuffer buffer = IterationBlockingBuffer.get(query.getName().getName()+" <-> " + target.getName().getName(),bufferCapasity);
+        final IterationBlockingBuffer buffer = IterationBlockingBuffer.get(query.getName().getName() + " <-> " + target.getName().getName(), bufferCapasity);
         gBlast.addListener(buffer);
 
         final long iterationsToGo = orfDAO.calculateOrfsForGenomeName(query.getName().getName()
@@ -285,27 +315,27 @@ public class main {
             @Override
             public Integer call() throws Exception {
                 int blastsSaved = 0;
-                int totalBlasts=0;
-                List<Iteration>iterationsToSave=new ArrayList<>(blastBufferSize-1);
+                int totalBlasts = 0;
+                List<Iteration> iterationsToSave = new ArrayList<>(blastBufferSize - 1);
                 while (!buffer.isDone()) {
 
                     final Iteration iteration = buffer.take();
                     if (iteration == IterationBlockingBuffer.DONE) {
-                        blastsSaved+=iterationsToSave.size();
+                        blastsSaved += iterationsToSave.size();
                         blastDAO.saveBlastResultBatch(iterationsToSave.stream());
                         break;
                     } else if (iteration.getIterationHits().getHit() != null && !iteration.getIterationHits().getHit().isEmpty()) {
                         iterationsToSave.add(iteration);
-                        if(iterationsToSave.size()==blastBufferSize-1){
+                        if (iterationsToSave.size() == blastBufferSize - 1) {
                             blastDAO.saveBlastResultBatch(iterationsToSave.stream());
-                            blastsSaved+=iterationsToSave.size();
+                            blastsSaved += iterationsToSave.size();
                             iterationsToSave.clear();
                         }
                     }
                     totalBlasts++;
                 }
-                synchronized (System.out){
-                    System.out.println("Total number of blasts: "+totalBlasts+" done for "+query.getName().getName()+" <->"+target.getName().getName());
+                synchronized (System.out) {
+                    System.out.println("Total number of blasts: " + totalBlasts + " done for " + query.getName().getName() + " <->" + target.getName().getName());
                 }
                 return blastsSaved;
             }

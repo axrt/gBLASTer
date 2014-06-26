@@ -15,4 +15,5 @@ public interface OrfDAO {
     public IntStream saveOrfsForChromosomeId(int idChromosome,Stream<? extends ORF> orfStream, int batchSize) throws Exception;
     public Stream<ORF> loadAllOrfsForGenomeId(int genomeId,int balancer,int minLength,int maxLength) throws Exception;
     public long calculateOrfsForGenomeName(String genomeName,int minLength,int maxLength) throws Exception;
+    public long reportORFBaseSize(Genome genome) throws Exception;
 }
