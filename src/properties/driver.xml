@@ -39,7 +39,7 @@ and open the template in the editor.
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/s_wittichii.fasta"/>
         <GeneticTable type="standard"/>
     </Genome>
-    <Genome>
+    <!--Genome>
         <Name name="Drosophila_simulans"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/drosophila_simulans.fasta"/>
         <GeneticTable type="standard"/>
@@ -49,7 +49,7 @@ and open the template in the editor.
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/culex_pipiens.fasta"/>
         <GeneticTable type="standard"/>
     </Genome>
-    <!--Genome>
+    <Genome>
         <Name name="Arabidopsis_thaliana"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/arabidopsis_thaliana.fasta"/>
         <GeneticTable type="standard"/>

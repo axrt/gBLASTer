@@ -23,8 +23,10 @@ public class Progress {
         System.out.print("]");
     }
 
-    public static synchronized void updateProgressCuncurrent(String marker,double progressPercentage){
-        System.out.println("[ "+marker+" "+DF.format(progressPercentage)+" ]% accomplished.");
+    public static void updateProgressCuncurrent(String marker,double progressPercentage){
+        synchronized (System.out.getClass()) {
+            System.out.println("[ " + marker + " " + DF.format(progressPercentage) + " ]% accomplished.");
+        }
     }
 
 }

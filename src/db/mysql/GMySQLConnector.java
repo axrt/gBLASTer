@@ -8,7 +8,7 @@ import db.BlastDAO;
 import db.GenomeDAO;
 import db.OrfDAO;
 import format.text.LargeFormat;
-import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.xml.sax.SAXException;
 import sequence.nucleotide.genome.Chromosome;
 import sequence.nucleotide.genome.Genome;
@@ -20,10 +20,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
 import java.sql.*;
-import java.util.Iterator;
-import java.util.Optional;
-import java.util.Spliterator;
-import java.util.Spliterators;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -49,6 +46,12 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
         this.connectionPool.setUrl(URL);
         this.connectionPool.setUsername(user);
         this.connectionPool.setPassword(password);
+        this.connectionPool.setPoolPreparedStatements(true);
+    }
+
+    public void setNumberOfConnections(int numberOfConnections){
+        this.connectionPool.setInitialSize(numberOfConnections);
+        this.connectionPool.setMaxOpenPreparedStatements(numberOfConnections);
     }
 
     @Override
@@ -383,18 +386,15 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                 "(?,\n" +
                 "?,\n" +
                 "?);\n", Statement.RETURN_GENERATED_KEYS);
-             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-            final long orfs_id = Long.valueOf(iteration.getIterationQueryDef().split("\\|")[0]);
-            final long hitorf_id = Long.valueOf(iteration.getIterationHits().getHit().get(0).getHitDef().split("\\|")[0]);
+             ) {
+            final long orfs_id = Long.parseLong(iteration.getIterationQueryDef().split("\\|")[0]);
+            final long hitorf_id = Long.parseLong(iteration.getIterationHits().getHit().get(0).getHitDef().split("\\|")[0]);
             preparedStatement.setLong(1, orfs_id);
             preparedStatement.setLong(2, hitorf_id);
-            BlastHelper.marshallIteration(iteration, byteArrayOutputStream);
-            try (InputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-                 Reader reader = new BufferedReader(new InputStreamReader(byteArrayInputStream))) {
-                preparedStatement.setCharacterStream(3, reader);
-                preparedStatement.executeUpdate();
-                this.connection.commit();
-            }
+            preparedStatement.setString(3,BlastHelper.marshallIterationToString(iteration));
+            preparedStatement.executeUpdate();
+            this.connection.commit();
+
             final ResultSet resultSet = preparedStatement.getGeneratedKeys();
             if (resultSet.next()) {
                 result = resultSet.getInt(1);
@@ -421,8 +421,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                             "inner join gblaster.genomes lg on lg.id_genomes=lc.id_genome " +
                             "inner join gblaster.genomes rg on rg.id_genomes=rc.id_genome " +
                             "where lg.id_genomes=" + query_genome_id + " and " +
-                            "rg.id_genomes=" + target_genome_id +
-                            " limit 1"
+                            "rg.id_genomes=" + target_genome_id +" limit 1"
             );
             return resultSet.next();
         }
@@ -528,8 +527,8 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
 
     @Override
     public boolean saveBlastResultBatch(Stream<Iteration> iterations) throws Exception {
-        try (Connection pooledConnection = this.connectionPool.getConnection();
-             PreparedStatement preparedStatement = pooledConnection.prepareStatement(
+        try (
+             PreparedStatement preparedStatement = this.connection.prepareStatement(
                 "INSERT INTO `gblaster`.`blasts`\n" +
                         "(`orfs_id`,\n" +
                         "`hitorf_id`,\n" +
@@ -539,28 +538,26 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                         "?,\n" +
                         "?);\n"
         )) {
-            pooledConnection.setAutoCommit(false);
+
             iterations.forEach(iter -> {
                 try {
-                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                    final long orfs_id = Long.valueOf(iter.getIterationQueryDef().split("\\|")[0]);
-                    final long hitorf_id = Long.valueOf(iter.getIterationHits().getHit().get(0).getHitDef().split("\\|")[0]);
+                    final long orfs_id=Long.parseLong(iter.getIterationQueryDef().split("\\|")[0]);
+                    final long hitorf_id = Long.parseLong(iter.getIterationHits().getHit().get(0).getHitDef().split("\\|")[0]);
                     preparedStatement.setLong(1, orfs_id);
                     preparedStatement.setLong(2, hitorf_id);
-                    BlastHelper.marshallIteration(iter, byteArrayOutputStream);
-                    final InputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-                    final Reader reader = new BufferedReader(new InputStreamReader(byteArrayInputStream));
-                    preparedStatement.setCharacterStream(3, reader);
+                    preparedStatement.setString(3, BlastHelper.marshallIterationToString(iter));
                     preparedStatement.addBatch();
                 } catch (Exception e) {
+                    e.printStackTrace();
                     throw new RuntimeException(e);
                 }
 
             });
             preparedStatement.executeBatch();
-            pooledConnection.setAutoCommit(true);
-        } catch (RuntimeException e){
-           throw (Exception)e.getCause();
+            this.connection.commit();
+        } catch (Exception e){
+           e.printStackTrace();
+           throw e;
         }
 
         return true;

@@ -52,8 +52,8 @@ public class main {
     final static ExecutorService helperExecutorService = Executors.newCachedThreadPool();
     final static ExecutorService blastDriverExecutorService = Executors.newCachedThreadPool();
     final static int orfUnloadBalancer = Integer.MIN_VALUE;
-    final static int orfBatchSize = 100;
-    final static int blastBufferSize = 100;
+    final static int orfBatchSize = 1000;
+    final static int blastBufferSize = 1000;
     final static int blastThreadsPerRun = 1;
     final static int largeChromosomeBatchSize = 1;
     final static int minimumOrfLength = 50;
@@ -79,9 +79,10 @@ public class main {
             final Map<Genome, GeneticCode<AminoAcid>> genomeGeneticCodeMap = Deployer.mapGenomesToGeneticCode(gBlasterProperties.getGenome().stream());
 
             //3.Connect to database
-            final MySQLConnector mySQLConnector = GMySQLConnector.get("jdbc:mysql://localhost:3306?netTimeoutForStreamingResults=60&useCursorFetch=true", "gblaster", "gblaster");
+            final MySQLConnector mySQLConnector = GMySQLConnector.get("jdbc:mysql://localhost/gblaster", "gblaster", "gblaster");
 
             mySQLConnector.connectToDatabase();
+            ((GMySQLConnector) mySQLConnector).setNumberOfConnections(maxThreads);
             mySQLConnector.getConnection().setAutoCommit(false);
 
 
@@ -173,6 +174,7 @@ public class main {
 
             //11. Create and submit all blasts
             final List<Callable<Object>> preparedBlasts = new ArrayList<>();
+
             for (Genome[] pair : pairs) {
                 if (!blastDAO.genomeHasBeenBlastedOver(pair[0], pair[1])) {
                     preparedBlasts.add(wrapInCallable(pair, orfDAO, blastDAO, blastBufferSize, gBlasterProperties.getBlastProperties(), blastThreadsPerRun));
@@ -180,6 +182,7 @@ public class main {
                     System.out.println("Genome " + pair[0].getName().getName() + " has already been blasted over " + pair[1].getName().getName() + ".");
                     countDown--;
                 }
+
             }
             // mySQLConnector.getConnection().setAutoCommit(true);
             final List<Future<Object>> blastFutures = new ArrayList<>();
@@ -246,7 +249,7 @@ public class main {
         genomeSet.stream().forEach(gen -> {
             try {
                 final int num = (int) (orfDAO.reportORFBaseSize(gen[0]) + orfDAO.reportORFBaseSize(gen[1]));
-                genomeMap.put(gen,num);
+                genomeMap.put(gen, num);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -316,18 +319,25 @@ public class main {
             public Integer call() throws Exception {
                 int blastsSaved = 0;
                 int totalBlasts = 0;
-                List<Iteration> iterationsToSave = new ArrayList<>(blastBufferSize - 1);
+                List<Iteration> iterationsToSave = new ArrayList<>(blastBufferSize);
                 while (!buffer.isDone()) {
 
                     final Iteration iteration = buffer.take();
                     if (iteration == IterationBlockingBuffer.DONE) {
                         blastsSaved += iterationsToSave.size();
+
                         blastDAO.saveBlastResultBatch(iterationsToSave.stream());
                         break;
                     } else if (iteration.getIterationHits().getHit() != null && !iteration.getIterationHits().getHit().isEmpty()) {
                         iterationsToSave.add(iteration);
-                        if (iterationsToSave.size() == blastBufferSize - 1) {
+                        if (iterationsToSave.size() == blastBufferSize) {
+                            synchronized (System.out.getClass()) {
+                                System.out.println("Saving results for " + query.getName().getName() + " -> " + target.getName().getName());
+
                             blastDAO.saveBlastResultBatch(iterationsToSave.stream());
+
+                                System.out.println("Results saved for " + query.getName().getName() + " -> " + target.getName().getName());
+                            }
                             blastsSaved += iterationsToSave.size();
                             iterationsToSave.clear();
                         }

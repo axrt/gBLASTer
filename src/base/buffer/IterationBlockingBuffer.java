@@ -27,7 +27,9 @@ public class IterationBlockingBuffer extends SimpleBlockingBuffer<Iteration> imp
         if (event.getEvent().isPresent()) {
             this.put(event.getEvent().get());
             if(this.remainingCapacity()==0){
-                System.out.println("buffer ".concat(this.name)+" is full;");
+                synchronized (System.out.getClass()) {
+                    System.out.println("buffer ".concat(this.name) + " is full;");
+                }
             }
             return 0;
         }

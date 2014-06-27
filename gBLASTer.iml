@@ -28,7 +28,7 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="mysql:mysql-connector-java:5.1.28" level="project" />
-    <orderEntry type="library" name="commons-dbcp:commons-dbcp:1.4" level="project" />
+    <orderEntry type="library" name="org.apache.commons:commons-dbcp2:2.0.1" level="project" />
   </component>
 </module>
 

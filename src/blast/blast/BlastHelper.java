@@ -17,6 +17,7 @@ import javax.xml.transform.sax.SAXSource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.util.Optional;
 
 /**
@@ -360,5 +361,14 @@ public final class BlastHelper {
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         jaxbMarshaller.marshal(iteration, outputStream);
 
+    }
+    public static String marshallIterationToString(Iteration iteration) throws JAXBException {
+        final StringWriter sw = new StringWriter();
+        final JAXBContext jaxbContext = JAXBContext.newInstance(Iteration.class);
+        final Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+        jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+        jaxbMarshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+        jaxbMarshaller.marshal(iteration, sw);
+        return sw.toString();
     }
 }
