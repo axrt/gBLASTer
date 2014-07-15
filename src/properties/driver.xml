@@ -39,7 +39,7 @@ and open the template in the editor.
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/s_wittichii.fasta"/>
         <GeneticTable type="standard"/>
     </Genome>
-    <!--Genome>
+    <Genome>
         <Name name="Drosophila_simulans"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/drosophila_simulans.fasta"/>
         <GeneticTable type="standard"/>
@@ -83,5 +83,20 @@ and open the template in the editor.
         <Name name="Thalassiosira_pseudonana_CCMP1335"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/thalassiosira_pseudonana_CCMP1335.fasta"/>
         <GeneticTable type="standard"/>
-    </Genome-->
+    </Genome>
+    <Genome>
+        <Name name="Anopheles_gambiae_str_PEST"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/anopheles_gambiae_str_pest.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Takifugu_rubripes"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/takifugu_rubripes.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Encephalitozoon_cuniculi_GB-M1"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/encephalitozoon_cuniculi_gb-m1.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
 </gBlasterProperties>

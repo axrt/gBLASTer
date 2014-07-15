@@ -3,9 +3,11 @@ package gblaster;
 import alphabet.character.amino.AminoAcid;
 import alphabet.nucleotide.NucleotideAlphabet;
 import alphabet.translate.GeneticCode;
+import analisys.bbh.BidirectionalBlastHit;
 import base.buffer.IterationBlockingBuffer;
 import base.progress.Progress;
 import blast.blast.AbstractBlast;
+import blast.blast.BlastHelper;
 import blast.db.MakeBlastDB;
 import blast.output.BlastOutput;
 import blast.output.Iteration;
@@ -33,6 +35,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * Created by alext on 5/23/14.
@@ -44,10 +47,11 @@ public class main {
     final static Path home = Paths.get("/home/alext/Documents/gBlaster");
     final static Path tmpFolder = home.resolve("tmp");
     final static Path orfFolder = home.resolve("orfs");
+    final static Path bbhFolder = home.resolve("bbh");
     final static Path blastdbFolder = home.resolve("blastdb");
     final static Path toMakeBlastDb = Paths.get("/bin/makeblastdb");
     final static Path toBlastP = Paths.get("/bin/blastp");
-    final static int maxThreads = 11;
+    final static int maxThreads = 12;
     final static ExecutorService blastExecutorService = Executors.newFixedThreadPool(maxThreads);
     final static ExecutorService helperExecutorService = Executors.newCachedThreadPool();
     final static ExecutorService blastDriverExecutorService = Executors.newCachedThreadPool();
@@ -193,10 +197,25 @@ public class main {
                 future.get();
             }
 
-            //Shutdown
+            //Shutdown services
             blastExecutorService.shutdown();
             blastDriverExecutorService.shutdown();
             helperExecutorService.shutdown();
+
+            //Unload BBHs
+
+            for(int i=0;i<gBlasterProperties.getGenome().size();i++){
+                for(int j=i+1;j<gBlasterProperties.getGenome().size();j++){
+                    System.out.println("Unloading pair: "+gBlasterProperties.getGenome().get(i).getName().getName()+" <-> "+gBlasterProperties.getGenome().get(j).getName().getName());
+                    unloadBBHForGenomePair(
+                            gBlasterProperties.getGenome().get(i),
+                            gBlasterProperties.getGenome().get(j),
+                            orfUnloadBalancer,blastDAO,bbhFolder
+                    );
+                }
+            }
+
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -334,7 +353,7 @@ public class main {
                             synchronized (System.out.getClass()) {
                                 System.out.println("Saving results for " + query.getName().getName() + " -> " + target.getName().getName());
 
-                            blastDAO.saveBlastResultBatch(iterationsToSave.stream());
+                                blastDAO.saveBlastResultBatch(iterationsToSave.stream());
 
                                 System.out.println("Results saved for " + query.getName().getName() + " -> " + target.getName().getName());
                             }
@@ -362,5 +381,55 @@ public class main {
         synchronized (System.out.getClass()) {
             System.out.println("Blast results saved to database: " + saverFuture.get());
         }
+    }
+
+    public static Path unloadBBHForGenomePair(Genome one, Genome two, int balancer, BlastDAO blastDAO, Path folder) throws Exception {
+
+        final Stream<BidirectionalBlastHit> blastHitStream = blastDAO.getBBHforGenomePair(one, two, balancer);
+        final String unloadFileName = one.getName().getName().concat("_VS_").concat(two.getName().getName());
+        final Path toOutput = folder.resolve(unloadFileName);
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(toOutput.toFile()))) {
+
+            final StringBuilder stringBuilder=new StringBuilder();
+            stringBuilder.append("FWD_BLAST_ID\t");
+            stringBuilder.append("FWD_ORF_ID\t");
+            stringBuilder.append("FWD_HITORF_ID\t");
+            stringBuilder.append("FWD_ITERATION\t");
+            stringBuilder.append("RWD_BLAST_ID\t");
+            stringBuilder.append("RWD_ORF_ID\t");
+            stringBuilder.append("RWD_HITORF_ID\t");
+            stringBuilder.append("RWD_ITERATION");
+            bufferedWriter.write(stringBuilder.toString());
+            bufferedWriter.newLine();
+
+            blastHitStream.forEach(
+                    bbh -> {
+                        try {
+
+                            bufferedWriter.write(String.valueOf(bbh.getForwardHit().getId_blasts()));
+                            bufferedWriter.write("\t");
+                            bufferedWriter.write(String.valueOf(bbh.getForwardHit().getOrfs_id()));
+                            bufferedWriter.write("\t");
+                            bufferedWriter.write(String.valueOf(bbh.getForwardHit().getHitorf_id()));
+                            bufferedWriter.write("\t");
+                            bufferedWriter.write(BlastHelper.marshallIterationToString(bbh.getForwardHit().getIteration()));
+                            bufferedWriter.write("\t");
+                            bufferedWriter.write(String.valueOf(bbh.getReverseHit().getId_blasts()));
+                            bufferedWriter.write("\t");
+                            bufferedWriter.write(String.valueOf(bbh.getReverseHit().getOrfs_id()));
+                            bufferedWriter.write("\t");
+                            bufferedWriter.write(String.valueOf(bbh.getReverseHit().getHitorf_id()));
+                            bufferedWriter.write("\t");
+                            bufferedWriter.write(BlastHelper.marshallIterationToString(bbh.getReverseHit().getIteration()));
+                            bufferedWriter.newLine();
+
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+            );
+        }
+
+        return toOutput;
     }
 }

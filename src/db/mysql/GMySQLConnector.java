@@ -447,19 +447,20 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     public Stream<BidirectionalBlastHit> getBBHforGenomePair(properties.jaxb.Genome one, properties.jaxb.Genome two, int balancer) throws Exception {
         try {
             PreparedStatement preparedStatement = this.connection.prepareStatement(
-                    "SELECT " +
-                            "`A.id_blasts`," +
-                            "`A.orfs_id`," +
-                            "`A.hitorf_id`," +
-                            "`A.report`," +
-                            "`B.id_blasts`," +
-                            "`B.orfs_id`," +
-                            "`B.hitorf_id`," +
-                            "`B.report`" +
-                            "FROM gblaster.bbh_view " +
-                            "inner join gblaster.gco_view as L on `A.orfs_id` = L.id_orfs " +
-                            "inner join gblaster.gco_view as R on `B.orfs_id`=R.id_orfs " +
-                            "where L.genome_name=? and R.genome_name=?"
+                    "select \n" +
+                            "A.id_blasts as \"A.id_blasts\",\n" +
+                            "A.orfs_id as \"A.orfs_id\",\n" +
+                            "A.hitorf_id as \"A.hitorf_id\",\n" +
+                            "A.report as \"A.report\",\n" +
+                            "B.id_blasts as \"B.id_blasts\",\n" +
+                            "B.orfs_id as \"B.orfs_id\",\n" +
+                            "B.hitorf_id as \"B.hitorf_id\",\n" +
+                            "B.report as \"B.report\"\n" +
+                            "from \n" +
+                            "(select * from gco_no_sequence_blast_view where genome_name=?) as A\n" +
+                            "inner join \n" +
+                            "(select * from gco_no_sequence_blast_view where genome_name=?) as B\n" +
+                            "on A.orfs_id=B.hitorf_id and B.orfs_id=A.hitorf_id"
                     , ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY
             );
 
@@ -526,7 +527,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     }
 
     @Override
-    public boolean saveBlastResultBatch(Stream<Iteration> iterations) throws Exception {
+    public synchronized boolean saveBlastResultBatch(Stream<Iteration> iterations) throws Exception {
         try (
              PreparedStatement preparedStatement = this.connection.prepareStatement(
                 "INSERT INTO `gblaster`.`blasts`\n" +
@@ -565,7 +566,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
 
     @Override
     public long reportORFBaseSize(properties.jaxb.Genome genome) throws Exception {
-        try(PreparedStatement preparedStatement=this.connection.prepareStatement("select count(id_orfs) from gblaster.gco_view where genome_name=?")){
+        try(PreparedStatement preparedStatement=this.connection.prepareStatement("select count(id_orfs) from gblaster.gco_no_sequence_view where genome_name=?")){
             preparedStatement.setString(1,genome.getName().getName());
             final ResultSet resultSet=preparedStatement.executeQuery();
             if(resultSet.next()){

@@ -29,7 +29,9 @@ public class GBlast extends AbstractBlast<Iteration> {
     protected GBlast(BlastBuilder builder) {
         super();
         this.command = builder.getCommand();
-        System.out.println(this.command.stream().collect(Collectors.joining(" ")));
+        synchronized (System.out.getClass()) {
+            System.out.println(this.command.stream().collect(Collectors.joining(" ")));
+        }
     }
 
     @Override
