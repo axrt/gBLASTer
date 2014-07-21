@@ -391,14 +391,18 @@ public class main {
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(toOutput.toFile()))) {
 
             final StringBuilder stringBuilder=new StringBuilder();
+
+            //Query-related
+            stringBuilder.append("FWD_QUERY_ORF_ID\t");
+            stringBuilder.append("FWD_QUERY_SEQUENCE\t");
             stringBuilder.append("FWD_BLAST_ID\t");
-            stringBuilder.append("FWD_ORF_ID\t");
-            stringBuilder.append("FWD_HITORF_ID\t");
             stringBuilder.append("FWD_ITERATION\t");
+
+            stringBuilder.append("RWD_QUERY_ORF_ID\t");
+            stringBuilder.append("RWD_QUERY_SEQUENCE\t");
             stringBuilder.append("RWD_BLAST_ID\t");
-            stringBuilder.append("RWD_ORF_ID\t");
-            stringBuilder.append("RWD_HITORF_ID\t");
-            stringBuilder.append("RWD_ITERATION");
+            stringBuilder.append("RWD_ITERATION\t");
+
             bufferedWriter.write(stringBuilder.toString());
             bufferedWriter.newLine();
 
@@ -406,21 +410,25 @@ public class main {
                     bbh -> {
                         try {
 
-                            bufferedWriter.write(String.valueOf(bbh.getForwardHit().getId_blasts()));
-                            bufferedWriter.write("\t");
                             bufferedWriter.write(String.valueOf(bbh.getForwardHit().getOrfs_id()));
                             bufferedWriter.write("\t");
-                            bufferedWriter.write(String.valueOf(bbh.getForwardHit().getHitorf_id()));
+                            bufferedWriter.write(bbh.getForwardHit().getSequence());
                             bufferedWriter.write("\t");
-                            bufferedWriter.write(BlastHelper.marshallIterationToString(bbh.getForwardHit().getIteration()));
+
+                            bufferedWriter.write(String.valueOf(bbh.getForwardHit().getId_blasts()));
                             bufferedWriter.write("\t");
-                            bufferedWriter.write(String.valueOf(bbh.getReverseHit().getId_blasts()));
+                            bufferedWriter.write(bbh.getForwardHit().getTextIteration().replaceAll("\n","").replaceAll(" ",""));
                             bufferedWriter.write("\t");
+
                             bufferedWriter.write(String.valueOf(bbh.getReverseHit().getOrfs_id()));
                             bufferedWriter.write("\t");
-                            bufferedWriter.write(String.valueOf(bbh.getReverseHit().getHitorf_id()));
+                            bufferedWriter.write(bbh.getReverseHit().getSequence());
                             bufferedWriter.write("\t");
-                            bufferedWriter.write(BlastHelper.marshallIterationToString(bbh.getReverseHit().getIteration()));
+
+                            bufferedWriter.write(String.valueOf(bbh.getReverseHit().getId_blasts()));
+                            bufferedWriter.write("\t");
+                            bufferedWriter.write(bbh.getReverseHit().getTextIteration().replaceAll("\n","").replaceAll(" ",""));
+
                             bufferedWriter.newLine();
 
                         } catch (Exception e) {

@@ -312,8 +312,14 @@ public class GMySQLConnectorTest {
             mock.setName(new Name());
 
             blastDAO.getBBHforGenomePair(one,two,Integer.MIN_VALUE).forEach(bbh->{
-                System.out.println(bbh.getForwardHit().getIteration());
-                System.out.println(bbh.getReverseHit().getIteration());
+                try {
+                    System.out.println(bbh.getForwardHit().getIteration());
+                    System.out.println(bbh.getReverseHit().getIteration());
+                } catch (JAXBException e) {
+                    e.printStackTrace();
+                } catch (SAXException e) {
+                    e.printStackTrace();
+                }
             });
 
         } catch (SQLException e) {

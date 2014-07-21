@@ -1,6 +1,7 @@
 package blast.blast;
 
 import blast.output.BlastOutput;
+import blast.output.Hit;
 import blast.output.Iteration;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
@@ -19,6 +20,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Created by alext on 5/27/14.
@@ -362,6 +364,7 @@ public final class BlastHelper {
         jaxbMarshaller.marshal(iteration, outputStream);
 
     }
+
     public static String marshallIterationToString(Iteration iteration) throws JAXBException {
         final StringWriter sw = new StringWriter();
         final JAXBContext jaxbContext = JAXBContext.newInstance(Iteration.class);
@@ -370,5 +373,19 @@ public final class BlastHelper {
         jaxbMarshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
         jaxbMarshaller.marshal(iteration, sw);
         return sw.toString();
+    }
+
+    public static int getPidents(Hit hit) {
+        return hit.getHitHsps().getHsp().stream().mapToInt(hsp -> Integer.parseInt(hsp.getHspIdentity())).sum();
+    }
+
+    public static String getTabbedAlignment(Hit hit){
+        final String queryAlnseq=hit.getHitHsps().getHsp().stream().map(hsp->hsp.getHspQseq()).collect(Collectors.joining());
+        final String midline=hit.getHitHsps().getHsp().stream().map(hsp->hsp.getHspMidline()).collect(Collectors.joining());
+        final String subjectAlnseq=hit.getHitHsps().getHsp().stream().map(hsp->hsp.getHspHseq()).collect(Collectors.joining());
+        return queryAlnseq.concat("\t").concat(midline).concat("\t").concat(subjectAlnseq);
+    }
+    public static int getAlignmentLength(Hit hit){
+        return hit.getHitHsps().getHsp().stream().mapToInt(hsp->Integer.parseInt(hsp.getHspAlignLen())).sum();
     }
 }
