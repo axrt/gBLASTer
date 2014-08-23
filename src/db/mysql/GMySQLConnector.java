@@ -454,49 +454,28 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
 
             PreparedStatement preparedStatement = this.connection.prepareStatement(
                     "select \n" +
-                            "\n" +
                             "A.query_genome_id,\n" +
                             "A.blast_id,\n" +
                             "A.id_orfs,\n" +
                             "A.sequence,\n" +
                             "A.report,\n" +
-                            "\n" +
                             "B.query_genome_id,\n" +
                             "B.blast_id,\n" +
                             "B.id_orfs,\n" +
                             "B.sequence,\n" +
                             "B.report\n" +
-                            "\n" +
-                            "from\n" +
-                            "(select query_genome_id,blast_id,id_orfs, hitorf_id,report, sequence from \n" +
-                            "(select query_genome_id,blast_id,orfs_id, hitorf_id,report from \n" +
-                            "(select query_genome_id,blast_id from gblaster.blastlinks\n" +
-                            "where query_genome_id=? and target_genome_id=?) as L\n" +
-                            "inner join gblaster.blasts as LB on L.blast_id=LB.id_blasts\n" +
-                            ") as LBA\n" +
-                            "inner join gblaster.orfs as LO on LBA.orfs_id=LO.id_orfs\n" +
-                            ") as A\n" +
-                            ",\n" +
-                            "(select query_genome_id,blast_id,id_orfs, hitorf_id,report, sequence from\n" +
-                            "(select query_genome_id,blast_id,orfs_id, hitorf_id,report from \n" +
-                            "(select query_genome_id,blast_id from gblaster.blastlinks\n" +
-                            "where query_genome_id=? and target_genome_id=?) as R \n" +
-                            "inner join gblaster.blasts as RB on R.blast_id=RB.id_blasts\n" +
-                            ") as LBB\n" +
-                            "inner join gblaster.orfs as RO on LBB.orfs_id=RO.id_orfs\n" +
-                            ")as B\n" +
-                            "\n" +
-                            "\n" +
-                            "where B.id_orfs=A.hitorf_id and A.id_orfs=B.hitorf_id\n;"
-
-                    , balancer, ResultSet.CONCUR_READ_ONLY
+                            "from \n" +
+                            "(select * from gblaster.gco_orf_sequence_only_blast_view where genome_name=?) as A\n" +
+                            "inner join \n" +
+                            "(select * from gblaster.gco_orf_sequence_only_blast_view where genome_name=?) as B\n" +
+                            "on A.orfs_id=B.hitorf_id and B.orfs_id=A.hitorf_id;"
+                    , ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY
             );
 
             preparedStatement.setFetchSize(balancer);
-            preparedStatement.setInt(1, query_genome_id);
-            preparedStatement.setInt(2, target_genome_id);
-            preparedStatement.setInt(3, target_genome_id);
-            preparedStatement.setInt(4, query_genome_id);
+            preparedStatement.setString(1, one.getName().getName());
+            preparedStatement.setString(2, two.getName().getName());
+            final ResultSet resultSet = preparedStatement.executeQuery();
             final ResultSet resultSet = preparedStatement.executeQuery();
 
             Iterator<BidirectionalBlastHit> iter = new Iterator<BidirectionalBlastHit>() {
