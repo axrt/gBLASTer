@@ -99,4 +99,39 @@ and open the template in the editor.
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/encephalitozoon_cuniculi_gb-m1.fasta"/>
         <GeneticTable type="standard"/>
     </Genome>
+    <Genome>
+        <Name name="Methanosarcina_barkeri_str_Fusaro"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/methanosarcina_barkeri_str_fusaro.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Haloquadratum_walsbyi"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/haloquadratum_walsbyi.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Acidilobus_saccharovorans"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/acidilobus_saccharovorans.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Cryptococcus_Neoformans_CNA3"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/cryptococcus_neoformans_cna3.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Tribolium_castaneum"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/tribolium_castaneum.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Ciona_intestinalis"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/ciona_intestinalis.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Cyanidioschyzon_merolae_strain_10D"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/cyanidioschyzon_merolae_strain_10d.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
 </gBlasterProperties>

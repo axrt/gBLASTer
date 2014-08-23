@@ -419,14 +419,12 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                      )) {
 
             final ResultSet resultSet = statement.executeQuery(
-                    "select id_blasts from gblaster.orfs lo inner join gblaster.blasts on lo.id_orfs=orfs_id " +
-                            "inner join gblaster.orfs ro on ro.id_orfs=hitorf_id " +
-                            "inner join gblaster.chromosomes lc on lc.id_chromosomes=lo.id_chromosome " +
-                            "inner join gblaster.chromosomes rc on rc.id_chromosomes=ro.id_chromosome " +
-                            "inner join gblaster.genomes lg on lg.id_genomes=lc.id_genome " +
-                            "inner join gblaster.genomes rg on rg.id_genomes=rc.id_genome " +
-                            "where lg.id_genomes=" + query_genome_id + " and " +
-                            "rg.id_genomes=" + target_genome_id + " limit 1"
+                    "select A.id_blasts from" +
+                            "(SELECT * FROM gblaster.gco_no_sequence_blast_view where id_genomes=" + query_genome_id + ") as A " +
+                            ", " +
+                            "(SELECT * FROM gblaster.gco_no_sequence_view where id_genomes=" + target_genome_id + ") as B " +
+                            "where A.hitorf_id=B.id_orfs " +
+                            "limit 1"
             );
             return resultSet.next();
         }
@@ -450,30 +448,55 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
 
     @Override
     public Stream<BidirectionalBlastHit> getBBHforGenomePair(properties.jaxb.Genome one, properties.jaxb.Genome two, int balancer) throws Exception {
+        final int query_genome_id = this.genomeIdByName(one.getName().getName());
+        final int target_genome_id = this.genomeIdByName(two.getName().getName());
         try {
+
             PreparedStatement preparedStatement = this.connection.prepareStatement(
                     "select \n" +
-                            "A.id_blasts as \"A.id_blasts\",\n" +
-                            "A.orfs_id as \"A.orfs_id\",\n" +
-                            "A.orf_sequence,\n" +
-                            "A.hitorf_id as \"A.hitorf_id\",\n" +
-                            "A.report as \"A.report\",\n" +
-                            "B.id_blasts as \"B.id_blasts\",\n" +
-                            "B.orfs_id as \"B.orfs_id\",\n" +
-                            "B.orf_sequence,\n" +
-                            "B.hitorf_id as \"B.hitorf_id\",\n" +
-                            "B.report as \"B.report\"\n" +
-                            "from \n" +
-                            "(select * from gblaster.gco_orf_sequence_only_blast_view where genome_name=?) as A\n" +
-                            "inner join \n" +
-                            "(select * from gblaster.gco_orf_sequence_only_blast_view where genome_name=?) as B\n" +
-                            "on A.orfs_id=B.hitorf_id and B.orfs_id=A.hitorf_id;"
-                    , ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY
+                            "\n" +
+                            "A.query_genome_id,\n" +
+                            "A.blast_id,\n" +
+                            "A.id_orfs,\n" +
+                            "A.sequence,\n" +
+                            "A.report,\n" +
+                            "\n" +
+                            "B.query_genome_id,\n" +
+                            "B.blast_id,\n" +
+                            "B.id_orfs,\n" +
+                            "B.sequence,\n" +
+                            "B.report\n" +
+                            "\n" +
+                            "from\n" +
+                            "(select query_genome_id,blast_id,id_orfs, hitorf_id,report, sequence from \n" +
+                            "(select query_genome_id,blast_id,orfs_id, hitorf_id,report from \n" +
+                            "(select query_genome_id,blast_id from gblaster.blastlinks\n" +
+                            "where query_genome_id=? and target_genome_id=?) as L\n" +
+                            "inner join gblaster.blasts as LB on L.blast_id=LB.id_blasts\n" +
+                            ") as LBA\n" +
+                            "inner join gblaster.orfs as LO on LBA.orfs_id=LO.id_orfs\n" +
+                            ") as A\n" +
+                            ",\n" +
+                            "(select query_genome_id,blast_id,id_orfs, hitorf_id,report, sequence from\n" +
+                            "(select query_genome_id,blast_id,orfs_id, hitorf_id,report from \n" +
+                            "(select query_genome_id,blast_id from gblaster.blastlinks\n" +
+                            "where query_genome_id=? and target_genome_id=?) as R \n" +
+                            "inner join gblaster.blasts as RB on R.blast_id=RB.id_blasts\n" +
+                            ") as LBB\n" +
+                            "inner join gblaster.orfs as RO on LBB.orfs_id=RO.id_orfs\n" +
+                            ")as B\n" +
+                            "\n" +
+                            "\n" +
+                            "where B.id_orfs=A.hitorf_id and A.id_orfs=B.hitorf_id\n;"
+
+                    , balancer, ResultSet.CONCUR_READ_ONLY
             );
 
             preparedStatement.setFetchSize(balancer);
-            preparedStatement.setString(1, one.getName().getName());
-            preparedStatement.setString(2, two.getName().getName());
+            preparedStatement.setInt(1, query_genome_id);
+            preparedStatement.setInt(2, target_genome_id);
+            preparedStatement.setInt(3, target_genome_id);
+            preparedStatement.setInt(4, query_genome_id);
             final ResultSet resultSet = preparedStatement.executeQuery();
 
             Iterator<BidirectionalBlastHit> iter = new Iterator<BidirectionalBlastHit>() {
@@ -498,12 +521,12 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                         final BlastHit blastHitOne;
 
                         blastHitOne = BlastHit.get(
-                                resultSet.getLong(1), resultSet.getLong(2), resultSet.getString(3), resultSet.getLong(4), resultSet.getString(5));
+                                resultSet.getInt(1), resultSet.getLong(2), resultSet.getLong(3), resultSet.getString(4), resultSet.getLong(8), resultSet.getString(5));
 
                         final BlastHit blastHitTwo;
 
                         blastHitTwo = BlastHit.get(
-                                resultSet.getLong(6), resultSet.getLong(7), resultSet.getString(8), resultSet.getLong(9), resultSet.getString(10));
+                                resultSet.getInt(6), resultSet.getLong(7), resultSet.getLong(8), resultSet.getString(9), resultSet.getLong(3), resultSet.getString(10));
 
                         return new BidirectionalBlastHit(blastHitOne, blastHitTwo);
                     } catch (SQLException e) {

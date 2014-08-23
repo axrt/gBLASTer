@@ -20,13 +20,21 @@ import format.text.CommonFormats;
 import format.text.LargeFormat;
 import gblaster.blast.GBlast;
 import gblaster.deploy.Deployer;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLReaderFactory;
 import properties.PropertiesLoader;
 import properties.jaxb.BlastProperties;
 import properties.jaxb.GBlasterProperties;
 import properties.jaxb.Genome;
 
+import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.Source;
+import javax.xml.transform.sax.SAXSource;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -51,7 +59,7 @@ public class main {
     final static Path blastdbFolder = home.resolve("blastdb");
     final static Path toMakeBlastDb = Paths.get("/bin/makeblastdb");
     final static Path toBlastP = Paths.get("/bin/blastp");
-    final static int maxThreads = 12;
+    final static int maxThreads = 6;
     final static ExecutorService blastExecutorService = Executors.newFixedThreadPool(maxThreads);
     final static ExecutorService helperExecutorService = Executors.newCachedThreadPool();
     final static ExecutorService blastDriverExecutorService = Executors.newCachedThreadPool();
@@ -207,13 +215,24 @@ public class main {
             for(int i=0;i<gBlasterProperties.getGenome().size();i++){
                 for(int j=i+1;j<gBlasterProperties.getGenome().size();j++){
                     System.out.println("Unloading pair: "+gBlasterProperties.getGenome().get(i).getName().getName()+" <-> "+gBlasterProperties.getGenome().get(j).getName().getName());
+                    if(!bbhFolder.resolve(gBlasterProperties.getGenome().get(i).getName().getName()
+                            .concat("_VS_").concat(
+                                    gBlasterProperties.getGenome().get(j).getName().getName()))
+                            .toFile().exists()){
                     unloadBBHForGenomePair(
                             gBlasterProperties.getGenome().get(i),
                             gBlasterProperties.getGenome().get(j),
-                            orfUnloadBalancer,blastDAO,bbhFolder
-                    );
+                            orfUnloadBalancer,genomeDAO,blastDAO,bbhFolder);
+                    }else{
+                        System.out.println("The pair: "
+                                +gBlasterProperties.getGenome().get(i).getName().getName()
+                                +" <-> "+gBlasterProperties.getGenome().get(j).getName().getName()
+                                +" has already been unloaded.");
+                    }
                 }
             }
+
+            //Create the legend for the BBHs
 
 
         } catch (FileNotFoundException e) {
@@ -383,11 +402,15 @@ public class main {
         }
     }
 
-    public static Path unloadBBHForGenomePair(Genome one, Genome two, int balancer, BlastDAO blastDAO, Path folder) throws Exception {
+    public static Path unloadBBHForGenomePair(Genome one, Genome two, int balancer, GenomeDAO genomeDAO, BlastDAO blastDAO, Path folder) throws Exception {
 
+        final String unloadFileName = String.valueOf(genomeDAO.genomeIdByName(one.getName().getName()))
+                .concat("_VS_")
+                .concat(String.valueOf(genomeDAO.genomeIdByName(two.getName().getName())));
         final Stream<BidirectionalBlastHit> blastHitStream = blastDAO.getBBHforGenomePair(one, two, balancer);
-        final String unloadFileName = one.getName().getName().concat("_VS_").concat(two.getName().getName());
+
         final Path toOutput = folder.resolve(unloadFileName);
+
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(toOutput.toFile()))) {
 
             final StringBuilder stringBuilder=new StringBuilder();
