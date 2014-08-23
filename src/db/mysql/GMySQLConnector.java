@@ -476,7 +476,6 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
             preparedStatement.setString(1, one.getName().getName());
             preparedStatement.setString(2, two.getName().getName());
             final ResultSet resultSet = preparedStatement.executeQuery();
-            final ResultSet resultSet = preparedStatement.executeQuery();
 
             Iterator<BidirectionalBlastHit> iter = new Iterator<BidirectionalBlastHit>() {
                 @Override
