@@ -465,29 +465,41 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                             "RO.sequence,\n" +
                             "BR.report\n" +
                             "from \n" +
-                            "gblaster.blasts BL \n" +
-                            "inner join \n" +
-                            "gblaster.blasts BR \n" +
-                            "on \n" +
-                            "BL.orfs_id=BR.hitorf_id \n" +
-                            "and  \n" +
-                            "BR.orfs_id=BL.hitorf_id\n" +
-                            "inner join \n" +
-                            "gblaster.orfs LO on LO.id_orfs=BL.orfs_id\n" +
-                            "inner join\n" +
-                            "gblaster.orfs RO on RO.id_orfs=BR.orfs_id\n" +
-                            "inner join\n" +
-                            "gblaster.chromosomes CL on CL.id_chromosomes=LO.id_chromosome\n" +
-                            "inner join\n" +
-                            "gblaster.chromosomes CR on CR.id_chromosomes=RO.id_chromosome\n" +
-                            "inner join \n" +
-                            "gblaster.genomes GL on GL.id_genomes=CL.id_genome\n" +
-                            "inner join \n" +
-                            "gblaster.genomes GR on GR.id_genomes=CR.id_genome\n" +
+                            "gblaster.blasts as BL \n" +
+                            ",\n" +
+                            "gblaster.blasts as BR \n" +
+                            ",\n" +
+                            "gblaster.orfs LO  \n" +
+                            ",\n" +
+                            "gblaster.orfs RO \n" +
+                            ",\n" +
+                            "gblaster.chromosomes CL\n" +
+                            ",\n" +
+                            "gblaster.chromosomes CR \n" +
+                            ",\n" +
+                            "gblaster.genomes GL \n" +
+                            ",\n" +
+                            "gblaster.genomes GR\n" +
                             "where \n" +
                             "GL.id_genomes=?\n" +
                             "and\n" +
-                            "GR.id_genomes=?;"
+                            "GR.id_genomes=?\n" +
+                            "and\n" +
+                            "LO.id_orfs=BL.orfs_id\n" +
+                            "and \n" +
+                            "RO.id_orfs=BR.orfs_id\n" +
+                            "and\n" +
+                            "CL.id_chromosomes=LO.id_chromosome\n" +
+                            "and\n" +
+                            "CR.id_chromosomes=RO.id_chromosome\n" +
+                            "and\n" +
+                            "GL.id_genomes=CL.id_genome\n" +
+                            "and\n" +
+                            "GR.id_genomes=CR.id_genome\n" +
+                            "and\n" +
+                            "BL.orfs_id=BR.hitorf_id \n" +
+                            "and  \n" +
+                            "BR.orfs_id=BL.hitorf_id;"
                     , ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY
             );
 
