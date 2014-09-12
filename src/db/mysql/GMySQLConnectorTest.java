@@ -239,7 +239,7 @@ public class GMySQLConnectorTest {
             final MySQLConnector mySQLConnector = GMySQLConnector.get("jdbc:mysql://localhost", "gblaster", "gblaster");
             mySQLConnector.connectToDatabase();
             final BlastDAO blastDAO = (BlastDAO) mySQLConnector;
-            blastDAO.saveBlastResult(it);
+            blastDAO.saveBlastResult(it,1,2);
 
 
         } catch (FileNotFoundException e) {

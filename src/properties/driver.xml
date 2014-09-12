@@ -134,4 +134,34 @@ and open the template in the editor.
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/cyanidioschyzon_merolae_strain_10d.fasta"/>
         <GeneticTable type="standard"/>
     </Genome>
+    <Genome>
+        <Name name="Pyrobaculum_aerophilum_str_IM2"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/pyrobaculum_aerophilum_str_im2.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Methanobacterium_sp_SWAN_1"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/methanobacterium_sp_swan_1.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Monosiga_brevicollis"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/monosiga_brevicollis.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Capsaspora_owczarzaki"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/capsaspora_owczarzaki.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Bartonella_henselae_str_Houston_1"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/bartonella_henselae_str_houston_1.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Schistosoma_mansoni_puerto_rico"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/schistosoma_mansoni_puerto_rico.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
 </gBlasterProperties>

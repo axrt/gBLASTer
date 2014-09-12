@@ -4,6 +4,7 @@ import alphabet.character.amino.AminoAcid;
 import alphabet.nucleotide.NucleotideAlphabet;
 import alphabet.translate.GeneticCode;
 import analisys.bbh.BidirectionalBlastHit;
+import analisys.bbh.UnidirectionalBlastHit;
 import base.buffer.IterationBlockingBuffer;
 import base.progress.Progress;
 import blast.blast.AbstractBlast;
@@ -56,8 +57,9 @@ public class main {
     final static Path tmpFolder = home.resolve("tmp");
     final static Path orfFolder = home.resolve("orfs");
     final static Path bbhFolder = home.resolve("bbh");
+    final static Path bhFolder = home.resolve("bh");
     final static Path blastdbFolder = home.resolve("blastdb");
-    final static Path toMakeBlastDb = Paths.get("/bin/makeblastdb");
+    final static Path toMakeBlastDb = Paths.get("/usr/local/bin/makeblastdb");
     final static Path toBlastP = Paths.get("/bin/blastp");
     final static int maxThreads = 6;
     final static ExecutorService blastExecutorService = Executors.newFixedThreadPool(maxThreads);
@@ -69,6 +71,7 @@ public class main {
     final static int blastThreadsPerRun = 1;
     final static int largeChromosomeBatchSize = 1;
     final static int minimumOrfLength = 50;
+    final static double bitscoreCutoff=80;
     static int countDown;
 
     /**
@@ -189,7 +192,7 @@ public class main {
 
             for (Genome[] pair : pairs) {
                 if (!blastDAO.genomeHasBeenBlastedOver(pair[0], pair[1])) {
-                    preparedBlasts.add(wrapInCallable(pair, orfDAO, blastDAO, blastBufferSize, gBlasterProperties.getBlastProperties(), blastThreadsPerRun));
+                    preparedBlasts.add(wrapInCallable(pair,genomeDAO, orfDAO, blastDAO, blastBufferSize, gBlasterProperties.getBlastProperties(), blastThreadsPerRun));
                 } else {
                     System.out.println("Genome " + pair[0].getName().getName() + " has already been blasted over " + pair[1].getName().getName() + ".");
                     countDown--;
@@ -215,9 +218,9 @@ public class main {
             for(int i=0;i<gBlasterProperties.getGenome().size();i++){
                 for(int j=i+1;j<gBlasterProperties.getGenome().size();j++){
                     System.out.println("Unloading pair: "+gBlasterProperties.getGenome().get(i).getName().getName()+" <-> "+gBlasterProperties.getGenome().get(j).getName().getName());
-                    if(!bbhFolder.resolve(gBlasterProperties.getGenome().get(i).getName().getName()
+                    if(!bbhFolder.resolve(String.valueOf(genomeDAO.genomeIdByName(gBlasterProperties.getGenome().get(i).getName().getName()))
                             .concat("_VS_").concat(
-                                    gBlasterProperties.getGenome().get(j).getName().getName()))
+                                    String.valueOf(genomeDAO.genomeIdByName(gBlasterProperties.getGenome().get(j).getName().getName()))))
                             .toFile().exists()){
                     unloadBBHForGenomePair(
                             gBlasterProperties.getGenome().get(i),
@@ -231,6 +234,36 @@ public class main {
                     }
                 }
             }
+
+            //Unload BHs
+
+            for(int i=0;i<gBlasterProperties.getGenome().size();i++){
+                for(int j=0;j<gBlasterProperties.getGenome().size();j++){
+                    if(i==j){
+                        continue;
+                    }
+                    System.out.println("Unloading hits: "+gBlasterProperties.getGenome().get(i).getName().getName()+" <-> "+gBlasterProperties.getGenome().get(j).getName().getName());
+                    final Path toUnload=bhFolder.resolve(String.valueOf(genomeDAO.genomeIdByName(gBlasterProperties.getGenome().get(i).getName().getName()))
+                            .concat("_VS_")
+                            .concat(
+                                    String.valueOf(genomeDAO.genomeIdByName(gBlasterProperties.getGenome().get(j).getName().getName())))
+                            .concat("_")
+                            .concat(String.valueOf(bitscoreCutoff)));
+                    if(!toUnload.toFile().exists()){
+                        unloadBHForGenomePair(
+                                gBlasterProperties.getGenome().get(i),
+                                gBlasterProperties.getGenome().get(j),
+                                orfUnloadBalancer,genomeDAO,blastDAO,
+                                bhFolder,bitscoreCutoff);
+                    }else{
+                        System.out.println("Hits for: "
+                                +gBlasterProperties.getGenome().get(i).getName().getName()
+                                +" <-> "+gBlasterProperties.getGenome().get(j).getName().getName()
+                                +" have already been unloaded.");
+                    }
+                }
+            }
+
 
             //Create the legend for the BBHs
 
@@ -256,11 +289,11 @@ public class main {
 
     }
 
-    public static Callable<Object> wrapInCallable(Genome[] pair, OrfDAO orfDAO, BlastDAO blastDAO, int blastBufferSize, BlastProperties blastProperties, int maxThreadsOnBlast) {
+    public static Callable<Object> wrapInCallable(Genome[] pair, GenomeDAO genomeDAO, OrfDAO orfDAO, BlastDAO blastDAO, int blastBufferSize, BlastProperties blastProperties, int maxThreadsOnBlast) {
         final Callable<Object> pairRun = new Callable<Object>() {
             @Override
             public Object call() throws Exception {
-                pairBlast(pair[0], pair[1], blastBufferSize, orfDAO, blastDAO, blastProperties, maxThreadsOnBlast);
+                pairBlast(pair[0], pair[1], blastBufferSize, genomeDAO,  orfDAO, blastDAO, blastProperties, maxThreadsOnBlast);
                 synchronized (System.out.getClass()) {
                     System.out.println("Blasts to run: " + --countDown);
                 }
@@ -315,10 +348,13 @@ public class main {
         return toSort.toArray(pairs);
     }
 
-    public static void pairBlast(Genome query, Genome target, int bufferCapasity, OrfDAO orfDAO, BlastDAO blastDAO, BlastProperties blastProperties, int numThreads) throws Exception {
+    public static void pairBlast(Genome query, Genome target, int bufferCapasity, GenomeDAO genomeDAO, OrfDAO orfDAO, BlastDAO blastDAO, BlastProperties blastProperties, int numThreads) throws Exception {
 
         final Path queryFile = orfFolder.resolve(query.getName().getName());
         final Path db = blastdbFolder.resolve(target.getName().getName());
+
+        final int qgenome_id=genomeDAO.genomeIdByName(query.getName().getName());
+        final int tgenome_id=genomeDAO.genomeIdByName(target.getName().getName());
 
         final GBlast.GBlastPBuilder gBlastPBuilder = new GBlast.GBlastPBuilder(toBlastP, queryFile, db.toFile().getPath());
         final double evalue = Double.parseDouble(blastProperties.getExpect().getValue());
@@ -364,7 +400,7 @@ public class main {
                     if (iteration == IterationBlockingBuffer.DONE) {
                         blastsSaved += iterationsToSave.size();
 
-                        blastDAO.saveBlastResultBatch(iterationsToSave.stream());
+                        blastDAO.saveBlastResultBatch(iterationsToSave.stream(),qgenome_id,tgenome_id);
                         break;
                     } else if (iteration.getIterationHits().getHit() != null && !iteration.getIterationHits().getHit().isEmpty()) {
                         iterationsToSave.add(iteration);
@@ -372,7 +408,7 @@ public class main {
                             synchronized (System.out.getClass()) {
                                 System.out.println("Saving results for " + query.getName().getName() + " -> " + target.getName().getName());
 
-                                blastDAO.saveBlastResultBatch(iterationsToSave.stream());
+                                blastDAO.saveBlastResultBatch(iterationsToSave.stream(),qgenome_id,tgenome_id);
 
                                 System.out.println("Results saved for " + query.getName().getName() + " -> " + target.getName().getName());
                             }
@@ -382,6 +418,8 @@ public class main {
                     }
                     totalBlasts++;
                 }
+                //Add all bitscores
+
                 synchronized (System.out) {
                     System.out.println("Total number of blasts: " + totalBlasts + " done for " + query.getName().getName() + " <->" + target.getName().getName());
                 }
@@ -418,7 +456,7 @@ public class main {
             //Query-related
             stringBuilder.append("FWD_QUERY_ORF_ID\t");
             stringBuilder.append("FWD_QUERY_SEQUENCE\t");
-            stringBuilder.append("FWD_BLAST_ID\t");
+            stringBuilder.append("FWD_BLAST_ID\t");         //TODO make static
             stringBuilder.append("FWD_ITERATION\t");
 
             stringBuilder.append("RWD_QUERY_ORF_ID\t");
@@ -451,6 +489,67 @@ public class main {
                             bufferedWriter.write(String.valueOf(bbh.getReverseHit().getId_blasts()));
                             bufferedWriter.write("\t");
                             bufferedWriter.write(bbh.getReverseHit().getTextIteration().replaceAll("\n","").replaceAll(" ",""));
+
+                            bufferedWriter.newLine();
+
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+            );
+        }
+
+        return toOutput;
+    }
+    public static Path unloadBHForGenomePair(Genome one, Genome two, int balancer, GenomeDAO genomeDAO, BlastDAO blastDAO, Path folder, double cutoff) throws Exception {
+
+        final String unloadFileName = String.valueOf(genomeDAO.genomeIdByName(one.getName().getName()))
+                .concat("_VS_")
+                .concat(String.valueOf(genomeDAO.genomeIdByName(two.getName().getName())))
+                .concat("_")
+                .concat(String.valueOf(cutoff));
+        final Stream<UnidirectionalBlastHit> blastHitStream = blastDAO.getBHforGenomePair(one, two,cutoff,balancer);
+
+        final Path toOutput = folder.resolve(unloadFileName);
+
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(toOutput.toFile()))) {
+
+            final StringBuilder stringBuilder=new StringBuilder();
+
+            //Query-related
+            stringBuilder.append("QUERY_ORF_ID\t");
+            stringBuilder.append("QUERY_SEQUENCE\t");
+            stringBuilder.append("TARGET_ORF_ID\t");
+            stringBuilder.append("TARGET_SEQUENCE\t");
+            stringBuilder.append("BLAST_ID\t");
+            stringBuilder.append("BITSCORE_CUTOFF"); //TODO make static
+            stringBuilder.append("FWD_ITERATION\t");
+
+            bufferedWriter.write(stringBuilder.toString());
+            bufferedWriter.newLine();
+
+            blastHitStream.forEach(
+                    bh -> {
+                        try {
+
+                            bufferedWriter.write(String.valueOf(bh.getOrfs_id()));
+                            bufferedWriter.write("\t");
+                            bufferedWriter.write(bh.getSequence());
+                            bufferedWriter.write("\t");
+
+                            bufferedWriter.write(String.valueOf(bh.getHitorf_id()));
+                            bufferedWriter.write("\t");
+                            bufferedWriter.write(bh.getHitSequence());
+                            bufferedWriter.write("\t");
+
+                            bufferedWriter.write(String.valueOf(bh.getId_blasts()));
+                            bufferedWriter.write("\t");
+
+                            bufferedWriter.write(String.valueOf(cutoff));
+                            bufferedWriter.write("\t");
+
+                            bufferedWriter.write(bh.getTextIteration().replaceAll("\n","").replaceAll(" ",""));
+                            bufferedWriter.write("\t");
 
                             bufferedWriter.newLine();
 
