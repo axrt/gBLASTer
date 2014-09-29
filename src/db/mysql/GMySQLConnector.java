@@ -416,7 +416,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     @Override
     public int saveBitsScore(Iteration iteration, long id_blasts) throws Exception {
         int result = 0;
-        final double bitscore = BlastHelper.comulativeScore(iteration);
+        final double bitscore = BlastHelper.comulativeBitScore(iteration);
         try (PreparedStatement preparedStatement = this.connection.prepareStatement("INSERT INTO " +
                 "`gblaster`.`bitscores` " +
                 "(`blast_id`, `bitscore`) VALUES (?, ?);\n", Statement.RETURN_GENERATED_KEYS);
@@ -579,9 +579,9 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                             "RO.id_orfs,\n" +
                             "RO.sequence,\n" +
                             "B.id_blasts,\n" +
-                            "B.report,\n" +
-                            "BS.bitscore\n" +
-                            " \n" +
+                            "B.report\n" +
+                            //"BS.bitscore\n" +
+                            //" \n" +
                             "from\n" +
                             "gblaster.gblasts B\n" +
                             "inner join \n" +
@@ -590,22 +590,23 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                             "inner join\n" +
                             "gblaster.orfs RO\n" +
                             "on B.hitorf_id=RO.id_orfs\n" +
-                            "inner join \n" +
-                            "gblaster.bitscores BS\n" +
-                            "on B.id_blasts=BS.blast_id\n" +
+                            //"inner join \n" +
+                            //"gblaster.bitscores BS\n" +
+                            //"on B.id_blasts=BS.blast_id\n" +
                             "where \n" +
                             "B.qgenome_id=?\n" +
                             "and \n" +
                             "B.tgenome_id=?\n" +
-                            "and\n" +
-                            "BS.bitscore >=?"
+                            //"and\n" +
+                            //"BS.bitscore >=?"
+                            ";"
                     , ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY
             );
 
             preparedStatement.setFetchSize(balancer);
             preparedStatement.setInt(1, query_genome_id);
             preparedStatement.setInt(2, target_genome_id);
-            preparedStatement.setDouble(3, cutoff);
+            //preparedStatement.setDouble(3, cutoff);
             final ResultSet resultSet = preparedStatement.executeQuery();
 
             Iterator<UnidirectionalBlastHit> iter = new Iterator<UnidirectionalBlastHit>() {
@@ -630,7 +631,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                         final UnidirectionalBlastHit unidirectionalBlastHit = UnidirectionalBlastHit.get(
                                 query_genome_id, target_genome_id, resultSet.getInt(5),
                                 resultSet.getInt(1), resultSet.getString(2), resultSet.getInt(3),
-                                resultSet.getString(6), resultSet.getDouble(7), resultSet.getString(4));
+                                resultSet.getString(6), cutoff, resultSet.getString(4));
 
                         return unidirectionalBlastHit;
                     } catch (SQLException e) {
@@ -663,15 +664,10 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                                 "?," +
                                 "?," +
                                 "?);"
-                        , Statement.RETURN_GENERATED_KEYS
+
                 );
-                PreparedStatement bitscoreStatement = this.connection.prepareStatement(
-                        "INSERT INTO\n" +
-                                "`gblaster`.`bitscores`\n" +
-                                "(`blast_id`, `bitscore`)\n" +
-                                "VALUES (?, ?);"
-                )) {
-            final List<Iteration>iters=new ArrayList<>();
+               ) {
+
             iterations.forEach(iter -> {
                 try {
                     final int orfs_id = Integer.parseInt(iter.getIterationQueryDef().split("\\|")[0]);
@@ -682,7 +678,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                     preparedStatement.setInt(4, qgenome_id);
                     preparedStatement.setInt(5, tgenome_id);
                     preparedStatement.addBatch();
-                    iters.add(iter);
+
                 } catch (Exception e) {
                     e.printStackTrace();
                     throw new RuntimeException(e);
@@ -690,21 +686,6 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
 
             });
             preparedStatement.executeBatch();
-            final ResultSet keySet = preparedStatement.getGeneratedKeys();
-            iters.forEach(iter -> {
-                try {
-                    if (keySet.next()) {
-                        int id_blasts = keySet.getInt(1);
-                        bitscoreStatement.setInt(1, id_blasts);
-                        bitscoreStatement.setDouble(2, BlastHelper.comulativeScore(iter));
-                        bitscoreStatement.addBatch();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e);
-                }
-            });
-            bitscoreStatement.executeUpdate();
             this.connection.commit();
         } catch (Exception e) {
             e.printStackTrace();

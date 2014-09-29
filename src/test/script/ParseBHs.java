@@ -15,7 +15,7 @@ import java.util.Optional;
  * Created by alext on 9/8/14.
  * TODO document class
  */
-public class ParsBHs {
+public class ParseBHs {
 
     public static void main(String[] args) {
         final Path input = Paths.get("/home/alext/Backup/db/mysql/bhs/blast.bh");

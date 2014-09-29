@@ -420,7 +420,7 @@ public class main {
                 }
                 //Add all bitscores
 
-                synchronized (System.out) {
+                synchronized (System.out.getClass()) {
                     System.out.println("Total number of blasts: " + totalBlasts + " done for " + query.getName().getName() + " <->" + target.getName().getName());
                 }
                 return blastsSaved;
@@ -435,8 +435,9 @@ public class main {
         synchronized (System.out.getClass()) {
             System.out.println("Buffer for ".concat(query.getName().getName()).concat(" was released."));
         }
+        final int resSaved= saverFuture.get();
         synchronized (System.out.getClass()) {
-            System.out.println("Blast results saved to database: " + saverFuture.get());
+            System.out.println("Blast results saved to database: " + resSaved);
         }
     }
 
@@ -522,8 +523,8 @@ public class main {
             stringBuilder.append("TARGET_ORF_ID\t");
             stringBuilder.append("TARGET_SEQUENCE\t");
             stringBuilder.append("BLAST_ID\t");
-            stringBuilder.append("BITSCORE_CUTOFF"); //TODO make static
-            stringBuilder.append("FWD_ITERATION\t");
+            stringBuilder.append("BITSCORE_CUTOFF\t"); //TODO make static
+            stringBuilder.append("FWD_ITERATION");
 
             bufferedWriter.write(stringBuilder.toString());
             bufferedWriter.newLine();

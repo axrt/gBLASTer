@@ -14,7 +14,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -146,7 +145,7 @@ public final class BlastHelper {
             qseq,// means Aligned part of query sequence
             sseq,// means Aligned part of subject sequence
             evalue,// means Expect value
-            bitscore,// means Bit score
+            bitscore,// means comulativeBitScore score
             score,// means Raw score
             length,// means Alignment length
             pident,// means Percentage of identical matches
@@ -416,13 +415,18 @@ public final class BlastHelper {
         return hit.getHitHsps().getHsp().stream().mapToInt(hsp->Integer.parseInt(hsp.getHspAlignLen())).sum();
     }
 
-    public static double comulativeScore(Iteration iteration) throws JAXBException, SAXException {
+    public static double comulativeBitScore(Iteration iteration) throws JAXBException, SAXException {
 
         final HitHsps hitHsps = iteration.getIterationHits().getHit().get(0).getHitHsps();
-        final double comulativeScore  = hitHsps.getHsp().stream().mapToDouble(hsp -> {
-                return Double.parseDouble(hsp.getHspBitScore());
-            }).sum();
+        return comulativeBitScore(hitHsps);
+    }
 
-        return comulativeScore;
+    public static double comulativeBitScore(HitHsps hitHsps) throws JAXBException, SAXException {
+
+        final double comulativeBitScore  = hitHsps.getHsp().stream().mapToDouble(hsp -> {
+            return Double.parseDouble(hsp.getHspBitScore());
+        }).sum();
+
+        return comulativeBitScore;
     }
 }

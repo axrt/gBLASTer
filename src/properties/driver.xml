@@ -164,4 +164,10 @@ and open the template in the editor.
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/schistosoma_mansoni_puerto_rico.fasta"/>
         <GeneticTable type="standard"/>
     </Genome>
+    <Genome>
+        <Name name="Fusarium_oxysporum_lycopersici_4287.fasta"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/fusarium_oxysporum_lycopersici_4287.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+
 </gBlasterProperties>
