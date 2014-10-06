@@ -18,61 +18,73 @@ and open the template in the editor.
         <Name name="Escherichia_coli_str_K_12_substr_MG1655_complete_genome"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/e_coli.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Bacillus_subtilis_subsp_subtilis_str_168_chromosome_complete_genome"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/b_subtilis_168.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Wolbachia_endosymbiont_of_Drosophila_simulans_wHa_complete_genome"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/wolbachia_wha.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Wolbachia_endosymbiont_of_Culex_quinquefasciatus_Pel_chromosome_complete_genome"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/wolbachia_pel.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Sphingomonas_wittichii_RW1_chromosome_complete_genome"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/s_wittichii.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Drosophila_simulans"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/drosophila_simulans.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Culex_pipiens"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/culex_pipiens.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Arabidopsis_thaliana"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/arabidopsis_thaliana.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Ostreococcus_tauri"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/ostreococcus_tauri.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Caenorhabditis_Elegans_Bristol_N2"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/caenorhabditis_elegans_bristol_n2.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Saccharomyces_Cerevisiae_S288c"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/saccharomyces_cerevisiae_s288c.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Cryptosporidium_Parvum"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/cryptosporidium_parvum.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Schizosaccharomyces_Pombe_972h"/>
@@ -83,120 +95,156 @@ and open the template in the editor.
         <Name name="Thalassiosira_pseudonana_CCMP1335"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/thalassiosira_pseudonana_CCMP1335.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Anopheles_gambiae_str_PEST"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/anopheles_gambiae_str_pest.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Takifugu_rubripes"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/takifugu_rubripes.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Encephalitozoon_cuniculi_GB-M1"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/encephalitozoon_cuniculi_gb-m1.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Methanosarcina_barkeri_str_Fusaro"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/methanosarcina_barkeri_str_fusaro.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Haloquadratum_walsbyi"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/haloquadratum_walsbyi.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Acidilobus_saccharovorans"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/acidilobus_saccharovorans.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Cryptococcus_Neoformans_CNA3"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/cryptococcus_neoformans_cna3.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Tribolium_castaneum"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/tribolium_castaneum.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Ciona_intestinalis"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/ciona_intestinalis.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Cyanidioschyzon_merolae_strain_10D"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/cyanidioschyzon_merolae_strain_10d.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Pyrobaculum_aerophilum_str_IM2"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/pyrobaculum_aerophilum_str_im2.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Methanobacterium_sp_SWAN_1"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/methanobacterium_sp_swan_1.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Monosiga_brevicollis"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/monosiga_brevicollis.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Capsaspora_owczarzaki"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/capsaspora_owczarzaki.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Bartonella_henselae_str_Houston_1"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/bartonella_henselae_str_houston_1.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Schistosoma_mansoni_puerto_rico"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/schistosoma_mansoni_puerto_rico.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Fusarium_oxysporum_lycopersici_4287.fasta"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/fusarium_oxysporum_lycopersici_4287.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Allomyces_macrogynus_ATCC_38327.fasta"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/allomyces_macrogynus_atcc_38327.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Rubrobacter_xylanophilus_DSM_9941.fasta"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/rubrobacter_xylanophilus_dsm_9941.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Mycoplasma_genitalium_G37.fasta"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/mycoplasma_genitalium_g37.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Mycoplasma_gallisepticum_S6.fasta"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/mycoplasma_gallisepticum_s6.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Mycobacterium_tuberculosis_H37Rv.fasta"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/mycobacterium_tuberculosis_h37rv.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Nema_parisii_ERTm1_V3.fasta"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/nema_parisii_ertm1_v3.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <Genome>
+        <Name name="Drosophila_simulans_13_mito.fasta"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/drosophila_simulans_13_mito.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="prot"/>
+    </Genome>
+    <Genome>
+        <Name name="Human_mito_323_600.fasta"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/human_mito_323_600.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="prot"/>
     </Genome>
 </gBlasterProperties>

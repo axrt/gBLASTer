@@ -14,6 +14,7 @@ import java.util.stream.Stream;
  */
 public interface ChromosomeDAO {
 
+    public int saveMockChromosome(int genomeId)throws Exception;
     public int saveChromososmeForGenomeID(int genomeId, Chromosome chromosome) throws Exception;
     public int saveLargeChromososmeForGenomeID(int genomeId, LargeChromosome largeChromosome) throws Exception;
     public Optional<Chromosome> loadCrhomosomeForID(int id)throws Exception;

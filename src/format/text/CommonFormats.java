@@ -25,7 +25,7 @@ public class CommonFormats {
     public static final Format FASTA = new Fasta();
     public static final LargeFormat LARGE_FASTA = new LargeFasta();
 
-    private static class Fasta implements Format {
+    public static class Fasta implements Format {
         public static final int MAX_LENGTH = 100;
         public static final String FASTA_START = ">";
 

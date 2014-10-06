@@ -3,6 +3,7 @@ package sequence.nucleotide.genome;
 import alphabet.character.nucleotide.Nucleotide;
 import format.text.Format;
 import sequence.nucleotide.NucleotideSequence;
+import sequence.protein.ORF;
 
 import java.io.*;
 import java.nio.file.Path;

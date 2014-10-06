@@ -17,7 +17,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlMixed;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
+import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import org.w3c.dom.Element;
 
@@ -29,38 +29,38 @@ import org.w3c.dom.Element;
 @XmlType(name = "", propOrder = {
     "content"
 })
-@XmlRootElement(name = "MaxORFLength")
-public class MaxORFLength {
+@XmlRootElement(name = "FastaType")
+public class FastaType {
 
-    @XmlAttribute(name = "max", required = true)
-    @XmlJavaTypeAdapter(NormalizedStringAdapter.class)
-    protected String max;
+    @XmlAttribute(name = "type", required = true)
+    @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
+    protected String type;
     @XmlMixed
     @XmlAnyElement
     protected List<Object> content;
 
     /**
-     * Gets the value of the max property.
+     * Gets the value of the type property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getMax() {
-        return max;
+    public String getType() {
+        return type;
     }
 
     /**
-     * Sets the value of the max property.
+     * Sets the value of the type property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setMax(String value) {
-        this.max = value;
+    public void setType(String value) {
+        this.type = value;
     }
 
     /**

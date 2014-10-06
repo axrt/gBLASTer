@@ -5,18 +5,21 @@ import alphabet.character.amino.AminoAcid;
 import alphabet.nucleotide.NucleotideAlphabet;
 import alphabet.translate.GStreamRibosome;
 import alphabet.translate.GeneticCode;
+import alphabet.translate.RibosomeHelper;
 import db.ChromosomeDAO;
 import db.GenomeDAO;
 import db.OrfDAO;
 import format.text.Format;
 import format.text.LargeFormat;
 import properties.jaxb.Genome;
+import sequence.nucleotide.genome.Chromosome;
 import sequence.nucleotide.genome.LargeChromosome;
 import sequence.nucleotide.genome.LargeGenome;
 import sequence.nucleotide.genome.LargeSequenceHelper;
 
 import java.io.*;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -75,6 +78,18 @@ public final class Deployer {
             final IntStream stream = genomeDAO.saveLargeChromosomesForGenomeId(genomeId, largeRCChromosomes,batchSize);
             return stream;
         }
+    }
+
+    public static void deployMockGenomeORFBase(GenomeDAO genomeDAO,String genomeName, OrfDAO orfDAO,int batchSize, Genome g ) throws Exception{
+        //Lock on file
+        final Path toORFBaseFile = Paths.get(g.getPathToFile().getPath());
+        //Save genome
+        final int id_genome=genomeDAO.saveGenomeForName(genomeName);
+        //Save mock chromosome
+        final int id_chromosome=genomeDAO.saveMockChromosome(id_genome);
+        //Save ORFS from file
+        orfDAO.saveOrfsForChromosomeId(id_chromosome, RibosomeHelper.readORFsFromFile(toORFBaseFile),batchSize);
+
     }
 
     public static void translateAndGetORFStreamForGenomeId(

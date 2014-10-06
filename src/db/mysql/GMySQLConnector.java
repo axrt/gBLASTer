@@ -58,17 +58,12 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     }
 
     @Override
-    public int saveGenomeForName(Genome<? extends Chromosome> genome) throws Exception {
-        return 0;
-    }
-
-    @Override
-    public int saveLargeGenome(LargeGenome genome) throws SQLException {
+    public int saveGenomeForName(String genome) throws SQLException {
         int id_genome = 0;
         try (PreparedStatement preparedStatement = this.connection
                 .prepareStatement("INSERT INTO `gblaster`.`genomes` ( `name`, `comment`) " +
                         "VALUES ( ?, ?);", Statement.RETURN_GENERATED_KEYS)) {
-            preparedStatement.setString(1, genome.getName());
+            preparedStatement.setString(1, genome);
             preparedStatement.setString(2, COMMENT_TEMPLATE);
             preparedStatement.executeUpdate();
             this.connection.commit();
@@ -79,6 +74,17 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
         }
 
         return id_genome;
+    }
+
+    @Override
+    public int saveGenomeForName(Genome<? extends Chromosome> genome) throws Exception {
+        return 0;
+    }
+
+    @Override
+    public int saveLargeGenome(LargeGenome genome) throws SQLException {
+
+        return saveGenomeForName(genome.getName());
     }
 
     @Override
@@ -100,6 +106,29 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
 
 
         return 0;
+    }
+
+    @Override
+    public int saveMockChromosome(int genomeId) throws Exception {
+        int id_chormosome = 0;
+        try (PreparedStatement preparedStatement = this.connection
+                .prepareStatement("INSERT INTO `gblaster`.`chromosomes` (`id_genome`, `name`, `sequence`) VALUES (?, ?, ?);", Statement.RETURN_GENERATED_KEYS);
+             ) {
+
+            preparedStatement.setInt(1, genomeId);
+            preparedStatement.setString(2, "MockAC_genome: "+genomeId);
+            preparedStatement.setString(3, "ATGC");
+            preparedStatement.executeUpdate();
+            this.connection.commit();
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+            if (resultSet.next()) {
+                id_chormosome = resultSet.getInt(1);
+            }
+        } catch (SQLException e) {
+            this.connection.rollback();
+            throw e;
+        }
+        return id_chormosome;
     }
 
     @Override
