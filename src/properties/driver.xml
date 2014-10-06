@@ -169,5 +169,34 @@ and open the template in the editor.
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/fusarium_oxysporum_lycopersici_4287.fasta"/>
         <GeneticTable type="standard"/>
     </Genome>
-
+    <Genome>
+        <Name name="Allomyces_macrogynus_ATCC_38327.fasta"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/allomyces_macrogynus_atcc_38327.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Rubrobacter_xylanophilus_DSM_9941.fasta"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/rubrobacter_xylanophilus_dsm_9941.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Mycoplasma_genitalium_G37.fasta"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/mycoplasma_genitalium_g37.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Mycoplasma_gallisepticum_S6.fasta"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/mycoplasma_gallisepticum_s6.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Mycobacterium_tuberculosis_H37Rv.fasta"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/mycobacterium_tuberculosis_h37rv.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
+    <Genome>
+        <Name name="Nema_parisii_ERTm1_V3.fasta"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/nema_parisii_ertm1_v3.fasta"/>
+        <GeneticTable type="standard"/>
+    </Genome>
 </gBlasterProperties>

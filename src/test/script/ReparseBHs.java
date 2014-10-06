@@ -7,10 +7,10 @@ import javax.xml.bind.JAXBException;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Created by alext on 9/23/14.
@@ -49,7 +49,15 @@ public class ReparseBHs {
     @Test
     public void reparse() {
         final Path dir = Paths.get("/home/alext/Documents/gBlaster/bh/");
-        final List<File> paths = Arrays.asList(dir.toFile().listFiles());
+        final Set<String> fileNames=Arrays.asList(dir.toFile().listFiles()).stream().map(file->{return file.getPath();}).collect(Collectors.toSet());
+        final List<File> paths=new ArrayList<>();
+        for(String s:fileNames){
+            if(!s.endsWith(".short")){
+                if(!fileNames.contains(s.concat(".short"))){
+                   paths.add(new File(s));
+                }
+            }
+        }
 
         paths.parallelStream().forEach(path -> {
             System.out.println("Parsing ".concat(path.getName().toString()));
@@ -137,15 +145,15 @@ public class ReparseBHs {
             stringBuilder.append("</Hsp_num>");
             stringBuilder.append('\t');
             stringBuilder.append("<Hsp_qseq>");
-            stringBuilder.append(source.substring(matchers.get(i++).end(),matchers.get(i++).start()));
+            stringBuilder.append(source.substring(matchers.get(i++).end(), matchers.get(i++).start()));
             stringBuilder.append("</Hsp_qseq>");
             stringBuilder.append('\t');
             stringBuilder.append("<Hsp_hseq>");
-            stringBuilder.append(source.substring(matchers.get(i++).end(),matchers.get(i++).start()));
+            stringBuilder.append(source.substring(matchers.get(i++).end(), matchers.get(i++).start()));
             stringBuilder.append("</Hsp_hseq>");
             stringBuilder.append('\t');
             stringBuilder.append("<Hsp_midline>");
-            stringBuilder.append(source.substring(matchers.get(i++).end(),matchers.get(i++).start()));
+            stringBuilder.append(source.substring(matchers.get(i++).end(), matchers.get(i++).start()));
             stringBuilder.append("</Hsp_midline>");
             stringBuilder.append('\t');
         }
