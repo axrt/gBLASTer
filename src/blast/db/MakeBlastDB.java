@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  * Created by alext on 6/13/14.
  * TODO document class
  */
-public final class MakeBlastDB implements Callable<Optional<File>> {
+public class MakeBlastDB implements Callable<Optional<File>> {
 
     public static final String MAKEBLASTDB = "makeblastdb";
 
@@ -70,12 +70,12 @@ public final class MakeBlastDB implements Callable<Optional<File>> {
     }
 
     public static class MakeBlastDBBuilder {
-        private Path makeBlastDb;
-        private Path pathToDbFolder;
-        private Path pathToSequenceFile;
-        private String name;
-        private DBType type;
-        private final ArrayList<String> command;
+        protected Path makeBlastDb;
+        protected Path pathToDbFolder;
+        protected Path pathToSequenceFile;
+        protected String name;
+        protected DBType type;
+        protected final ArrayList<String> command;
 
         public MakeBlastDBBuilder(String name) {
             this.name = name;
@@ -125,7 +125,7 @@ public final class MakeBlastDB implements Callable<Optional<File>> {
             return new MakeBlastDB(this);
         }
 
-        private static boolean pathChecks(Path toFile) {
+        protected static boolean pathChecks(Path toFile) {
             if (toFile == null || !toFile.toFile().exists()) {
                 return false;
             }
