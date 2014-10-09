@@ -52,14 +52,14 @@ public class main {
     final static Path blastdbFolder = home.resolve("blastdb");
     final static Path toMakeBlastDb = Paths.get("/usr/local/bin/makeblastdb");
     final static Path toBlastP = Paths.get("/bin/blastp");
-    final static int maxThreads = 6;
+    final static int maxThreads = 2;
     final static ExecutorService blastExecutorService = Executors.newFixedThreadPool(maxThreads);
     final static ExecutorService helperExecutorService = Executors.newCachedThreadPool();
     final static ExecutorService blastDriverExecutorService = Executors.newCachedThreadPool();
     final static int orfUnloadBalancer = Integer.MIN_VALUE;
     final static int orfBatchSize = 1000;
     final static int blastBufferSize = 1000;
-    final static int blastThreadsPerRun = 1;
+    final static int blastThreadsPerRun = 3;
     final static int largeChromosomeBatchSize = 1;
     final static int minimumOrfLength = 50;
     final static double bitscoreCutoff = 80;

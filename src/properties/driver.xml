@@ -247,4 +247,10 @@ and open the template in the editor.
         <GeneticTable type="standard"/>
         <FastaType type="prot"/>
     </Genome>
+    <Genome>
+        <Name name="Cyanidioschyzon_merolae.fasta"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/cyanidioschyzon_merolae.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
 </gBlasterProperties>
