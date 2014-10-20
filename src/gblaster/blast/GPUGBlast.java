@@ -1,16 +1,10 @@
 package gblaster.blast;
 
-import blast.blast.AbstractBlast;
+import blast.blast.BlastHelper;
 import blast.output.BlastOutput;
-import blast.output.Iteration;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.transform.stream.StreamSource;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
@@ -27,8 +21,8 @@ public class GPUGBlast extends GBlast {
     public static final String GPU = "-gpu";
     public static final String GPU_THREADS = "-gpu_threads";
     public static final String GPU_BLOCKS = "-gpu_blocks";
-    protected static final String GPU_INFO=".gpuinfo";
-
+    protected static final String GPU_MARK =".gpu";
+    protected final File markerFile;
 
     public enum Method {
         ALIGNMENT(1), CREATE_DATABASE(2);
@@ -46,26 +40,38 @@ public class GPUGBlast extends GBlast {
 
     protected GPUGBlast(GPUGBlastBuilder builder) {
         super(builder);
+        this.markerFile=builder.getMarkerFile();
     }
 
     @Override
     public Optional<BlastOutput> call() throws Exception {
-        final List<String> modeFormat=new ArrayList<>(this.command);
-        modeFormat.add(Method.METHOD); modeFormat.add(Method.CREATE_DATABASE.getMode());
-        final ProcessBuilder processBuilder = new ProcessBuilder(modeFormat);
-        final Process p = processBuilder.start();
-        try (InputStream inputStream = p.getInputStream();
-             InputStream errorStream = p.getErrorStream();
-             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(errorStream))) {
-
-             bufferedReader.lines().forEach(l -> {
-                synchronized (System.out.getClass()) {
-                    System.out.println("BLAST ERR METHOD 2:> ".concat(l));
+        if(!this.markerFile.exists()){
+            final List<String> modeFormat=new ArrayList<>();
+            for(int i=0;i<this.command.size();i++){
+                if(!this.command.get(i).contains(BlastHelper.NUM_THREADS)){
+                    modeFormat.add(this.command.get(i));
+                }else{
+                    i++;
                 }
-             });
-
-            return super.call();
+            }
+            modeFormat.add(Method.METHOD); modeFormat.add(Method.CREATE_DATABASE.getMode());
+            synchronized (System.out.getClass()) {
+                System.out.println(modeFormat.stream().collect(Collectors.joining(" ")));
+            }
+            final ProcessBuilder processBuilder = new ProcessBuilder(modeFormat);
+            final Process p = processBuilder.start();
+            try (InputStream inputStream = p.getInputStream();
+                 InputStream errorStream = p.getErrorStream();
+                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(errorStream))) {
+                 bufferedReader.lines().forEach(l -> {
+                    synchronized (System.out.getClass()) {
+                        System.out.println("BLAST ERR METHOD 2:> ".concat(l));
+                    }
+                });
+            }
         }
+
+        return super.call();
     }
 
     public static class GPUGBlastBuilder extends GBlastPBuilder {
@@ -91,10 +97,14 @@ public class GPUGBlast extends GBlast {
             return this;
         }
 
+        public File getMarkerFile(){
+            return new File(this.queryFile.toFile(),GPU_MARK);
+        }
+
         @Override
         public GBlast build() {
             this.optionalParams.put(GPU,"T");
-            return super.build();
+            return new GPUGBlast(this);
         }
     }
 }

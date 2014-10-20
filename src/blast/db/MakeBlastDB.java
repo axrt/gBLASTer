@@ -56,6 +56,9 @@ public class MakeBlastDB implements Callable<Optional<File>> {
      */
     @Override
     public Optional<File> call() throws Exception {
+        synchronized (System.out.getClass()) {
+            System.out.println(this.command.stream().collect(Collectors.joining(" ")));
+        }
         final ProcessBuilder processBuilder = new ProcessBuilder(this.command);
         final Process p = processBuilder.start();
         try (InputStream inputStream = p.getInputStream();

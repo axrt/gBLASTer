@@ -8,6 +8,7 @@ import analisys.bbh.UnidirectionalBlastHit;
 import base.buffer.IterationBlockingBuffer;
 import base.progress.Progress;
 import blast.blast.AbstractBlast;
+import blast.db.GPUMakeBlastDB;
 import blast.db.MakeBlastDB;
 import blast.output.BlastOutput;
 import blast.output.Iteration;
@@ -19,6 +20,7 @@ import db.mysql.MySQLConnector;
 import format.text.CommonFormats;
 import format.text.LargeFormat;
 import gblaster.blast.GBlast;
+import gblaster.blast.GPUGBlast;
 import gblaster.deploy.Deployer;
 import org.xml.sax.SAXException;
 import properties.PropertiesLoader;
@@ -50,19 +52,21 @@ public class main {
     final static Path bbhFolder = home.resolve("bbh");
     final static Path bhFolder = home.resolve("bh");
     final static Path blastdbFolder = home.resolve("blastdb");
-    final static Path toMakeBlastDb = Paths.get("/usr/local/bin/makeblastdb");
-    final static Path toBlastP = Paths.get("/bin/blastp");
-    final static int maxThreads = 2;
+    final static Path toMakeBlastDb = Paths.get("/usr/local/bin/gmakeblastdb");
+    final static Path toBlastP = Paths.get("/usr/local/bin/gblastp");
+    final static int maxThreads = 1;
     final static ExecutorService blastExecutorService = Executors.newFixedThreadPool(maxThreads);
     final static ExecutorService helperExecutorService = Executors.newCachedThreadPool();
     final static ExecutorService blastDriverExecutorService = Executors.newCachedThreadPool();
     final static int orfUnloadBalancer = Integer.MIN_VALUE;
     final static int orfBatchSize = 1000;
     final static int blastBufferSize = 1000;
-    final static int blastThreadsPerRun = 3;
+    final static int blastThreadsPerRun = 6;
     final static int largeChromosomeBatchSize = 1;
     final static int minimumOrfLength = 50;
     final static double bitscoreCutoff = 80;
+    final static int gpu_threads=4;
+    final static int gpu_blocks=512;
     static int countDown;
 
     /**
@@ -155,7 +159,7 @@ public class main {
                         })
                         .map(g -> {
 
-                            final MakeBlastDB.MakeBlastDBBuilder makeBlastDBBuilder = new MakeBlastDB.MakeBlastDBBuilder(g.getName().getName());
+                            final GPUMakeBlastDB.GPUMakeBlastDBBuilder makeBlastDBBuilder = new GPUMakeBlastDB.GPUMakeBlastDBBuilder(g.getName().getName());
                             System.out.println("Deploying blast database for Genome ".concat(g.getName().getName()));
                             final MakeBlastDB makeBlastDb = makeBlastDBBuilder
                                     .pathToMakeBlastDb(toMakeBlastDb)
@@ -292,7 +296,7 @@ public class main {
         final Callable<Object> pairRun = new Callable<Object>() {
             @Override
             public Object call() throws Exception {
-                pairBlast(pair[0], pair[1], blastBufferSize, genomeDAO, orfDAO, blastDAO, blastProperties, maxThreadsOnBlast);
+                pairBlast(pair[0], pair[1], blastBufferSize, genomeDAO, orfDAO, blastDAO, blastProperties, maxThreadsOnBlast,gpu_threads,gpu_blocks);
                 synchronized (System.out.getClass()) {
                     System.out.println("Blasts to run: " + --countDown);
                 }
@@ -347,7 +351,7 @@ public class main {
         return toSort.toArray(pairs);
     }
 
-    public static void pairBlast(Genome query, Genome target, int bufferCapasity, GenomeDAO genomeDAO, OrfDAO orfDAO, BlastDAO blastDAO, BlastProperties blastProperties, int numThreads) throws Exception {
+    public static void pairBlast(Genome query, Genome target, int bufferCapasity, GenomeDAO genomeDAO, OrfDAO orfDAO, BlastDAO blastDAO, BlastProperties blastProperties, int numThreads, int gpu_threads, int gpu_blocks) throws Exception {
 
         final Path queryFile = orfFolder.resolve(query.getName().getName());
         final Path db = blastdbFolder.resolve(target.getName().getName());
@@ -355,9 +359,9 @@ public class main {
         final int qgenome_id = genomeDAO.genomeIdByName(query.getName().getName());
         final int tgenome_id = genomeDAO.genomeIdByName(target.getName().getName());
 
-        final GBlast.GBlastPBuilder gBlastPBuilder = new GBlast.GBlastPBuilder(toBlastP, queryFile, db.toFile().getPath());
+        final GPUGBlast.GPUGBlastBuilder gBlastPBuilder = new GPUGBlast.GPUGBlastBuilder(toBlastP, queryFile, db.toFile().getPath());
         final double evalue = Double.parseDouble(blastProperties.getExpect().getValue());
-        final GBlast gBlast = gBlastPBuilder.evalue(Optional.of(evalue)).num_threads(Optional.of(numThreads)).maxTargetSeqs(Optional.of(1)).build();
+        final GBlast gBlast = gBlastPBuilder.gpuBlocks(gpu_blocks).gpuThreads(gpu_threads).evalue(Optional.of(evalue)).num_threads(Optional.of(numThreads)).maxTargetSeqs(Optional.of(1)).build();
 
         final IterationBlockingBuffer buffer = IterationBlockingBuffer.get(query.getName().getName() + " <-> " + target.getName().getName(), bufferCapasity);
         gBlast.addListener(buffer);

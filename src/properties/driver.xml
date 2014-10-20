@@ -253,4 +253,52 @@ and open the template in the editor.
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
+    <Genome>
+        <Name name="Plasmodium_falciparum_3D7"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/plasmodium_falciparum_3d7.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <Genome>
+        <Name name="Ichthyophthirius_multifiliis"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/ichthyophthirius_multifiliis.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <Genome>
+        <Name name="Genlisea_aurea"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/genlisea_aurea.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <Genome>
+        <Name name="Naegleria_fowleri"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/naegleria_fowleri.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <Genome>
+        <Name name="Gregarina_niphandrodes"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/gregarina_niphandrodes.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <Genome>
+        <Name name="Amphi_decontaminated_assembly_scaffolds"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/amphi_decont_scaffolds.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <!--<Genome>
+        <Name name="Amphi_accepted_scaffolds"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/amphi_accepted_scaffolds.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome> -->
+    <Genome>
+        <Name name="Human_genscan"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/human_genscan.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
 </gBlasterProperties>

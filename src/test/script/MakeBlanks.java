@@ -17,7 +17,7 @@ public class MakeBlanks {
     @Test
     public void make(){
 
-        final Path dir= Paths.get("/home/alext/Documents/gBlaster/bh");
+        final Path dir= Paths.get("/home/alext/Documents/gBlaster/bbh");
         List<File> files = Arrays.asList(dir.toFile().listFiles());
         files.stream().forEach(file->{
             try(BufferedWriter bufferedWriter=new BufferedWriter(new FileWriter(file))){
