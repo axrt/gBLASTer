@@ -13,7 +13,7 @@ public class IterationBlockingBuffer extends SimpleBlockingBuffer<Iteration> imp
 
     public static final Iteration DONE=new Iteration();
 
-    protected String name;
+    protected String name="";
 
     protected IterationBlockingBuffer(int capacity) {
         super(capacity);
