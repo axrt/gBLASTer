@@ -1,6 +1,6 @@
 package test.script;
 
-import blast.output.BlastOutput;
+import blast.ncbi.output.BlastOutput;
 import format.text.CommonFormats;
 import gblaster.blast.GPUGBlast;
 

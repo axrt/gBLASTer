@@ -4,7 +4,7 @@ import analisys.bbh.BidirectionalBlastHit;
 import analisys.bbh.BlastHit;
 import analisys.bbh.UnidirectionalBlastHit;
 import blast.blast.BlastHelper;
-import blast.output.Iteration;
+import blast.ncbi.output.Iteration;
 import db.BlastDAO;
 import db.GenomeDAO;
 import db.OrfDAO;

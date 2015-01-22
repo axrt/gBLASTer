@@ -1,6 +1,6 @@
 package blast.blast;
 
-import blast.output.BlastOutput;
+import blast.ncbi.output.BlastOutput;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -42,6 +42,26 @@ public abstract class AbstractBlast<E> implements Callable<Optional<BlastOutput>
             value.ifPresent(v -> this.optionalParams.put(QUERY_LOC, v));
             return this;
         }
+
+        public BlastBuilder<E,T> gilist(Optional<Path> value) {
+            value.ifPresent(v -> this.optionalParams.put(GILIST, v.toFile().getPath()));
+            return this;
+        }
+
+        public BlastBuilder<E,T> negative_gilist(Optional<Path> value) {
+            value.ifPresent(v -> this.optionalParams.put(NEGATIVE_GILIST, v.toFile().getPath()));
+            return this;
+        }
+
+        public BlastBuilder<E,T> remote (Optional<Boolean> value) {
+            value.ifPresent(v -> {
+                if(v) {
+                    this.optionalParams.put(REMOTE, "");
+                }
+            });
+            return this;
+        }
+
         public BlastBuilder<E,T> strand(Optional<BlastHelper.STRAND_VALS> value) {
             value.ifPresent(v -> this.optionalParams.put(STRAND, v.toString()));
             return this;

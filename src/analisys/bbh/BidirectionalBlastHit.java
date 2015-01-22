@@ -1,6 +1,6 @@
 package analisys.bbh;
 
-import blast.output.Iteration;
+import blast.ncbi.output.Iteration;
 
 /**
  * Created by alext on 6/19/14.

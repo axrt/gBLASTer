@@ -1,7 +1,7 @@
 package analisys.bbh;
 
 import blast.blast.BlastHelper;
-import blast.output.Iteration;
+import blast.ncbi.output.Iteration;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;

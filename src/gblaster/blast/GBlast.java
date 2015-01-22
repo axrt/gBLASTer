@@ -1,8 +1,8 @@
 package gblaster.blast;
 
 import blast.blast.AbstractBlast;
-import blast.output.BlastOutput;
-import blast.output.Iteration;
+import blast.ncbi.output.BlastOutput;
+import blast.ncbi.output.Iteration;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;

@@ -1,6 +1,6 @@
 package blast.blast;
 
-import blast.output.*;
+import blast.ncbi.output.*;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -282,10 +282,10 @@ public final class BlastHelper {
 
 
     /**
-     * Returns a {@link blast.output.BlastOutput} from an {@code InputStream}.
+     * Returns a {@link blast.ncbi.output.BlastOutput} from an {@code InputStream}.
      *
      * @param in :{@link java.io.InputStream } from a URL or other type of connection
-     * @return {@link blast.output.BlastOutput}
+     * @return {@link blast.ncbi.output.BlastOutput}
      * @throws javax.xml.bind.JAXBException
      */
     public static BlastOutput catchBLASTOutput(InputStream in)

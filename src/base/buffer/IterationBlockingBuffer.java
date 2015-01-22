@@ -1,9 +1,8 @@
 package base.buffer;
 
 import blast.blast.AbstractBlast;
-import blast.output.Iteration;
+import blast.ncbi.output.Iteration;
 
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by alext on 6/17/14.
@@ -28,7 +27,7 @@ public class IterationBlockingBuffer extends SimpleBlockingBuffer<Iteration> imp
             this.put(event.getEvent().get());
             if(this.remainingCapacity()==0){
                 synchronized (System.out.getClass()) {
-                    System.out.println("buffer ".concat(this.name) + " is full;");
+                    System.out.println("Buffer ".concat(this.name) + " is full;");
                 }
             }
             return 0;

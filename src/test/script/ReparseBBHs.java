@@ -1,9 +1,9 @@
 package test.script;
 
 import blast.blast.BlastHelper;
-import blast.output.BlastOutput;
-import blast.output.HitHsps;
-import blast.output.Iteration;
+import blast.ncbi.output.BlastOutput;
+import blast.ncbi.output.HitHsps;
+import blast.ncbi.output.Iteration;
 import org.junit.Test;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;

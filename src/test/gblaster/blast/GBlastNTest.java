@@ -2,8 +2,8 @@ package test.gblaster.blast;
 
 import base.buffer.SimpleBlockingBuffer;
 import blast.blast.AbstractBlast;
-import blast.output.BlastOutput;
-import blast.output.Iteration;
+import blast.ncbi.output.BlastOutput;
+import blast.ncbi.output.Iteration;
 import gblaster.blast.GBlast;
 import org.junit.Test;
 

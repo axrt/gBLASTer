@@ -2,7 +2,7 @@ package db;
 
 import analisys.bbh.BidirectionalBlastHit;
 import analisys.bbh.UnidirectionalBlastHit;
-import blast.output.Iteration;
+import blast.ncbi.output.Iteration;
 import properties.jaxb.Genome;
 
 import java.util.List;

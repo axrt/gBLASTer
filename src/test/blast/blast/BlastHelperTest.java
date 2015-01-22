@@ -1,8 +1,8 @@
 package test.blast.blast;
 
 import blast.blast.BlastHelper;
-import blast.output.BlastOutput;
-import blast.output.Iteration;
+import blast.ncbi.output.BlastOutput;
+import blast.ncbi.output.Iteration;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 

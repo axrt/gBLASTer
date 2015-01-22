@@ -1,7 +1,7 @@
 package gblaster.blast;
 
 import blast.blast.BlastHelper;
-import blast.output.BlastOutput;
+import blast.ncbi.output.BlastOutput;
 
 import java.io.BufferedReader;
 import java.io.File;
