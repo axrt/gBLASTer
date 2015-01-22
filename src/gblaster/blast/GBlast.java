@@ -6,8 +6,10 @@ import blast.ncbi.output.Iteration;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.stream.StreamSource;
 import java.io.BufferedReader;
@@ -42,20 +44,7 @@ public class GBlast extends AbstractBlast<Iteration> {
              InputStream errorStream = p.getErrorStream();
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(errorStream))) {
 
-            final XMLInputFactory xif = XMLInputFactory.newFactory();
-            final StreamSource xml = new StreamSource(inputStream);
-            final XMLStreamReader xsr = xif.createXMLStreamReader(xml);
-            final JAXBContext jc = JAXBContext.newInstance(Iteration.class);
-            final Unmarshaller unmarshaller = jc.createUnmarshaller();
-
-            while (xsr.hasNext()) {
-                if (xsr.isStartElement() && xsr.getLocalName().equals("Iteration")) {
-                    final JAXBElement<Iteration> jb = unmarshaller.unmarshal(xsr, Iteration.class);
-                    final Iteration iteration = jb.getValue();
-                    this.notifyListeners(new AbstractBlast.BlastEvent<>(iteration));
-                }
-                xsr.next();
-            }
+            this.process(inputStream);
 
             bufferedReader.lines().forEach(l -> {
                 synchronized (System.out.getClass()) {
@@ -64,6 +53,24 @@ public class GBlast extends AbstractBlast<Iteration> {
             });
 
             return Optional.empty();
+        }
+    }
+
+    public void process(InputStream inputStream) throws Exception {
+
+        final XMLInputFactory xif = XMLInputFactory.newFactory();
+        final StreamSource xml = new StreamSource(inputStream);
+        final XMLStreamReader xsr = xif.createXMLStreamReader(xml);
+        final JAXBContext jc = JAXBContext.newInstance(Iteration.class);
+        final Unmarshaller unmarshaller = jc.createUnmarshaller();
+
+        while (xsr.hasNext()) {
+            if (xsr.isStartElement() && xsr.getLocalName().equals("Iteration")) {
+                final JAXBElement<Iteration> jb = unmarshaller.unmarshal(xsr, Iteration.class);
+                final Iteration iteration = jb.getValue();
+                this.notifyListeners(new AbstractBlast.BlastEvent<>(iteration));
+            }
+            xsr.next();
         }
     }
 
