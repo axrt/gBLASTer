@@ -1,4 +1,4 @@
-package test.script;
+package script;
 
 import blast.ncbi.output.BlastOutput;
 import format.text.CommonFormats;

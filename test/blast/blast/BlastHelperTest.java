@@ -1,4 +1,4 @@
-package test.blast.blast;
+package blast.blast;
 
 import blast.blast.BlastHelper;
 import blast.ncbi.output.BlastOutput;

@@ -1,4 +1,4 @@
-package test.alphabet.translate;
+package alphabet.translate;
 
 import alphabet.character.amino.AminoAcid;
 import alphabet.character.nucleotide.Nucleotide;

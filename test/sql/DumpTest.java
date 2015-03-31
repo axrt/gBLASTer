@@ -1,4 +1,4 @@
-package test.sql;
+package sql;
 
 import org.junit.Test;
 

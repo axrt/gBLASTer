@@ -1,4 +1,4 @@
-package test.script;
+package script;
 
 import org.junit.Test;
 

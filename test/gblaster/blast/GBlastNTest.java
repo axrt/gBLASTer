@@ -1,4 +1,4 @@
-package test.gblaster.blast;
+package gblaster.blast;
 
 import base.buffer.SimpleBlockingBuffer;
 import blast.blast.AbstractBlast;

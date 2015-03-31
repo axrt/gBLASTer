@@ -1,5 +1,5 @@
 <component name="ArtifactManager">
-  <artifact name="gBLASTer:jar">
+  <artifact build-on-make="true" name="gBLASTer:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/gBLASTer_jar</output-path>
     <root id="root">
       <element id="archive" name="gBLASTer.jar">

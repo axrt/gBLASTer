@@ -1,4 +1,4 @@
-package test.alphabet.character.nucleotide;
+package alphabet.character.nucleotide;
 
 import alphabet.Alphabet;
 import alphabet.character.nucleotide.Nucleotide;

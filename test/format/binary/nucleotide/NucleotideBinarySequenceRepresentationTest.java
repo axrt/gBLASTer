@@ -1,4 +1,4 @@
-package test.format.binary.nucleotide;
+package format.binary.nucleotide;
 
 import alphabet.character.nucleotide.Nucleotide;
 import alphabet.nucleotide.NucleotideAlphabet;

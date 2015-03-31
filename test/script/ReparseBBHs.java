@@ -1,4 +1,4 @@
-package test.script;
+package script;
 
 import blast.ncbi.output.HitHsps;
 import org.junit.Test;

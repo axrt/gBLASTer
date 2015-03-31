@@ -1,4 +1,4 @@
-package test.format.text;
+package format.text;
 
 import format.text.CommonFormats;
 import format.text.LargeFormat;

@@ -1,4 +1,4 @@
-package test.sequence.nucleotide.genome;
+package sequence.nucleotide.genome;
 
 import alphabet.nucleotide.NucleotideAlphabet;
 import org.junit.Test;

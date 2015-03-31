@@ -1,4 +1,4 @@
-package test.script;
+package script;
 
 import blast.blast.BlastHelper;
 import blast.ncbi.output.HitHsps;
