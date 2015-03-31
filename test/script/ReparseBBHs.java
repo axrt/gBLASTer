@@ -1,24 +1,12 @@
 package test.script;
 
-import blast.blast.BlastHelper;
-import blast.ncbi.output.BlastOutput;
 import blast.ncbi.output.HitHsps;
-import blast.ncbi.output.Iteration;
 import org.junit.Test;
-import org.xml.sax.EntityResolver;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.Source;
-import javax.xml.transform.sax.SAXSource;
 import java.io.*;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 
 import java.text.DecimalFormat;
