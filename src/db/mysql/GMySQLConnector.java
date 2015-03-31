@@ -15,6 +15,7 @@ import sequence.nucleotide.genome.Genome;
 import sequence.nucleotide.genome.LargeChromosome;
 import sequence.nucleotide.genome.LargeGenome;
 import sequence.protein.ORF;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -55,6 +56,11 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     public void setNumberOfConnections(int numberOfConnections) {
         this.connectionPool.setInitialSize(numberOfConnections);
         this.connectionPool.setMaxOpenPreparedStatements(numberOfConnections);
+    }
+
+    @Override
+    public boolean removeGenomeForName(String name) throws Exception {
+        throw new NotImplementedException();
     }
 
     @Override

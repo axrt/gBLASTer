@@ -16,7 +16,7 @@ public class DerbyEmbeddedConnectorTest extends TestCase {
     }
 
     public void testConnectToDatabase() throws Exception {
-        final DerbyEmbeddedConnector connector=DerbyEmbeddedConnector.newDefaultInstance("jdbc:derby:testres/db/derby/testdb;create=true", "gblaster", "gblaser");
+        final DerbyEmbeddedConnector connector=DerbyEmbeddedConnector.newDefaultInstance("jdbc:derby:testres/db/derby/testdb;create=true", "gblaster", "gblaster");
         TestCase.assertEquals(true, connector.connectToDatabase());
     }
 }
