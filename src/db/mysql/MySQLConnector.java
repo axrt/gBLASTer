@@ -38,22 +38,6 @@ public class MySQLConnector extends Connector {
     }
 
     /**
-     * Connects to the remote derby database
-     *
-     * @return {@code true} if connected, {@code false} if smth went wrong
-     * @throws java.sql.SQLException
-     */
-    @Override
-    public boolean connectToDatabase() throws SQLException{
-        this.connection = DriverManager.getConnection(this.URL, this.connectionProperties);
-        if (this.connection != null) {
-            return (this.connected = true);
-        } else {
-            return (this.connected = false);
-        }
-    }
-
-    /**
      * @param URL      {@link String} of the database
      * @param user     {@link String} user name for the database
      * @param password {@link String} password for the given user

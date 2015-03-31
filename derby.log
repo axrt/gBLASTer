@@ -1,0 +1,10 @@
+----------------------------------------------------------------
+Tue Mar 31 12:42:37 EDT 2015:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.9.1.0 - (1344872): instance a816c00e-014c-70b6-938a-00003a2b8468 
+on database directory /home/alext/Developer/gBLASTer/testres/db/derby/testdb  with class loader sun.misc.Launcher$AppClassLoader@6d06d69c 
+Loaded from file:/home/alext/.m2/repository/org/apache/derby/derby/10.9.1.0/derby-10.9.1.0.jar
+java.vendor=Oracle Corporation
+java.runtime.version=1.8.0_25-b17
+user.dir=/home/alext/Developer/gBLASTer
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''

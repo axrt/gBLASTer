@@ -1,6 +1,7 @@
 package db.connect;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.Properties;
 //TODO document
 /**
@@ -69,12 +70,18 @@ public abstract class Connector {
     protected abstract boolean loadDriver() throws Exception;
 
     /**
-     * Connects to the remote derby database
-     *
-     * @return {@code true} if connected, {@code false} if smth went wrong
+     * Attemts to connect to the database
+     * @return {@code true} in case successfully conected, {@code false} otherwise
      * @throws Exception
      */
-    public abstract boolean connectToDatabase() throws Exception;
+    public boolean connectToDatabase() throws Exception {
+        this.connection = DriverManager.getConnection(this.URL, this.connectionProperties);
+        if (this.connection != null) {
+            return (this.connected = true);
+        } else {
+            return (this.connected = false);
+        }
+    }
 
     /**
      *

@@ -17,6 +17,7 @@
       <element id="library" level="project" name="commons-io:commons-io:2.41" />
       <element id="library" level="project" name="org.apache.derby:derby:10.9.1.0" />
       <element id="library" level="project" name="mysql:mysql-connector-java:5.1.28" />
+      <element id="directory" name="db" />
     </root>
   </artifact>
 </component>
