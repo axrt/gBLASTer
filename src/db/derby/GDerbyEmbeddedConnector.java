@@ -12,9 +12,13 @@ import sequence.nucleotide.genome.Chromosome;
 import sequence.nucleotide.genome.LargeChromosome;
 import sequence.nucleotide.genome.LargeGenome;
 import sequence.protein.ORF;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -38,6 +42,11 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
 
     public static GDerbyEmbeddedConnector get(String URL, String user, String password){
         return new GDerbyEmbeddedConnector(URL,user,password);
+    }
+
+    @Override
+    public boolean removeAllChromosomesForGenomeID(int genomeId) throws Exception {
+       throw new NotImplementedException();
     }
 
     @Override
@@ -155,12 +164,58 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
 
     @Override
     public IntStream loadChromosomeIdsForGenomeId(int genomeId) throws Exception {
-        return null;
+        try (PreparedStatement preparedStatement = this.connection
+                .prepareStatement("select id_chromosome from app.chromosomes where id_genome=?")) {
+            preparedStatement.setInt(1, genomeId);
+            final ResultSet resultSet = preparedStatement.executeQuery();
+            final IntStream.Builder builder = IntStream.builder();
+            while (resultSet.next()) {
+                builder.accept(resultSet.getInt(1));
+            }
+            return builder.build();
+        }
     }
 
     @Override
-    public IntStream saveLargeChromosomesForGenomeId(int genomeId, Stream<? extends LargeChromosome> chromoStream, int counter) throws Exception {
-        return null;
+    public IntStream saveLargeChromosomesForGenomeId(int genomeId, Stream<? extends LargeChromosome> chromoStream, int batchSize) throws Exception {
+        try (PreparedStatement preparedStatement = this.connection
+                .prepareStatement("INSERT INTO app.chromosomes (id_genome, name, sequence) VALUES (?, ?, ?)")) {
+            final int[] counter = {0};
+            chromoStream.forEach(ch -> {
+                final Reader reader = new InputStreamReader(ch.getSequenceInputstream());
+                try {
+                    preparedStatement.setInt(1, genomeId);
+                    preparedStatement.setString(2, ch.getAc());
+                    preparedStatement.setCharacterStream(3, reader);
+                    preparedStatement.addBatch();
+                    counter[0]++;
+                    if (counter[0] > batchSize) {
+                        counter[0] = 0;
+                        preparedStatement.executeBatch();
+                        this.connection.commit();
+                    }
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            preparedStatement.executeBatch();
+            this.connection.commit();
+        }
+        try (PreparedStatement preparedStatement = this.connection.prepareStatement("select id_chromosome from app.chromosomes where id_genome=?")) {
+            preparedStatement.setInt(1, genomeId);
+            final ResultSet resultSet = preparedStatement.executeQuery();
+            final IntStream.Builder builder = IntStream.builder();
+            while (resultSet.next()) {
+                builder.accept(resultSet.getInt(1));
+            }
+            return builder.build();
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof SQLException) {
+                throw (SQLException) e.getCause();
+            } else {
+                throw e;
+            }
+        }
     }
 
     @Override

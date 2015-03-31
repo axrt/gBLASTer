@@ -1,6 +1,6 @@
 ----------------------------------------------------------------
-Tue Mar 31 17:18:42 EDT 2015:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.9.1.0 - (1344872): instance a816c00e-014c-71b3-5be0-00003a2b8468 
+Tue Mar 31 19:25:03 EDT 2015:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.9.1.0 - (1344872): instance a816c00e-014c-7227-0a3b-00003a2b7e40 
 on database directory /home/alext/Developer/gBLASTer/testres/db/derby/testdb  with class loader sun.misc.Launcher$AppClassLoader@6d06d69c 
 Loaded from file:/home/alext/.m2/repository/org/apache/derby/derby/10.9.1.0/derby-10.9.1.0.jar
 java.vendor=Oracle Corporation

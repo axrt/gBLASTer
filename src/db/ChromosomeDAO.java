@@ -20,6 +20,7 @@ public interface ChromosomeDAO {
     public Optional<Chromosome> loadCrhomosomeForID(int id)throws Exception;
     public Optional<LargeChromosome> loadLargeCrhomosomeForID(int id,LargeFormat largeFormat)throws Exception;
     public IntStream loadChromosomeIdsForGenomeId(int genomeId)throws Exception;
+    public boolean removeAllChromosomesForGenomeID(int genomeId) throws Exception;
 
     /**
      * Note that the connection should be set to {@code false} autocommit if the database supports transactions

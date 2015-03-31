@@ -59,6 +59,11 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     }
 
     @Override
+    public boolean removeAllChromosomesForGenomeID(int genomeId) throws Exception {
+        throw new NotImplementedException();
+    }
+
+    @Override
     public boolean removeGenomeForName(String name) throws Exception {
         throw new NotImplementedException();
     }
@@ -218,7 +223,6 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
             chromoStream.forEach(ch -> {
                 final Reader reader = new InputStreamReader(ch.getSequenceInputstream());
                 try {
-                    preparedStatement.setInt(1, genomeId);
                     preparedStatement.setInt(1, genomeId);
                     preparedStatement.setString(2, ch.getAc());
                     preparedStatement.setCharacterStream(3, reader);
