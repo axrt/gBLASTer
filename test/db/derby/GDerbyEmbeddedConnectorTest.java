@@ -3,7 +3,9 @@ package db.derby;
 import format.text.CommonFormats;
 import format.text.LargeFormat;
 import junit.framework.TestCase;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import sequence.nucleotide.genome.LargeGenome;
 
 import java.io.BufferedInputStream;
@@ -22,6 +24,7 @@ public class GDerbyEmbeddedConnectorTest extends TestCase {
     private LargeGenome lg;
     private int batchSize;
 
+    @BeforeClass
     public void setUp() throws Exception {
         super.setUp();
         this.connector = GDerbyEmbeddedConnector.get("jdbc:derby:testres/db/derby/testdb;", "gblaster", "gblaster");
@@ -37,12 +40,12 @@ public class GDerbyEmbeddedConnectorTest extends TestCase {
         try (InputStream inputStream = new BufferedInputStream(new FileInputStream(this.testChromosomePath.toFile()))) {
             this.lg = LargeGenome.grasp(this.genomeName, inputStream, largeFormat, toTmp);
             this.genomeID = this.connector.saveLargeGenome(this.lg);
-            TestCase.assertTrue(this.connector.genomeForNameExists(genomeName));
+
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
         }finally{
-            this.tearDown();
+            TestCase.assertTrue(this.connector.genomeForNameExists(genomeName));
         }
     }
 
@@ -60,11 +63,10 @@ public class GDerbyEmbeddedConnectorTest extends TestCase {
 
             e.printStackTrace();
             throw e;
-        }finally {
-            this.tearDown();
         }
     }
 
+    @After
     public void tearDown() throws Exception {
         //remove genome
         this.connector.removeGenomeForName(this.genomeName);
