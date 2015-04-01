@@ -309,14 +309,13 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     public IntStream saveOrfsForChromosomeId(int idChromosome, Stream<? extends ORF> orfStream, int batchSize) throws SQLException {
 
         try (PreparedStatement preparedStatement = this.connection
-                .prepareStatement("INSERT INTO app.orfs " +
-                        "(id_genome,id_chromosome, frame,start,stop, name, sequence,length) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?,?);", Statement.RETURN_GENERATED_KEYS)) {
+                .prepareStatement("INSERT INTO `gblaster`.`orfs` " +
+                        "(`id_chromosome`, `frame`,`start`,`stop`, `name`, `sequence`,`length`) " +
+                        "VALUES (?, ?, ?, ?, ?, ?,?);", Statement.RETURN_GENERATED_KEYS)) {
             final int[] countHolder = {0};
             orfStream.forEach(orf -> {
                 try {
                     int position=0;
-                    preparedStatement.setInt(++position, idChromosome);
                     preparedStatement.setInt(++position, idChromosome);
                     preparedStatement.setInt(++position, orf.getFrame());
                     preparedStatement.setInt(++position, orf.getStart());

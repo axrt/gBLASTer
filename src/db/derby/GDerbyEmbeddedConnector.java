@@ -7,7 +7,6 @@ import db.BlastDAO;
 import db.GenomeDAO;
 import db.OrfDAO;
 import format.text.LargeFormat;
-import org.apache.commons.io.input.ReaderInputStream;
 import properties.jaxb.Genome;
 import sequence.nucleotide.genome.Chromosome;
 import sequence.nucleotide.genome.LargeChromosome;
@@ -17,8 +16,6 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -85,37 +82,37 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
 
     @Override
     public int saveBlastResult(Iteration iteration, int qgenome_id, int tgenome_id) throws Exception {
-        return 0;
+        throw new NotImplementedException();
     }
 
     @Override
     public int saveBitsScore(Iteration iteration, long id_blasts) throws Exception {
-        return 0;
+        throw new NotImplementedException();
     }
 
     @Override
     public boolean genomeHasBeenBlastedOver(Genome query, Genome target) throws Exception {
-        return false;
+        throw new NotImplementedException();
     }
 
     @Override
     public Stream<BidirectionalBlastHit> getBBHforGenomePair(Genome one, Genome two, int balancer) throws Exception {
-        return null;
+        throw new NotImplementedException();
     }
 
     @Override
     public boolean saveBlastResultBatch(Stream<Iteration> iterations, int qgenome_id, int tgenome_id) throws Exception {
-        return false;
+        throw new NotImplementedException();
     }
 
     @Override
     public Stream<UnidirectionalBlastHit> getBHforGenomePair(Genome one, Genome two, double cutoff, int balancer) throws Exception {
-        return null;
+        throw new NotImplementedException();
     }
 
     @Override
     public int saveGenomeForName(sequence.nucleotide.genome.Genome<? extends Chromosome> genome) throws Exception {
-        return 0;
+        throw new NotImplementedException();
     }
 
     @Override
@@ -157,17 +154,17 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
 
     @Override
     public int genomeIdByName(String name) throws Exception {
-        return 0;
+        throw new NotImplementedException();
     }
 
     @Override
     public int saveMockChromosome(int genomeId) throws Exception {
-        return 0;
+        throw new NotImplementedException();
     }
 
     @Override
     public int saveChromososmeForGenomeID(int genomeId, Chromosome chromosome) throws Exception {
-        return 0;
+        throw new NotImplementedException();
     }
 
     @Override
@@ -195,7 +192,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
 
     @Override
     public Optional<Chromosome> loadCrhomosomeForID(int id) throws Exception {
-        return null;
+        throw new NotImplementedException();
     }
 
     @Override
@@ -323,21 +320,116 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
 
     @Override
     public IntStream saveOrfsForChromosomeId(int idChromosome, Stream<? extends ORF> orfStream, int batchSize) throws Exception {
-        return null;
+
+        final int genome_id=this.genomeIDByChromosomeID(idChromosome).get();
+        try (PreparedStatement preparedStatement = this.connection
+                .prepareStatement("INSERT INTO app.orfs " +
+                        "(id_chromosome, id_genome, frame, start, stop, name, sequence, length) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?,?)", Statement.RETURN_GENERATED_KEYS)) {
+            final int[] countHolder = {0};
+            orfStream.forEach(orf -> {
+                try {
+
+                    int position=0;
+                    preparedStatement.setInt(++position, idChromosome);
+                    preparedStatement.setInt(++position, genome_id);
+                    preparedStatement.setInt(++position, orf.getFrame());
+                    preparedStatement.setInt(++position, orf.getStart());
+                    preparedStatement.setInt(++position, orf.getStop());
+                    preparedStatement.setString(++position, orf.getAc());
+                    preparedStatement.setString(++position, orf.getSequence());
+                    preparedStatement.setInt(++position, orf.getSequence().length());
+                    preparedStatement.addBatch();
+                    countHolder[0]++;
+
+                    if (countHolder[0] > batchSize) {
+                        countHolder[0] = 0;
+                        preparedStatement.executeBatch();
+                    }
+
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            preparedStatement.executeBatch();
+            this.connection.commit();
+            final ResultSet resultSet = preparedStatement.getGeneratedKeys();
+            final IntStream.Builder builder = IntStream.builder();
+            while (resultSet.next()) {
+                builder.accept(resultSet.getInt(1));
+            }
+            return builder.build();
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof SQLException) {
+                throw (SQLException) e.getCause();
+            } else {
+                throw e;
+            }
+        }
     }
 
     @Override
     public Stream<ORF> loadAllOrfsForGenomeId(int genomeId, int balancer, int minLength, int maxLength) throws Exception {
-        return null;
+        final PreparedStatement statement = this.connection
+                .prepareStatement("select sequence, name, start, stop, frame, id_orf from app.orfs where id_genome=?"
+                                + " and length>=?"
+                                + " and length<=?",
+                        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY
+                );
+        statement.setFetchSize(balancer);
+
+        try {
+            statement.setInt(1, genomeId);
+            statement.setInt(2, minLength);
+            statement.setInt(3, maxLength);
+            final ResultSet resultSet = statement.executeQuery();
+            System.out.println("next requested");
+            final Iterator<ORF> iter = new Iterator<ORF>() {
+                @Override
+                public boolean hasNext() {
+                    try {
+                        if (resultSet.next()) {
+
+                            return true;
+                        } else {
+                            statement.close();
+                            return false;
+                        }
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                @Override
+                public ORF next() {
+                    try {
+                        final ORF orf = ORF.get(resultSet.getString(1), resultSet.getString(2), resultSet.getInt(3), resultSet.getInt(4), resultSet.getInt(5));
+                        orf.setId(resultSet.getLong(6));
+                        return orf;
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            };
+            return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
+                    iter, Spliterator.NONNULL), false);
+        } catch (RuntimeException e) {
+            statement.close();
+            if (e.getCause() instanceof SQLException) {
+                throw (SQLException) e.getCause();
+            } else {
+                throw e;
+            }
+        }
     }
 
     @Override
     public long calculateOrfsForGenomeName(String genomeName, int minLength, int maxLength) throws Exception {
-        return 0;
+        throw new NotImplementedException();
     }
 
     @Override
     public long reportORFBaseSize(Genome genome) throws Exception {
-        return 0;
+        throw new NotImplementedException();
     }
 }
