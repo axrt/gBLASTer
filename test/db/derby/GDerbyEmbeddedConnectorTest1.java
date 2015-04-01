@@ -7,23 +7,25 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import sequence.nucleotide.genome.LargeChromosome;
 import sequence.nucleotide.genome.LargeGenome;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public class GDerbyEmbeddedConnectorTest {
-    private static GDerbyEmbeddedConnector connector;
-    private static Path testChromosomePath;
-    private static LargeFormat largeFormat;
-    private static String genomeName;
-    private static Path toTmp;
-    private static int genomeID;
-    private static LargeGenome lg;
-    private static int batchSize;
+public class GDerbyEmbeddedConnectorTest1 {
+
+    protected static GDerbyEmbeddedConnector connector;
+    protected static Path testGenomePath;
+    protected static LargeFormat largeFormat;
+    protected static String genomeName;
+    protected static Path toTmp;
+    protected static int genomeID;
+    protected static LargeGenome lg;
+    protected static int batchSize;
 
     @BeforeClass
     public static void setUp() throws Exception {
@@ -31,15 +33,16 @@ public class GDerbyEmbeddedConnectorTest {
         System.out.println("setUp()");
         connector = GDerbyEmbeddedConnector.get("jdbc:derby:testres/db/derby/testdb;", "gblaster", "gblaster");
         connector.connectToDatabase();
-        testChromosomePath = Paths.get("testres/db/genome/toxoplasma_gondii_m49.fasta");
+        testGenomePath = Paths.get("testres/db/genome/toxoplasma_gondii_m49.fasta");
         largeFormat = CommonFormats.LARGE_FASTA;
         genomeName = "Toxoplasma gondii M49";
         toTmp = Paths.get("/tmp");
         batchSize = 100;
     }
+
     @Test
     public void testSaveGenomeForName() throws Exception {
-        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(testChromosomePath.toFile()))) {
+        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(testGenomePath.toFile()))) {
             lg = LargeGenome.grasp(genomeName, inputStream, largeFormat, toTmp);
             genomeID = connector.saveLargeGenome(lg);
 
@@ -50,12 +53,13 @@ public class GDerbyEmbeddedConnectorTest {
             Assert.assertTrue(this.connector.genomeForNameExists(genomeName));
         }
     }
+
     @Test
     public void testSaveLargeChromosomesForGenomeId() throws Exception {
-        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(testChromosomePath.toFile()))){
+
+        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(testGenomePath.toFile()))) {
             lg = LargeGenome.grasp(genomeName, inputStream, largeFormat, toTmp);
             genomeID = connector.saveLargeGenome(lg);
-
             Assert.assertTrue(connector.genomeForNameExists(genomeName));
 
             final int[] returnedChromosomeIDs = connector.saveLargeChromosomesForGenomeId(genomeID, lg.stream(), batchSize).toArray();
@@ -65,6 +69,21 @@ public class GDerbyEmbeddedConnectorTest {
 
             e.printStackTrace();
             throw e;
+        }
+
+        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(testGenomePath.toFile()))) {
+
+            lg = LargeGenome.grasp(genomeName, inputStream, largeFormat, toTmp);
+
+            final List<String> queryChromosomes = connector.loadLargeChromosomesForGemomeID(genomeID, largeFormat)
+                    .map(LargeChromosome::getSequence).collect(Collectors.toList());
+            final List<String> targetChromosomes = lg.stream().map(LargeChromosome::getSequence).collect(Collectors.toList());
+
+            int point = 0;
+            for (String largeChromosome : queryChromosomes) {
+                Assert.assertEquals(largeChromosome, targetChromosomes.get(point));
+                point++;
+            }
         }
     }
 

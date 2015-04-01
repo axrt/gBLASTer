@@ -59,6 +59,11 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     }
 
     @Override
+    public Optional<Integer> genomeIDByChromosomeID(int chromosomeID) throws Exception {
+        throw new NotImplementedException();
+    }
+
+    @Override
     public boolean removeAllChromosomesForGenomeID(int genomeId) throws Exception {
         throw new NotImplementedException();
     }
@@ -304,17 +309,21 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     public IntStream saveOrfsForChromosomeId(int idChromosome, Stream<? extends ORF> orfStream, int batchSize) throws SQLException {
 
         try (PreparedStatement preparedStatement = this.connection
-                .prepareStatement("INSERT INTO `gblaster`.`orfs` (`id_chromosome`, `frame`,`start`,`stop`, `name`, `sequence`,`length`) VALUES (?, ?, ?, ?, ?, ?,?);", Statement.RETURN_GENERATED_KEYS)) {
+                .prepareStatement("INSERT INTO app.orfs " +
+                        "(id_genome,id_chromosome, frame,start,stop, name, sequence,length) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?,?);", Statement.RETURN_GENERATED_KEYS)) {
             final int[] countHolder = {0};
             orfStream.forEach(orf -> {
                 try {
-                    preparedStatement.setInt(1, idChromosome);
-                    preparedStatement.setInt(2, orf.getFrame());
-                    preparedStatement.setInt(3, orf.getStart());
-                    preparedStatement.setInt(4, orf.getStop());
-                    preparedStatement.setString(5, orf.getAc());
-                    preparedStatement.setString(6, orf.getSequence());
-                    preparedStatement.setInt(7, orf.getSequence().length());
+                    int position=0;
+                    preparedStatement.setInt(++position, idChromosome);
+                    preparedStatement.setInt(++position, idChromosome);
+                    preparedStatement.setInt(++position, orf.getFrame());
+                    preparedStatement.setInt(++position, orf.getStart());
+                    preparedStatement.setInt(++position, orf.getStop());
+                    preparedStatement.setString(++position, orf.getAc());
+                    preparedStatement.setString(++position, orf.getSequence());
+                    preparedStatement.setInt(++position, orf.getSequence().length());
                     preparedStatement.addBatch();
                     countHolder[0]++;
                     if (countHolder[0] > batchSize) {
