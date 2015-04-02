@@ -52,10 +52,9 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
 
     @Override
     public Optional<Integer> genomeIDByChromosomeID(int chromosomeID) throws Exception {
-
         try (PreparedStatement preparedStatement = this.connection
                 .prepareStatement("select id_genome from app.chromosomes where id_chromosome=?")){
-            preparedStatement.setInt(1,chromosomeID);
+            preparedStatement.setInt(1, chromosomeID);
             final ResultSet resultSet=preparedStatement.executeQuery();
             if(resultSet.next()){
                 return Optional.of(resultSet.getInt(1));
@@ -63,7 +62,6 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
                 throw new Exception("Could not find a corresponding genome for chromosome_id: "+chromosomeID);
             }
         }
-
     }
 
     @Override
@@ -78,6 +76,9 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
             preparedStatement.setString(1, name);
             preparedStatement.executeUpdate();
             this.connection.commit();
+        }catch (Exception e){
+            this.connection.rollback();
+            throw e;
         }
         return true;
     }
@@ -111,9 +112,12 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
                             "ID_QUERY_GENOME=" + query_genome_id + "\n" +
                             "and\n" +
                             "ID_TARGET_GENOME=" + target_genome_id + "\n" +
-                            "limit 1"
+                            "FETCH FIRST ROW ONLY"
             );
+            this.connection.commit();
             return resultSet.next();
+        }catch (Exception e){
+            throw e;
         }
     }
 
@@ -198,6 +202,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
                     }
                 }
             };
+            this.connection.commit();
             return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
                     iter, Spliterator.NONNULL), false);
         } catch (RuntimeException e) {
@@ -248,7 +253,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
             preparedStatement.executeBatch();
             this.connection.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            this.connection.rollback();
             throw e;
         }
         return true;
@@ -324,6 +329,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
                     }
                 }
             };
+            this.connection.commit();
             return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
                     iter, Spliterator.NONNULL), false);
         } catch (RuntimeException e) {
@@ -350,6 +356,10 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
             if (resultSet.next()) {
                 id_genome = resultSet.getInt(1);
             }
+            this.connection.commit();
+        }catch (Exception e){
+            this.connection.rollback();
+            throw e;
         }
         return id_genome;
     }
@@ -368,8 +378,8 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
             if (resultSet.next()) {
                 return true;
             }
-
         }
+        this.connection.commit();
         return false;
     }
 
@@ -380,6 +390,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
             preparedStatement.setString(1, name);
             final ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
+                this.connection.commit();
                 return resultSet.getInt(1);
             }else{
              throw new Exception("Genome by name \""+name+"\" does not exist in the database!");
@@ -458,6 +469,8 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
                 builder.accept(resultSet.getInt(1));
             }
             return builder.build();
+        }catch (Exception e){
+            throw e;
         }
     }
 
@@ -486,6 +499,10 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
             preparedStatement.executeBatch();
             this.connection.commit();
         }
+        catch (Exception e){
+            this.connection.rollback();
+            throw e;
+        }
         try (PreparedStatement preparedStatement = this.connection.prepareStatement("select id_chromosome from app.chromosomes where id_genome=?")) {
             preparedStatement.setInt(1, genomeId);
             final ResultSet resultSet = preparedStatement.executeQuery();
@@ -493,8 +510,10 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
             while (resultSet.next()) {
                 builder.accept(resultSet.getInt(1));
             }
+            this.connection.commit();
             return builder.build();
         } catch (RuntimeException e) {
+            this.connection.rollback();
             if (e.getCause() instanceof SQLException) {
                 throw (SQLException) e.getCause();
             } else {
@@ -590,6 +609,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
             }
             return builder.build();
         } catch (RuntimeException e) {
+            this.connection.rollback();
             if (e.getCause() instanceof SQLException) {
                 throw (SQLException) e.getCause();
             } else {
@@ -613,7 +633,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
             statement.setInt(2, minLength);
             statement.setInt(3, maxLength);
             final ResultSet resultSet = statement.executeQuery();
-            System.out.println("next requested");
+            System.out.println("Next set of ORFS requested...");
             final Iterator<ORF> iter = new Iterator<ORF>() {
                 @Override
                 public boolean hasNext() {
@@ -641,6 +661,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
                     }
                 }
             };
+            this.connection.commit();
             return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
                     iter, Spliterator.NONNULL), false);
         } catch (RuntimeException e) {
@@ -668,6 +689,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
             preparedStatement.setInt(3, maxLength);
             final ResultSet resultSet = preparedStatement.executeQuery();
             resultSet.next();
+            this.connection.commit();
             return resultSet.getInt(1);
         }
     }
@@ -679,8 +701,10 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
             preparedStatement.setInt(1, gemome_id);
             final ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
+                this.connection.commit();
                 return resultSet.getLong(1);
             } else {
+                this.connection.commit();
                 return 0;
             }
         }

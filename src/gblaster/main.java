@@ -91,7 +91,7 @@ public class main {
             final Map<Genome, GeneticCode<AminoAcid>> genomeGeneticCodeMap = Deployer.mapGenomesToGeneticCode(gBlasterProperties.getGenome().stream());
 
             //3.Connect to database
-            final Connector connector = GDerbyEmbeddedConnector.get("jdbc:derby:/home/alext/Documents/gBLASTer/db;create=true", "gblaster", "gblaster");
+            final Connector connector = GDerbyEmbeddedConnector.get("jdbc:derby:/home/alext/Documents/Research/gBLASTer/db/gblasterdb;create=true", "gblaster", "gblaster");
 
             connector.connectToDatabase();
             connector.getConnection().setAutoCommit(false);
@@ -267,7 +267,8 @@ public class main {
                 }
             }
 
-
+            System.out.println("All done.");
+            connector.getConnection().close();
             //TODO: Create the legend for the BBHs TODO
 
 

@@ -48,7 +48,11 @@ public class GPUMakeBlastDB extends MakeBlastDB {
         public GPUMakeBlastDB build() {
 
             if (!pathChecks(this.makeBlastDb) || !pathChecks(this.pathToDbFolder) || !pathChecks(this.pathToSequenceFile)) {
-                throw new IllegalStateException("One of the input paths is null or does not exist. Please check!");
+                throw new IllegalStateException("One of the input paths is null or does not exist. Please check!\n"
+                        +this.makeBlastDb.toFile()+'\n'
+                        +this.pathToDbFolder.toFile()+'\n'
+                        +this.pathToSequenceFile.toFile()
+                );
             }
             if (this.type == null) {
                 throw new IllegalArgumentException("Please specify DBType (-nucl,-prot) in builder.");
