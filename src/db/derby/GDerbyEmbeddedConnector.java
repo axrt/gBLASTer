@@ -1,6 +1,7 @@
 package db.derby;
 
 import analisys.bbh.BidirectionalBlastHit;
+import analisys.bbh.BlastHit;
 import analisys.bbh.UnidirectionalBlastHit;
 import blast.blast.BlastHelper;
 import blast.ncbi.output.Iteration;
@@ -118,7 +119,90 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
 
     @Override
     public Stream<BidirectionalBlastHit> getBBHforGenomePair(Genome one, Genome two, int balancer) throws Exception {
-        throw new NotImplementedException();
+        final int query_genome_id = this.genomeIdByName(one.getName().getName());
+        final int target_genome_id = this.genomeIdByName(two.getName().getName());
+        try {
+
+            PreparedStatement preparedStatement = this.connection.prepareStatement(
+                    "select \n" +
+                            "BL.ID_QUERY_GENOME,       \n" +
+                            "BL.ID_BLAST,\n" +
+                            "LO.ID_ORF,\n" +
+                            "LO.SEQUENCE,\n" +
+                            "BL.ITERATION,\n" +
+                            "BR.ID_QUERY_GENOME,\n" +
+                            "BR.ID_BLAST,\n" +
+                            "RO.ID_ORF,\n" +
+                            "RO.SEQUENCE,\n" +
+                            "BR.ITERATION\n" +
+                            "from\n" +
+                            "APP.BLASTS BL\n" +
+                            "inner join\n" +
+                            "APP.BLASTS BR\n" +
+                            "on BL.ID_QUERY_GENOME=BR.ID_TARGET_GENOME\n" +
+                            "and BR.ID_QUERY_GENOME=BL.ID_TARGET_GENOME\n" +
+                            "and BL.ID_QUERY_ORF=BR.ID_TARGET_ORF\n" +
+                            "and BR.ID_QUERY_ORF=BL.ID_TARGET_ORF\n" +
+                            "inner join\n" +
+                            "APP.ORFS LO\n" +
+                            "on BL.ID_QUERY_ORF=LO.ID_ORF\n" +
+                            "inner join\n" +
+                            "APP.ORFS RO\n" +
+                            "on BR.ID_QUERY_ORF=RO.ID_ORF\n" +
+                            "where\n" +
+                            "BL.ID_QUERY_GENOME=?\n" +
+                            "and\n" +
+                            "BR.ID_QUERY_GENOME=?"
+                    , ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY
+            );
+
+            preparedStatement.setFetchSize(balancer);
+            preparedStatement.setInt(1, query_genome_id);
+            preparedStatement.setInt(2, target_genome_id);
+            final ResultSet resultSet = preparedStatement.executeQuery();
+
+            Iterator<BidirectionalBlastHit> iter = new Iterator<BidirectionalBlastHit>() {
+                @Override
+                public boolean hasNext() {
+                    try {
+                        if (resultSet.next()) {
+                            return true;
+                        } else {
+                            preparedStatement.close();
+                            return false;
+                        }
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                @Override
+                public BidirectionalBlastHit next() {
+                    try {
+
+                        final BlastHit blastHitOne;
+
+                        blastHitOne = BlastHit.get(
+                                resultSet.getInt(1), resultSet.getLong(2), resultSet.getLong(3), resultSet.getString(4), resultSet.getLong(8), resultSet.getString(5));
+
+                        final BlastHit blastHitTwo;
+
+                        blastHitTwo = BlastHit.get(
+                                resultSet.getInt(6), resultSet.getLong(7), resultSet.getLong(8), resultSet.getString(9), resultSet.getLong(3), resultSet.getString(10));
+
+                        return new BidirectionalBlastHit(blastHitOne, blastHitTwo);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            };
+            return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
+                    iter, Spliterator.NONNULL), false);
+        } catch (RuntimeException e) {
+            throw (Exception) e.getCause();
+        }
     }
 
     @Override
@@ -172,7 +256,79 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
 
     @Override
     public Stream<UnidirectionalBlastHit> getBHforGenomePair(Genome one, Genome two, double cutoff, int balancer) throws Exception {
-        throw new NotImplementedException();
+        final int query_genome_id = this.genomeIdByName(one.getName().getName());
+        final int target_genome_id = this.genomeIdByName(two.getName().getName());
+        try {
+
+            PreparedStatement preparedStatement = this.connection.prepareStatement(
+                    "SELECT\n" +
+                            "LO.ID_ORF,\n" +
+                            "LO.SEQUENCE,\n" +
+                            "RO.ID_ORF,\n" +
+                            "RO.SEQUENCE,\n" +
+                            "B.ID_BLAST,\n" +
+                            "B.ITERATION,\n" +
+                            "B.SCORE\n" +
+                            "from\n" +
+                            "APP.BLASTS B\n" +
+                            "inner join\n" +
+                            "APP.ORFS LO\n" +
+                            "on B.ID_QUERY_ORF=LO.ID_ORF\n" +
+                            "inner join\n" +
+                            "APP.ORFS RO\n" +
+                            "on B.ID_TARGET_ORF=RO.ID_ORF\n" +
+                            "where\n" +
+                            "B.ID_QUERY_GENOME=?\n" +
+                            "and\n" +
+                            "B.ID_TARGET_GENOME=?\n" +
+                            "and\n" +
+                            "B.SCORE >=?"
+                    , ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY
+            );
+
+            preparedStatement.setFetchSize(balancer);
+            preparedStatement.setInt(1, query_genome_id);
+            preparedStatement.setInt(2, target_genome_id);
+            preparedStatement.setDouble(3, cutoff);
+            final ResultSet resultSet = preparedStatement.executeQuery();
+
+            Iterator<UnidirectionalBlastHit> iter = new Iterator<UnidirectionalBlastHit>() {
+                @Override
+                public boolean hasNext() {
+                    try {
+                        if (resultSet.next()) {
+                            return true;
+                        } else {
+                            preparedStatement.close();
+                            return false;
+                        }
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                @Override
+                public UnidirectionalBlastHit next() {
+                    try {
+
+                        final UnidirectionalBlastHit unidirectionalBlastHit = UnidirectionalBlastHit.get(
+                                query_genome_id, target_genome_id, resultSet.getInt(5),
+                                resultSet.getInt(1), resultSet.getString(2), resultSet.getInt(3),
+                                resultSet.getString(6), resultSet.getDouble(7), resultSet.getString(4));
+
+                        return unidirectionalBlastHit;
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            };
+            return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
+                    iter, Spliterator.NONNULL), false);
+        } catch (RuntimeException e) {
+            throw (Exception) e.getCause();
+        }
     }
 
     @Override

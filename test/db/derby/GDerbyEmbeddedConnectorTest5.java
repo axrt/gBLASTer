@@ -98,6 +98,7 @@ public class GDerbyEmbeddedConnectorTest5 {
 
     }
 
+
     @After
     public void tearDown() throws Exception {
         System.out.println("tearDown()");
@@ -107,5 +108,7 @@ public class GDerbyEmbeddedConnectorTest5 {
         //Chromosomes will be deleted automatically
         final int[] absentChromosomes=connector.loadChromosomeIdsForGenomeId(genomeID).toArray();
         Assert.assertEquals(absentChromosomes.length, 0);
+        //Delete the tmp file
+        tmpBlastOutput.toFile().delete();
     }
 }

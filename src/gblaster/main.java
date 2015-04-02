@@ -15,6 +15,8 @@ import blast.ncbi.output.Iteration;
 import db.BlastDAO;
 import db.GenomeDAO;
 import db.OrfDAO;
+import db.connect.Connector;
+import db.derby.GDerbyEmbeddedConnector;
 import db.mysql.GMySQLConnector;
 import db.mysql.MySQLConnector;
 import format.text.CommonFormats;
@@ -46,7 +48,7 @@ import java.util.stream.Stream;
 public class main {
 
     final static File propertiesFile = new File("/home/alext/Developer/gBLASTer/src/properties/driver.xml");
-    final static Path home = Paths.get("/home/alext/Documents/gBlaster");
+    final static Path home = Paths.get("/home/alext/Documents/Research/gBLASTer");
     final static Path tmpFolder = home.resolve("tmp");
     final static Path orfFolder = home.resolve("orfs");
     final static Path bbhFolder = home.resolve("bbh");
@@ -58,7 +60,7 @@ public class main {
     final static ExecutorService blastExecutorService = Executors.newFixedThreadPool(maxThreads);
     final static ExecutorService helperExecutorService = Executors.newCachedThreadPool();
     final static ExecutorService blastDriverExecutorService = Executors.newCachedThreadPool();
-    final static int orfUnloadBalancer = Integer.MIN_VALUE;
+    final static int orfUnloadBalancer = 100;
     final static int orfBatchSize = 1000;
     final static int blastBufferSize = 1000;
     final static int blastThreadsPerRun = 6;
@@ -89,17 +91,16 @@ public class main {
             final Map<Genome, GeneticCode<AminoAcid>> genomeGeneticCodeMap = Deployer.mapGenomesToGeneticCode(gBlasterProperties.getGenome().stream());
 
             //3.Connect to database
-            final MySQLConnector mySQLConnector = GMySQLConnector.get("jdbc:mysql://localhost/gblaster", "gblaster", "gblaster");
+            final Connector connector = GDerbyEmbeddedConnector.get("jdbc:derby:/home/alext/Documents/gBLASTer/db;create=true", "gblaster", "gblaster");
 
-            mySQLConnector.connectToDatabase();
-            ((GMySQLConnector) mySQLConnector).setNumberOfConnections(maxThreads);
-            mySQLConnector.getConnection().setAutoCommit(false);
+            connector.connectToDatabase();
+            connector.getConnection().setAutoCommit(false);
 
 
             //4.Define DAOs
-            final GenomeDAO genomeDAO = (GenomeDAO) mySQLConnector;
-            final OrfDAO orfDAO = (OrfDAO) mySQLConnector;
-            final BlastDAO blastDAO = (BlastDAO) mySQLConnector;
+            final GenomeDAO genomeDAO = (GenomeDAO) connector;
+            final OrfDAO orfDAO = (OrfDAO) connector;
+            final BlastDAO blastDAO = (BlastDAO) connector;
 
             //5.Define large format
             final LargeFormat largeFormat = CommonFormats.LARGE_FASTA;
@@ -239,7 +240,6 @@ public class main {
             }
 
             //Unload BHs
-
             for (int i = 0; i < gBlasterProperties.getGenome().size(); i++) {
                 for (int j = 0; j < gBlasterProperties.getGenome().size(); j++) {
                     if (i == j) {
@@ -268,7 +268,7 @@ public class main {
             }
 
 
-            //Create the legend for the BBHs
+            //TODO: Create the legend for the BBHs TODO
 
 
         } catch (FileNotFoundException e) {
@@ -421,7 +421,6 @@ public class main {
                     }
                     totalBlasts++;
                 }
-                //Add all bitscores
 
                 synchronized (System.out.getClass()) {
                     System.out.println("Total number of blasts: " + totalBlasts + " done for " + query.getName().getName() + " <->" + target.getName().getName());

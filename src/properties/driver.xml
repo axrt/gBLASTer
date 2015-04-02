@@ -16,17 +16,17 @@ and open the template in the editor.
     </BlastProperties>
     <Genome>
         <Name name="Escherichia_coli_str_K_12_substr_MG1655_complete_genome"/>
-        <PathToFile path="/home/alext/Documents/gBlaster/genomes/e_coli.fasta"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/Escherichia_coli_str_K_12_substr_MG1655_complete_genome.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Bacillus_subtilis_subsp_subtilis_str_168_chromosome_complete_genome"/>
-        <PathToFile path="/home/alext/Documents/gBlaster/genomes/b_subtilis_168.fasta"/>
+        <PathToFile path="/home/alext/Documents/gBlaster/genomes/Bacillus_subtilis_subsp_subtilis_str_168_chromosome_complete_genome.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
-    <Genome>
+    <!--<Genome>
         <Name name="Wolbachia_endosymbiont_of_Drosophila_simulans_wHa_complete_genome"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/wolbachia_wha.fasta"/>
         <GeneticTable type="standard"/>
@@ -90,6 +90,7 @@ and open the template in the editor.
         <Name name="Schizosaccharomyces_Pombe_972h"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/schizosaccharomyces_pombe_972h.fasta"/>
         <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Thalassiosira_pseudonana_CCMP1335"/>
@@ -289,16 +290,16 @@ and open the template in the editor.
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
-    <!--<Genome>
+    <Genome>
         <Name name="Amphi_accepted_scaffolds"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/amphi_accepted_scaffolds.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
-    </Genome> -->
+    </Genome>
     <Genome>
         <Name name="Human_genscan"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/human_genscan.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
-    </Genome>
+    </Genome>-->
 </gBlasterProperties>
