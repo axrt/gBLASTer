@@ -2,6 +2,7 @@ package db.derby;
 
 import analisys.bbh.BidirectionalBlastHit;
 import analisys.bbh.UnidirectionalBlastHit;
+import blast.blast.BlastHelper;
 import blast.ncbi.output.Iteration;
 import db.BlastDAO;
 import db.GenomeDAO;
@@ -92,9 +93,27 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
 
     @Override
     public boolean genomeHasBeenBlastedOver(Genome query, Genome target) throws Exception {
+        System.out.println(query.getName().getName() + " -> " + target.getName().getName());
+        final int query_genome_id = this.genomeIdByName(query.getName().getName());
+        final int target_genome_id = this.genomeIdByName(target.getName().getName());
 
+        try (Statement statement =
+                     this.connection.createStatement(
+                     )) {
 
-        throw new NotImplementedException();
+            final ResultSet resultSet = statement.executeQuery(
+                    "select \n" +
+                            "id_blast\n" +
+                            "from \n" +
+                            "app.blasts\n" +
+                            "where \n" +
+                            "ID_QUERY_GENOME=" + query_genome_id + "\n" +
+                            "and\n" +
+                            "ID_TARGET_GENOME=" + target_genome_id + "\n" +
+                            "limit 1"
+            );
+            return resultSet.next();
+        }
     }
 
     @Override
@@ -104,7 +123,51 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
 
     @Override
     public boolean saveBlastResultBatch(Stream<Iteration> iterations, int qgenome_id, int tgenome_id) throws Exception {
-        throw new NotImplementedException();
+
+        try (
+                PreparedStatement preparedStatement = this.connection.prepareStatement(
+                        "INSERT INTO APP.BLASTS \n" +
+                                "(ID_QUERY_ORF,\n" +
+                                "ID_TARGET_ORF,\n" +
+                                "ITERATION,\n" +
+                                "ID_QUERY_GENOME,\n" +
+                                "ID_TARGET_GENOME,\n" +
+                                "SCORE)\n" +
+                                "VALUES" +
+                                "(?," +
+                                "?," +
+                                "?," +
+                                "?," +
+                                "?," +
+                                "?)"
+                );
+        ) {
+
+            iterations.forEach(iter -> {
+                try {
+                    final int orfs_id = Integer.parseInt(iter.getIterationQueryDef().split("\\|")[0]);
+                    final int hitorf_id = Integer.parseInt(iter.getIterationHits().getHit().get(0).getHitDef().split("\\|")[0]);
+                    preparedStatement.setInt(1, orfs_id);
+                    preparedStatement.setInt(2, hitorf_id);
+                    preparedStatement.setString(3, BlastHelper.marshallIterationToString(iter));
+                    preparedStatement.setInt(4, qgenome_id);
+                    preparedStatement.setInt(5, tgenome_id);
+                    preparedStatement.setDouble(6,BlastHelper.comulativeBitScore(iter));
+                    preparedStatement.addBatch();
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(e);
+                }
+
+            });
+            preparedStatement.executeBatch();
+            this.connection.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+        return true;
     }
 
     @Override
@@ -436,7 +499,21 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
 
     @Override
     public long calculateOrfsForGenomeName(String genomeName, int minLength, int maxLength) throws Exception {
-        throw new NotImplementedException();
+
+        final int genome_id=this.genomeIdByName(genomeName);
+
+        try (PreparedStatement preparedStatement = this.connection
+                .prepareStatement("select count(*) from app.orfs where id_genome=?"
+                                + " and length>=?"
+                                + " and length<=?"
+                )) {
+            preparedStatement.setInt(1, genome_id);
+            preparedStatement.setInt(2, minLength);
+            preparedStatement.setInt(3, maxLength);
+            final ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+            return resultSet.getInt(1);
+        }
     }
 
     @Override

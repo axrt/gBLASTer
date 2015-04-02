@@ -94,7 +94,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
 
     @Override
     public int saveGenomeForName(Genome<? extends Chromosome> genome) throws Exception {
-        return 0;
+        throw new NotImplementedException();
     }
 
     @Override
@@ -119,9 +119,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
 
     @Override
     public int saveChromososmeForGenomeID(int genomeId, Chromosome chromosome) throws SQLException {
-
-
-        return 0;
+        throw new NotImplementedException();
     }
 
     @Override
