@@ -339,9 +339,9 @@ public class main {
                         return 0;
                     }
                     if (first > second) {
-                        return -1;
+                        return 1;
                     }
-                    return 1;
+                    return -1;
 
                 }
             }).collect(Collectors.toList());

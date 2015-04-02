@@ -92,6 +92,8 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
 
     @Override
     public boolean genomeHasBeenBlastedOver(Genome query, Genome target) throws Exception {
+
+
         throw new NotImplementedException();
     }
 
@@ -154,7 +156,16 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
 
     @Override
     public int genomeIdByName(String name) throws Exception {
-        throw new NotImplementedException();
+        try (PreparedStatement preparedStatement = this.connection.prepareStatement("select id_genome from app.genomes where name=?")) {
+
+            preparedStatement.setString(1, name);
+            final ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
+            }else{
+             throw new Exception("Genome by name \""+name+"\" does not exist in the database!");
+            }
+        }
     }
 
     @Override
@@ -430,6 +441,15 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
 
     @Override
     public long reportORFBaseSize(Genome genome) throws Exception {
-        throw new NotImplementedException();
+        final int gemome_id=this.genomeIdByName(genome.getName().getName());
+        try (PreparedStatement preparedStatement = this.connection.prepareStatement("select count(id_orf) from app.orfs where id_genome=?")) {
+            preparedStatement.setInt(1, gemome_id);
+            final ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getLong(1);
+            } else {
+                return 0;
+            }
+        }
     }
 }

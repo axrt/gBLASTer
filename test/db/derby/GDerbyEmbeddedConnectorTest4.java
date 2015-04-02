@@ -8,6 +8,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import properties.jaxb.Genome;
+import properties.jaxb.Name;
 import sequence.nucleotide.genome.LargeGenome;
 import sequence.protein.ORF;
 
@@ -85,7 +87,8 @@ public class GDerbyEmbeddedConnectorTest4 {
                 .filter(orf -> orf.getSequence().length() <= maxLen)
                 .sorted(Comparator.comparing(ORF::getSequence)).collect(Collectors.toList());
         System.out.println("step 4.");
-        final List<ORF> loadedOrfs=connector.loadAllOrfsForGenomeId(genomeID,balancer,minLen,maxLen).sorted(Comparator.comparing(ORF::getSequence)).collect(Collectors.toList());
+        final List<ORF> loadedOrfs=connector.loadAllOrfsForGenomeId(genomeID,balancer,minLen,maxLen).sorted(Comparator.comparing(ORF::getSequence))
+                .collect(Collectors.toList());
         System.out.println("step 5.");
 
         int point=0;
@@ -93,6 +96,11 @@ public class GDerbyEmbeddedConnectorTest4 {
             Assert.assertEquals(orf.getSequence(),loadedOrfs.get(point).getSequence());
             point++;
         }
+        final Genome genome=new Genome();
+        final Name name = new Name();
+        name.setName(genomeName);
+        genome.setName(name);
+        Assert.assertEquals(loadedOrfs.size(),connector.reportORFBaseSize(genome));
 
     }
 
