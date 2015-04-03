@@ -9,6 +9,7 @@ import db.BlastDAO;
 import db.GenomeDAO;
 import db.OrfDAO;
 import format.text.LargeFormat;
+import org.apache.commons.io.input.ReaderInputStream;
 import properties.jaxb.Genome;
 import sequence.nucleotide.genome.Chromosome;
 import sequence.nucleotide.genome.LargeChromosome;
@@ -16,16 +17,15 @@ import sequence.nucleotide.genome.LargeGenome;
 import sequence.protein.ORF;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Iterator;
-import java.util.Optional;
-import java.util.Spliterator;
-import java.util.Spliterators;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -413,11 +413,11 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
         int id_chormosome = 0;
         try (PreparedStatement preparedStatement = this.connection
                 .prepareStatement("INSERT INTO app.chromosomes (id_genome, name, sequence) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-             InputStream inputStream=largeChromosome.getSequenceInputstream()) {
+             BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(largeChromosome.getSequenceInputstream()))) {
 
             preparedStatement.setInt(1, genomeId);
             preparedStatement.setString(2, largeChromosome.getAc());
-            preparedStatement.setBinaryStream(3, inputStream);
+            preparedStatement.setClob(3, bufferedReader);
             preparedStatement.executeUpdate();
             this.connection.commit();
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
@@ -444,7 +444,8 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
             preparedStatement.setInt(1, id);
             final ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                return Optional.of(LargeChromosome.formPreprocessedComponents(resultSet.getString(3), resultSet.getBinaryStream(4), largeFormat));
+                return Optional.of(LargeChromosome.formPreprocessedComponents(resultSet.getString(3),
+                        new ReaderInputStream(new BufferedReader(resultSet.getCharacterStream(4))), largeFormat));
             } else {
                 return Optional.empty();
             }
@@ -479,12 +480,14 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
         try (PreparedStatement preparedStatement = this.connection
                 .prepareStatement("INSERT INTO app.chromosomes (id_genome, name, sequence) VALUES (?, ?, ?)")) {
             final int[] counter = {0};
+            final List<BufferedReader> readers=new ArrayList<>();
             chromoStream.forEach(ch -> {
-                final InputStream inputStream = ch.getSequenceInputstream();
+                final BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(ch.getSequenceInputstream()));
+                readers.add(bufferedReader);
                 try {
                     preparedStatement.setInt(1, genomeId);
                     preparedStatement.setString(2, ch.getAc());
-                    preparedStatement.setBinaryStream(3, inputStream);
+                    preparedStatement.setClob(3, bufferedReader);
                     preparedStatement.addBatch();
                     counter[0]++;
                     if (counter[0] > batchSize) {
@@ -498,6 +501,9 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
             });
             preparedStatement.executeBatch();
             this.connection.commit();
+            for (BufferedReader br:readers){
+                br.close();
+            }
         }
         catch (Exception e){
             this.connection.rollback();
@@ -549,7 +555,8 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
                 public LargeChromosome next() {
                     try {
 
-                        return LargeChromosome.formPreprocessedComponents(resultSet.getString(3), resultSet.getBinaryStream(4), largeFormat);
+                        return LargeChromosome.formPreprocessedComponents(resultSet.getString(3),
+                                new ReaderInputStream(new BufferedReader(resultSet.getCharacterStream(4))), largeFormat);
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
                     }
