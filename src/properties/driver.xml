@@ -28,47 +28,47 @@ and open the template in the editor.
     </Genome>
     <Genome>
         <Name name="Wolbachia_endosymbiont_of_Drosophila_simulans_wHa_complete_genome"/>
-        <PathToFile path="/home/alext/Documents/gBlaster/genomes/Wolbachia_endosymbiont_of_Drosophila_simulans_wHa_complete_genome.fasta"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Wolbachia_endosymbiont_of_Drosophila_simulans_wHa_complete_genome.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
-    <!--<Genome>
+    <Genome>
         <Name name="Wolbachia_endosymbiont_of_Culex_quinquefasciatus_Pel_chromosome_complete_genome"/>
-        <PathToFile path="/home/alext/Documents/gBlaster/genomes/wolbachia_pel.fasta"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Wolbachia_endosymbiont_of_Culex_quinquefasciatus_Pel_chromosome_complete_genome.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Sphingomonas_wittichii_RW1_chromosome_complete_genome"/>
-        <PathToFile path="/home/alext/Documents/gBlaster/genomes/s_wittichii.fasta"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Sphingomonas_wittichii_RW1_chromosome_complete_genome.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Drosophila_simulans"/>
-        <PathToFile path="/home/alext/Documents/gBlaster/genomes/drosophila_simulans.fasta"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Drosophila_simulans.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
-    <Genome>
+    <!--<Genome>
         <Name name="Culex_pipiens"/>
-        <PathToFile path="/home/alext/Documents/gBlaster/genomes/culex_pipiens.fasta"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Culex_pipiens.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
-    </Genome>
+    </Genome>-->
     <Genome>
         <Name name="Arabidopsis_thaliana"/>
-        <PathToFile path="/home/alext/Documents/gBlaster/genomes/arabidopsis_thaliana.fasta"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Arabidopsis_thaliana.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Ostreococcus_tauri"/>
-        <PathToFile path="/home/alext/Documents/gBlaster/genomes/ostreococcus_tauri.fasta"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Ostreococcus_tauri.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
-    <Genome>
+    <!--<Genome>
         <Name name="Caenorhabditis_Elegans_Bristol_N2"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/caenorhabditis_elegans_bristol_n2.fasta"/>
         <GeneticTable type="standard"/>

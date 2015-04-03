@@ -62,7 +62,7 @@ public class main {
     final static ExecutorService blastDriverExecutorService = Executors.newCachedThreadPool();
     final static int orfUnloadBalancer = 100;
     final static int orfBatchSize = 1000;
-    final static int blastBufferSize = 1000;
+    final static int blastBufferSize = 5000;
     final static int blastThreadsPerRun = 6;
     final static int largeChromosomeBatchSize = 1;
     final static int minimumOrfLength = 50;
@@ -268,6 +268,7 @@ public class main {
             }
 
             System.out.println("All done.");
+            connector.getConnection().commit();
             connector.getConnection().close();
             //TODO: Create the legend for the BBHs TODO
 
