@@ -30,6 +30,6 @@ public interface ChromosomeDAO {
      * @throws Exception
      */
     public IntStream saveLargeChromosomesForGenomeId(int genomeId, Stream<? extends LargeChromosome> chromoStream, int counter) throws Exception;
-    public Stream<LargeChromosome> loadLargeChromosomesForGemomeID(int genomeId, LargeFormat largeFormat) throws Exception;
+    public Stream<LargeChromosome> loadLargeChromosomesForGenomeID(int genomeId, LargeFormat largeFormat) throws Exception;
 
 }

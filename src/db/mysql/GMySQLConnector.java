@@ -261,7 +261,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     }
 
     @Override
-    public Stream<LargeChromosome> loadLargeChromosomesForGemomeID(int genomeId, LargeFormat largeFormat) throws SQLException {
+    public Stream<LargeChromosome> loadLargeChromosomesForGenomeID(int genomeId, LargeFormat largeFormat) throws SQLException {
         PreparedStatement preparedStatement = this.connection
                 .prepareStatement("select * from `gblaster`.`chromosomes` where id_genome=?");
         try {

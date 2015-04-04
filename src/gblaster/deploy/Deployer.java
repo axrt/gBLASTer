@@ -12,7 +12,6 @@ import db.OrfDAO;
 import format.text.Format;
 import format.text.LargeFormat;
 import properties.jaxb.Genome;
-import sequence.nucleotide.genome.Chromosome;
 import sequence.nucleotide.genome.LargeChromosome;
 import sequence.nucleotide.genome.LargeGenome;
 import sequence.nucleotide.genome.LargeSequenceHelper;
@@ -52,9 +51,9 @@ public final class Deployer {
             final LargeGenome largeGenome = LargeGenome.grasp(genome.getName().getName(), fileInputStream, format, toTmpFolder);
             final int genomeId = genomeDAO.saveLargeGenome(largeGenome);
             final Stream<LargeChromosome> largeChromosomeStream = largeGenome.stream();
-            final IntStream intStream = genomeDAO.saveLargeChromosomesForGenomeId(genomeId, largeChromosomeStream,batchSize);
+            genomeDAO.saveLargeChromosomesForGenomeId(genomeId, largeChromosomeStream,batchSize).forEach(i->System.out.println("Chromosome saved for id: " + i));
             //Calculate the RCs
-            final Stream<LargeChromosome> largeChromosomes = genomeDAO.loadLargeChromosomesForGemomeID(genomeId, format);
+            final Stream<LargeChromosome> largeChromosomes = genomeDAO.loadLargeChromosomesForGenomeID(genomeId, format);
             final Stream<LargeChromosome> largeRCChromosomes = largeChromosomes.map(lch -> {
                 final File inputFile = toTmpFolder.resolve(FWD_FILE).toFile();
                 if (inputFile.exists()) {
@@ -107,9 +106,10 @@ public final class Deployer {
                 final Optional<LargeChromosome> largeChromosomeOptional = chromosomeDAO.loadLargeCrhomosomeForID(chid, chromosomeFormat);
                 if (largeChromosomeOptional.isPresent()) {
                     final LargeChromosome largeChromosome = largeChromosomeOptional.get();
-                    System.out.println("chid> "+chid);
+                    System.out.println("Translating chromosome for id: "+chid);
                     final GStreamRibosome gStreamRibosome = GStreamRibosome.newInstance(largeChromosome.getSequenceInputstream(), geneticCode);
                     orfDAO.saveOrfsForChromosomeId(chid, gStreamRibosome.translate().filter(orf->orf.getSequence().length()>minOrfSize),batchSize);
+                    System.out.println("ORFs from chromosome for id "+chid+" saved.");
                 }
             } catch (Exception e) {
                 e.printStackTrace();

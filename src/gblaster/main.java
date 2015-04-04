@@ -122,6 +122,7 @@ public class main {
                                 final IntStream chromosomeIdStream = Deployer.deployAndGetchromosomeIds(genomeDAO, g, largeFormat, tmpFolder, nucleotideAlphabet, largeChromosomeBatchSize);
                                 System.out.println("Translating ORFs for Genome ".concat(g.getName().getName()));
                                 Deployer.translateAndGetORFStreamForGenomeId(chromosomeIdStream, genomeDAO, orfDAO, genomeGeneticCodeMap.get(g), largeFormat, orfBatchSize, minimumOrfLength);
+                                System.out.println("ORFs for Genome ".concat(g.getName().getName().concat(" translated.")));
                             }else if(g.getFastaType().getType().equals("prot")){
                                 System.out.println("Deploying ORFs ".concat(g.getName().getName()));
                                 Deployer.deployMockGenomeORFBase(genomeDAO,g.getName().getName(),orfDAO,orfBatchSize,g);
@@ -196,6 +197,7 @@ public class main {
 
             for (Genome[] pair : pairs) {
                 if (!blastDAO.genomeHasBeenBlastedOver(pair[0], pair[1])) {
+                    System.out.println(pair[0].getName().getName() + " -> " + pair[1].getName().getName());
                     preparedBlasts.add(wrapInCallable(pair, genomeDAO, orfDAO, blastDAO, blastBufferSize, gBlasterProperties.getBlastProperties(), blastThreadsPerRun));
                 } else {
                     System.out.println("Genome " + pair[0].getName().getName() + " has already been blasted over " + pair[1].getName().getName() + ".");

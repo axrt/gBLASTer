@@ -10,7 +10,6 @@ import db.GenomeDAO;
 import db.OrfDAO;
 import format.text.CommonFormats;
 import junit.extensions.TestSetup;
-import org.junit.Test;
 import org.xml.sax.SAXException;
 import properties.jaxb.Genome;
 import properties.jaxb.Name;
@@ -145,7 +144,7 @@ public class GMySQLConnectorTest {
             mySQLConnector.connectToDatabase();
             final GenomeDAO gd = (GenomeDAO) mySQLConnector;
             final LargeGenome chromosomes = LargeGenome.grasp("test", new FileInputStream(pathToFile.toFile()), CommonFormats.LARGE_FASTA, pathToFile.getParent());
-            gd.loadLargeChromosomesForGemomeID(2, CommonFormats.LARGE_FASTA).forEach(ch -> System.out.println(ch.getSequence()));
+            gd.loadLargeChromosomesForGenomeID(2, CommonFormats.LARGE_FASTA).forEach(ch -> System.out.println(ch.getSequence()));
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (Exception e) {

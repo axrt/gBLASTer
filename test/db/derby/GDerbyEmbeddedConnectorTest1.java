@@ -75,7 +75,7 @@ public class GDerbyEmbeddedConnectorTest1 {
 
             lg = LargeGenome.grasp(genomeName, inputStream, largeFormat, toTmp);
 
-            final List<String> queryChromosomes = connector.loadLargeChromosomesForGemomeID(genomeID, largeFormat)
+            final List<String> queryChromosomes = connector.loadLargeChromosomesForGenomeID(genomeID, largeFormat)
                     .map(LargeChromosome::getSequence).collect(Collectors.toList());
             final List<String> targetChromosomes = lg.stream().map(LargeChromosome::getSequence).collect(Collectors.toList());
 
