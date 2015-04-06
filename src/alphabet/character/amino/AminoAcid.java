@@ -8,9 +8,9 @@ public class AminoAcid extends alphabet.character.Character {
 
     protected final String threeLetterRep;
 
-    public AminoAcid(char pillar, byte representation,String threeLetterRep) {
+    public AminoAcid(char pillar, byte representation, String threeLetterRep) {
         super(pillar, representation);
-        this.threeLetterRep=threeLetterRep;
+        this.threeLetterRep = threeLetterRep;
     }
 
     public String getThreeLetterRep() {

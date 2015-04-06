@@ -406,7 +406,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
     public int saveLargeChromososmeForGenomeID(int genomeId, LargeChromosome largeChromosome) throws Exception {
         try (PreparedStatement preparedStatement = this.connection
                 .prepareStatement("INSERT INTO app.chromosomes (id_genome, name, sequence) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-            InputStreamReader inputStreamReader=new InputStreamReader(largeChromosome.getSequenceInputstream())) {
+             InputStreamReader inputStreamReader = new InputStreamReader(largeChromosome.getSequenceInputstream())) {
 
             preparedStatement.setInt(1, genomeId);
             preparedStatement.setString(2, largeChromosome.getAc());
@@ -415,7 +415,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
             if (resultSet.next()) {
                 return resultSet.getInt(1);
-            }else{
+            } else {
                 throw new Exception("Save operation failed to return chromosome ID!");
             }
         } catch (SQLException | IOException e) {
@@ -475,31 +475,30 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
                 .prepareStatement("INSERT INTO app.chromosomes (id_genome, name, sequence) VALUES (?, ?, ?)")) {
             final int[] counter = {0};
             chromoStream.forEach(ch -> {
-                final Reader reader=new InputStreamReader(ch.getSequenceInputstream());
+                final Reader reader = new InputStreamReader(ch.getSequenceInputstream());
                 try {
                     preparedStatement.setInt(1, genomeId);
                     preparedStatement.setString(2, ch.getAc());
                     preparedStatement.setClob(3, reader);
-                    System.out.println("Added chromosome: "+ch.getAc());
+                    System.out.println("Added chromosome: " + ch.getAc());
                     preparedStatement.addBatch();
-                    try{
-                    reader.close();
-                    }catch (IOException e){
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
                         throw new UncheckedIOException(e);
                     }
                     //counter[0]++;
                     //if (counter[0] > batchSize) {
-                        //counter[0] = 0;
-                        //preparedStatement.executeBatch();
-                   // }
+                    //counter[0] = 0;
+                    //preparedStatement.executeBatch();
+                    // }
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
             });
             preparedStatement.executeBatch();
             this.connection.commit();
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             this.connection.rollback();
             throw e;
         }
@@ -525,7 +524,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
     public Stream<LargeChromosome> loadLargeChromosomesForGenomeID(int genomeId, LargeFormat largeFormat) throws Exception {
 
         PreparedStatement preparedStatement = this.connection
-                .prepareStatement("select * from app.chromosomes where id_genome=?",ResultSet.TYPE_FORWARD_ONLY);
+                .prepareStatement("select * from app.chromosomes where id_genome=?", ResultSet.TYPE_FORWARD_ONLY);
         try {
             preparedStatement.setInt(1, genomeId);
             final ResultSet resultSet = preparedStatement.executeQuery();
@@ -603,14 +602,14 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
             preparedStatement.executeBatch();
             this.connection.commit();
             final ResultSet resultSet = preparedStatement.getGeneratedKeys();
-            if(resultSet!=null) {
+            if (resultSet != null) {
                 final IntStream.Builder builder = IntStream.builder();
 
                 while (resultSet.next()) {
                     builder.accept(resultSet.getInt(1));
                 }
                 return builder.build();
-            }else{
+            } else {
                 return IntStream.empty();
             }
         } catch (RuntimeException e) {

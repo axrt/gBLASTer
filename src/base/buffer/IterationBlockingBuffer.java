@@ -10,22 +10,24 @@ import blast.ncbi.output.Iteration;
  */
 public class IterationBlockingBuffer extends SimpleBlockingBuffer<Iteration> implements AbstractBlast.BlastEventListner<Iteration> {
 
-    public static final Iteration DONE=new Iteration();
+    public static final Iteration DONE = new Iteration();
 
-    protected String name="";
+    protected String name = "";
 
     protected IterationBlockingBuffer(int capacity) {
         super(capacity);
     }
-    protected IterationBlockingBuffer(String name,int capacity) {
-        super(capacity); this.name=name;
+
+    protected IterationBlockingBuffer(String name, int capacity) {
+        super(capacity);
+        this.name = name;
     }
 
     @Override
     public int listen(AbstractBlast.BlastEvent<Iteration> event) throws InterruptedException {
         if (event.getEvent().isPresent()) {
             this.put(event.getEvent().get());
-            if(this.remainingCapacity()==0){
+            if (this.remainingCapacity() == 0) {
                 synchronized (System.out.getClass()) {
                     System.out.println("Buffer ".concat(this.name) + " is full;");
                 }
@@ -46,7 +48,7 @@ public class IterationBlockingBuffer extends SimpleBlockingBuffer<Iteration> imp
 
     @Override
     public void release() throws InterruptedException {
-        synchronized (this){
+        synchronized (this) {
             this.done = true;
         }
         this.put(DONE);
@@ -55,7 +57,8 @@ public class IterationBlockingBuffer extends SimpleBlockingBuffer<Iteration> imp
     public static IterationBlockingBuffer get(int capasity) {
         return new IterationBlockingBuffer(capasity);
     }
-    public static IterationBlockingBuffer get(String name,int capasity) {
-        return new IterationBlockingBuffer(name,capasity);
+
+    public static IterationBlockingBuffer get(String name, int capasity) {
+        return new IterationBlockingBuffer(name, capasity);
     }
 }

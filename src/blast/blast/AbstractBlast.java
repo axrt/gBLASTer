@@ -24,7 +24,7 @@ public abstract class AbstractBlast<E> implements Callable<Optional<BlastOutput>
         this.listeners = new ArrayList<>();
     }
 
-    public abstract static class BlastBuilder<E,T extends AbstractBlast<E>> {
+    public abstract static class BlastBuilder<E, T extends AbstractBlast<E>> {
         protected final Path pathToBlast;
         protected final Path queryFile;
         protected final String database;
@@ -36,59 +36,64 @@ public abstract class AbstractBlast<E> implements Callable<Optional<BlastOutput>
             this.queryFile = queryFile;
             this.optionalParams = new LinkedHashMap<>();
         }
+
         protected abstract void die(Optional<Stream<String>> params, String addition);
 
-        public BlastBuilder<E,T> query_loc(Optional<String> value) {
+        public BlastBuilder<E, T> query_loc(Optional<String> value) {
             value.ifPresent(v -> this.optionalParams.put(QUERY_LOC, v));
             return this;
         }
 
-        public BlastBuilder<E,T> gilist(Optional<Path> value) {
+        public BlastBuilder<E, T> gilist(Optional<Path> value) {
             value.ifPresent(v -> this.optionalParams.put(GILIST, v.toFile().getPath()));
             return this;
         }
 
-        public BlastBuilder<E,T> negative_gilist(Optional<Path> value) {
+        public BlastBuilder<E, T> negative_gilist(Optional<Path> value) {
             value.ifPresent(v -> this.optionalParams.put(NEGATIVE_GILIST, v.toFile().getPath()));
             return this;
         }
 
-        public BlastBuilder<E,T> remote (Optional<Boolean> value) {
+        public BlastBuilder<E, T> remote(Optional<Boolean> value) {
             value.ifPresent(v -> {
-                if(v) {
+                if (v) {
                     this.optionalParams.put(REMOTE, "");
                 }
             });
             return this;
         }
 
-        public BlastBuilder<E,T> strand(Optional<BlastHelper.STRAND_VALS> value) {
+        public BlastBuilder<E, T> strand(Optional<BlastHelper.STRAND_VALS> value) {
             value.ifPresent(v -> this.optionalParams.put(STRAND, v.toString()));
             return this;
         }
-        public BlastBuilder<E,T> out(Optional<Path>value){
+
+        public BlastBuilder<E, T> out(Optional<Path> value) {
             value.ifPresent(v -> this.optionalParams.put(OUT, v.toFile().getPath()));
             return this;
         }
 
-        public BlastBuilder<E,T> evalue(Optional<Double> value) {
+        public BlastBuilder<E, T> evalue(Optional<Double> value) {
             value.ifPresent(v -> this.optionalParams.put(EVALUE, v.toString()));
             return this;
         }
-        public BlastBuilder<E,T> word_size(Optional<Integer> value) {
+
+        public BlastBuilder<E, T> word_size(Optional<Integer> value) {
             value.ifPresent(v -> this.optionalParams.put(WORD_SIZE, v.toString()));
             return this;
         }
 
-        public BlastBuilder<E,T> gapopen(Optional<Integer> value) {
+        public BlastBuilder<E, T> gapopen(Optional<Integer> value) {
             value.ifPresent(v -> this.optionalParams.put(GAPOPEN, v.toString()));
             return this;
         }
-        public BlastBuilder<E,T> maxTargetSeqs(Optional<Integer> value){
-            value.ifPresent(v->this.optionalParams.put(MAX_TARGET_SEQS,v.toString()));
+
+        public BlastBuilder<E, T> maxTargetSeqs(Optional<Integer> value) {
+            value.ifPresent(v -> this.optionalParams.put(MAX_TARGET_SEQS, v.toString()));
             return this;
         }
-        public BlastBuilder<E,T> subject(Optional<Path> value) {
+
+        public BlastBuilder<E, T> subject(Optional<Path> value) {
             final List<String> has = Stream.of(DB, GILIST, SEQIDLIST, NEGATIVE_GILIST, DB_SOFT_MASK, DB_HARD_MASK).filter(s -> this.optionalParams.containsKey(s)).collect(toList());
             if (!has.isEmpty()) {
                 value.ifPresent(v -> this.optionalParams.put(SUBJECT, v.toFile().getPath()));
@@ -97,6 +102,7 @@ public abstract class AbstractBlast<E> implements Callable<Optional<BlastOutput>
             this.die(Optional.of(has.stream()), SUBJECT);
             return this;
         }
+
         public List<String> getCommand() {
             this.optionalParams.put(OUTFMT, BlastHelper.OUTFMT_VALS.XML.toString());
             final List<String> command = new ArrayList<>();
@@ -112,14 +118,16 @@ public abstract class AbstractBlast<E> implements Callable<Optional<BlastOutput>
 
             return command;
         }
-        public BlastBuilder<E,T> num_threads(Optional<Integer> value) {
+
+        public BlastBuilder<E, T> num_threads(Optional<Integer> value) {
             value.ifPresent(v -> this.optionalParams.put(NUM_THREADS, String.valueOf(v.intValue())));
             return this;
         }
+
         public abstract T build();
     }
 
-    public abstract static class BlastNBuilder<E,T extends AbstractBlast<E>> extends BlastBuilder<E,T>{
+    public abstract static class BlastNBuilder<E, T extends AbstractBlast<E>> extends BlastBuilder<E, T> {
 
         public BlastNBuilder(Path pathToBlast, Path queryFile, String database) {
             super(pathToBlast, queryFile, database);
@@ -131,37 +139,37 @@ public abstract class AbstractBlast<E> implements Callable<Optional<BlastOutput>
             params.ifPresent(s -> new IllegalArgumentException("The BLASTN command already contains ".concat(s.collect(joining(", "))).concat(" commands, which are incompatible with ").concat(addition)));
         }
 
-        public <BLASTN_TASK_VALS>BlastNBuilder<E,T> task(Optional<BLASTN_TASK_VALS> value) {
+        public <BLASTN_TASK_VALS> BlastNBuilder<E, T> task(Optional<BLASTN_TASK_VALS> value) {
             value.ifPresent(v -> this.optionalParams.put(TASK, v.toString()));
             return this;
         }
 
-        public BlastNBuilder<E,T> gapextend(Optional<Integer> value) {
+        public BlastNBuilder<E, T> gapextend(Optional<Integer> value) {
             value.ifPresent(v -> this.optionalParams.put(GAPEXTEND, v.toString()));
             return this;
         }
 
-        public BlastNBuilder<E,T> penalty(Optional<Integer> value) {
+        public BlastNBuilder<E, T> penalty(Optional<Integer> value) {
             value.ifPresent(v -> this.optionalParams.put(PENALTY, v.toString()));
             return this;
         }
 
-        public BlastNBuilder<E,T> reward(Optional<Integer> value) {
+        public BlastNBuilder<E, T> reward(Optional<Integer> value) {
             value.ifPresent(v -> this.optionalParams.put(REWARD, v.toString()));
             return this;
         }
 
-        public BlastNBuilder<E,T> use_index(Optional<Boolean> value) {
+        public BlastNBuilder<E, T> use_index(Optional<Boolean> value) {
             value.ifPresent(v -> this.optionalParams.put(USE_INDEX, v.toString()));
             return this;
         }
 
-        public BlastNBuilder<E,T> index_name(Optional<String> value) {
+        public BlastNBuilder<E, T> index_name(Optional<String> value) {
             value.ifPresent(v -> this.optionalParams.put(INDEX_NAME, v));
             return this;
         }
 
-        public BlastNBuilder<E,T> subject_loc(Optional<String> value) {
+        public BlastNBuilder<E, T> subject_loc(Optional<String> value) {
             final List<String> has = Stream.of(DB, GILIST, SEQIDLIST, NEGATIVE_GILIST, DB_SOFT_MASK, DB_HARD_MASK, REMOTE).filter(s -> this.optionalParams.containsKey(s)).collect(toList());
             if (!has.isEmpty()) {
                 value.ifPresent(v -> this.optionalParams.put(SUBJECT, v));
@@ -171,7 +179,7 @@ public abstract class AbstractBlast<E> implements Callable<Optional<BlastOutput>
             return this;//will never be reached
         }
 
-        public BlastNBuilder<E,T> outfmt(Optional<OUTFMT_VALS> value, Optional<OUTFMT_VALS.CUSTOM_FMT_VALS>... custom_fmt_vals) {
+        public BlastNBuilder<E, T> outfmt(Optional<OUTFMT_VALS> value, Optional<OUTFMT_VALS.CUSTOM_FMT_VALS>... custom_fmt_vals) {
             value.ifPresent(v -> {
                 final Set<OUTFMT_VALS> allowedVals;
                 if (!(allowedVals = Stream.of(TABULAR, TABULAR_WITH_COMMENT_LINES, COMMA_SEP_VALS).collect(Collectors.toSet())).contains(v)) {
@@ -190,7 +198,7 @@ public abstract class AbstractBlast<E> implements Callable<Optional<BlastOutput>
             return this;
         }
 
-        public BlastNBuilder<E,T> show_gis() {
+        public BlastNBuilder<E, T> show_gis() {
             this.optionalParams.put(SHOW_GIS, "");
             return this;
         }
@@ -210,20 +218,21 @@ public abstract class AbstractBlast<E> implements Callable<Optional<BlastOutput>
         }
     }
 
-    public abstract static class BlastPBuilder<E,T extends AbstractBlast<E>> extends BlastBuilder<E,T>{
+    public abstract static class BlastPBuilder<E, T extends AbstractBlast<E>> extends BlastBuilder<E, T> {
         public BlastPBuilder(Path pathToBlast, Path queryFile, String database) {
             super(pathToBlast, queryFile, database);
         }
+
         @Override
         protected void die(Optional<Stream<String>> params, String addition) {
             params.orElseThrow(() -> new IllegalArgumentException("Inconsistent parameter ".concat(addition).concat("!")));
             params.ifPresent(s -> new IllegalArgumentException("The BLASTN command already contains ".concat(s.collect(joining(", "))).concat(" commands, which are incompatible with ").concat(addition)));
         }
-     //Specific methods
+        //Specific methods
 
     }
 
-    public static interface BlastEventListner<E>{
+    public static interface BlastEventListner<E> {
         public int listen(BlastEvent<E> event) throws Exception;
     }
 

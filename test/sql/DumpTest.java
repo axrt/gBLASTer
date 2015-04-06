@@ -13,10 +13,10 @@ import java.util.regex.Pattern;
 public class DumpTest {
 
     @Test
-    public void test(){
+    public void test() {
 
-        final File pathToFile=new File("/home/alext/dumps/gblaster_first_10/gblaster_blasts.sql");
-        try(BufferedReader bufferedReader=new BufferedReader(new FileReader(pathToFile))){
+        final File pathToFile = new File("/home/alext/dumps/gblaster_first_10/gblaster_blasts.sql");
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(pathToFile))) {
             final Pattern p = Pattern.compile("<Iteration>");
             System.out.println(bufferedReader.lines().mapToInt(line -> {
 

@@ -18,13 +18,13 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * 
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "dbConnection",
-    "blastProperties",
-    "genome"
+        "dbConnection",
+        "blastProperties",
+        "genome"
 })
 @XmlRootElement(name = "gBlasterProperties")
 public class GBlasterProperties {
@@ -38,11 +38,9 @@ public class GBlasterProperties {
 
     /**
      * Gets the value of the dbConnection property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link DBConnection }
-     *     
+     *
+     * @return possible object is
+     * {@link DBConnection }
      */
     public DBConnection getDBConnection() {
         return dbConnection;
@@ -50,11 +48,9 @@ public class GBlasterProperties {
 
     /**
      * Sets the value of the dbConnection property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link DBConnection }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link DBConnection }
      */
     public void setDBConnection(DBConnection value) {
         this.dbConnection = value;
@@ -62,11 +58,9 @@ public class GBlasterProperties {
 
     /**
      * Gets the value of the blastProperties property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link BlastProperties }
-     *     
+     *
+     * @return possible object is
+     * {@link BlastProperties }
      */
     public BlastProperties getBlastProperties() {
         return blastProperties;
@@ -74,11 +68,9 @@ public class GBlasterProperties {
 
     /**
      * Sets the value of the blastProperties property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link BlastProperties }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link BlastProperties }
      */
     public void setBlastProperties(BlastProperties value) {
         this.blastProperties = value;
@@ -86,25 +78,23 @@ public class GBlasterProperties {
 
     /**
      * Gets the value of the genome property.
-     * 
+     * <p>
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the genome property.
-     * 
+     * <p>
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getGenome().add(newItem);
      * </pre>
-     * 
-     * 
+     * <p>
+     * <p>
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link Genome }
-     * 
-     * 
      */
     public List<Genome> getGenome() {
         if (genome == null) {

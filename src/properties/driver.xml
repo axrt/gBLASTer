@@ -16,31 +16,36 @@ and open the template in the editor.
     </BlastProperties>
     <Genome>
         <Name name="Escherichia_coli_str_K_12_substr_MG1655_complete_genome"/>
-        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Escherichia_coli_str_K_12_substr_MG1655_complete_genome.fasta"/>
+        <PathToFile
+                path="/home/alext/Documents/Research/gBLASTer/genomes/Escherichia_coli_str_K_12_substr_MG1655_complete_genome.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Bacillus_subtilis_subsp_subtilis_str_168_chromosome_complete_genome"/>
-        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Bacillus_subtilis_subsp_subtilis_str_168_chromosome_complete_genome.fasta"/>
+        <PathToFile
+                path="/home/alext/Documents/Research/gBLASTer/genomes/Bacillus_subtilis_subsp_subtilis_str_168_chromosome_complete_genome.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Wolbachia_endosymbiont_of_Drosophila_simulans_wHa_complete_genome"/>
-        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Wolbachia_endosymbiont_of_Drosophila_simulans_wHa_complete_genome.fasta"/>
+        <PathToFile
+                path="/home/alext/Documents/Research/gBLASTer/genomes/Wolbachia_endosymbiont_of_Drosophila_simulans_wHa_complete_genome.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Wolbachia_endosymbiont_of_Culex_quinquefasciatus_Pel_chromosome_complete_genome"/>
-        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Wolbachia_endosymbiont_of_Culex_quinquefasciatus_Pel_chromosome_complete_genome.fasta"/>
+        <PathToFile
+                path="/home/alext/Documents/Research/gBLASTer/genomes/Wolbachia_endosymbiont_of_Culex_quinquefasciatus_Pel_chromosome_complete_genome.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Sphingomonas_wittichii_RW1_chromosome_complete_genome"/>
-        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Sphingomonas_wittichii_RW1_chromosome_complete_genome.fasta"/>
+        <PathToFile
+                path="/home/alext/Documents/Research/gBLASTer/genomes/Sphingomonas_wittichii_RW1_chromosome_complete_genome.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
@@ -104,7 +109,7 @@ and open the template in the editor.
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
-   <Genome>
+    <Genome>
         <Name name="Takifugu_rubripes"/>
         <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Takifugu_rubripes.fasta"/>
         <GeneticTable type="standard"/>

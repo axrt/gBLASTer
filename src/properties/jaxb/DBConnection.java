@@ -19,15 +19,16 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.NormalizedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 import org.w3c.dom.Element;
 
 
 /**
- * 
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "content"
+        "content"
 })
 @XmlRootElement(name = "DBConnection")
 public class DBConnection {
@@ -47,11 +48,9 @@ public class DBConnection {
 
     /**
      * Gets the value of the url property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getUrl() {
         return url;
@@ -59,11 +58,9 @@ public class DBConnection {
 
     /**
      * Sets the value of the url property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setUrl(String value) {
         this.url = value;
@@ -71,11 +68,9 @@ public class DBConnection {
 
     /**
      * Gets the value of the login property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getLogin() {
         return login;
@@ -83,11 +78,9 @@ public class DBConnection {
 
     /**
      * Sets the value of the login property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setLogin(String value) {
         this.login = value;
@@ -95,11 +88,9 @@ public class DBConnection {
 
     /**
      * Gets the value of the password property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     *
+     * @return possible object is
+     * {@link String }
      */
     public String getPassword() {
         return password;
@@ -107,11 +98,9 @@ public class DBConnection {
 
     /**
      * Sets the value of the password property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link String }
      */
     public void setPassword(String value) {
         this.password = value;
@@ -119,26 +108,24 @@ public class DBConnection {
 
     /**
      * Gets the value of the content property.
-     * 
+     * <p>
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the content property.
-     * 
+     * <p>
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getContent().add(newItem);
      * </pre>
-     * 
-     * 
+     * <p>
+     * <p>
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
      * {@link Element }
-     * 
-     * 
      */
     public List<Object> getContent() {
         if (content == null) {

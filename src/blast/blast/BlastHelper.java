@@ -405,14 +405,15 @@ public final class BlastHelper {
         return hit.getHitHsps().getHsp().stream().mapToInt(hsp -> Integer.parseInt(hsp.getHspIdentity())).sum();
     }
 
-    public static String getTabbedAlignment(Hit hit){
-        final String queryAlnseq=hit.getHitHsps().getHsp().stream().map(hsp->hsp.getHspQseq()).collect(Collectors.joining());
-        final String midline=hit.getHitHsps().getHsp().stream().map(hsp->hsp.getHspMidline()).collect(Collectors.joining());
-        final String subjectAlnseq=hit.getHitHsps().getHsp().stream().map(hsp->hsp.getHspHseq()).collect(Collectors.joining());
+    public static String getTabbedAlignment(Hit hit) {
+        final String queryAlnseq = hit.getHitHsps().getHsp().stream().map(hsp -> hsp.getHspQseq()).collect(Collectors.joining());
+        final String midline = hit.getHitHsps().getHsp().stream().map(hsp -> hsp.getHspMidline()).collect(Collectors.joining());
+        final String subjectAlnseq = hit.getHitHsps().getHsp().stream().map(hsp -> hsp.getHspHseq()).collect(Collectors.joining());
         return queryAlnseq.concat("\t").concat(midline).concat("\t").concat(subjectAlnseq);
     }
-    public static int getAlignmentLength(Hit hit){
-        return hit.getHitHsps().getHsp().stream().mapToInt(hsp->Integer.parseInt(hsp.getHspAlignLen())).sum();
+
+    public static int getAlignmentLength(Hit hit) {
+        return hit.getHitHsps().getHsp().stream().mapToInt(hsp -> Integer.parseInt(hsp.getHspAlignLen())).sum();
     }
 
     public static double comulativeBitScore(Iteration iteration) throws JAXBException, SAXException {
@@ -423,7 +424,7 @@ public final class BlastHelper {
 
     public static double comulativeBitScore(HitHsps hitHsps) throws JAXBException, SAXException {
 
-        final double comulativeBitScore  = hitHsps.getHsp().stream().mapToDouble(hsp -> {
+        final double comulativeBitScore = hitHsps.getHsp().stream().mapToDouble(hsp -> {
             return Double.parseDouble(hsp.getHspBitScore());
         }).sum();
 

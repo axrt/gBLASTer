@@ -6,7 +6,7 @@ import alphabet.character.Character;
  * Created by alext on 5/23/14.
  * TODO document class
  */
-public abstract class Sequence<T extends Character>{
+public abstract class Sequence<T extends Character> {
 
     protected final String sequence;
     protected final String ac;

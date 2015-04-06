@@ -28,7 +28,6 @@ public class LargeChromosomeTest {
             System.out.println(lc.getSequence());
 
 
-
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

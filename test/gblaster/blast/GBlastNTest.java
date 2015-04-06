@@ -31,10 +31,10 @@ public class GBlastNTest {
         final String db = "16SMicrobial";
 
         final int bufferCapasity = 1;
-        final IterationEventBuffer buffer=new IterationEventBuffer(bufferCapasity);
+        final IterationEventBuffer buffer = new IterationEventBuffer(bufferCapasity);
 
         executor.execute(buffer);
-        final GBlast gblastn =(GBlast)new GBlast.GBlastNBuilder(toBlastN, toTestFile, db).num_threads(Optional.of(12)).build();
+        final GBlast gblastn = (GBlast) new GBlast.GBlastNBuilder(toBlastN, toTestFile, db).num_threads(Optional.of(12)).build();
 
         gblastn.addListener(buffer);
         final Future<Optional<BlastOutput>> future = executor.submit(gblastn);
@@ -65,8 +65,12 @@ public class GBlastNTest {
 
         @Override
         public int listen(AbstractBlast.BlastEvent<Iteration> event) {
-            event.getEvent().ifPresent(i->{
-                try{this.put(i);}catch (InterruptedException ie){ie.printStackTrace();}
+            event.getEvent().ifPresent(i -> {
+                try {
+                    this.put(i);
+                } catch (InterruptedException ie) {
+                    ie.printStackTrace();
+                }
             });
             return this.size();
         }
@@ -88,8 +92,8 @@ public class GBlastNTest {
 
         @Override
         public void run() {
-             final Thread t=new Thread(this);
-            while(!isDone()){
+            final Thread t = new Thread(this);
+            while (!isDone()) {
                 final Iteration i;
                 try {
                     i = this.take();

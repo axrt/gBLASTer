@@ -127,10 +127,10 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
         int id_chormosome = 0;
         try (PreparedStatement preparedStatement = this.connection
                 .prepareStatement("INSERT INTO `gblaster`.`chromosomes` (`id_genome`, `name`, `sequence`) VALUES (?, ?, ?);", Statement.RETURN_GENERATED_KEYS);
-             ) {
+        ) {
 
             preparedStatement.setInt(1, genomeId);
-            preparedStatement.setString(2, "MockAC_genome: "+genomeId);
+            preparedStatement.setString(2, "MockAC_genome: " + genomeId);
             preparedStatement.setString(3, "ATGC");
             preparedStatement.executeUpdate();
             this.connection.commit();
@@ -313,7 +313,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
             final int[] countHolder = {0};
             orfStream.forEach(orf -> {
                 try {
-                    int position=0;
+                    int position = 0;
                     preparedStatement.setInt(++position, idChromosome);
                     preparedStatement.setInt(++position, orf.getFrame());
                     preparedStatement.setInt(++position, orf.getStart());
@@ -711,7 +711,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
                                 "?);"
 
                 );
-               ) {
+        ) {
 
             iterations.forEach(iter -> {
                 try {

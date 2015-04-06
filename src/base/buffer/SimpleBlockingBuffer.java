@@ -13,20 +13,20 @@ public abstract class SimpleBlockingBuffer<E> extends ArrayBlockingQueue<E> {
 
     public SimpleBlockingBuffer(int capacity) {
         super(capacity);
-        this.done=false;
+        this.done = false;
     }
 
     public SimpleBlockingBuffer(int capacity, boolean fair) {
         super(capacity, fair);
-        this.done=false;
+        this.done = false;
     }
 
     public SimpleBlockingBuffer(int capacity, boolean fair, Collection<? extends E> c) {
         super(capacity, fair, c);
-        this.done=false;
+        this.done = false;
     }
 
-    public synchronized boolean isDone(){
+    public synchronized boolean isDone() {
         return this.done;
     }
 

@@ -17,15 +17,15 @@ import java.util.concurrent.Future;
 public class MakeBlastDBTest {
 
     @Test
-    public void test(){
-         final MakeBlastDB makeBlastDB=new  MakeBlastDB.MakeBlastDBBuilder("test")
-                 .pathToMakeBlastDb(Paths.get("/bin/makeblastdb"))
-                 .pathToDbFolder(Paths.get("/home/alext/Downloads/tmp"))
-                 .pathToSequenceFile(Paths.get("/home/alext/Downloads/tmp/test.nu"))
-                 .type(MakeBlastDB.DBType.NUCL)
-                 .build();
-        final ExecutorService executorService= Executors.newSingleThreadExecutor();
-        final Future<Optional<File>> fileFuture=executorService.submit(makeBlastDB);
+    public void test() {
+        final MakeBlastDB makeBlastDB = new MakeBlastDB.MakeBlastDBBuilder("test")
+                .pathToMakeBlastDb(Paths.get("/bin/makeblastdb"))
+                .pathToDbFolder(Paths.get("/home/alext/Downloads/tmp"))
+                .pathToSequenceFile(Paths.get("/home/alext/Downloads/tmp/test.nu"))
+                .type(MakeBlastDB.DBType.NUCL)
+                .build();
+        final ExecutorService executorService = Executors.newSingleThreadExecutor();
+        final Future<Optional<File>> fileFuture = executorService.submit(makeBlastDB);
         try {
             fileFuture.get().ifPresent(System.out::println);
         } catch (InterruptedException e) {

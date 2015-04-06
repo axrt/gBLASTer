@@ -5,10 +5,9 @@ import junit.framework.TestCase;
 public class DerbyEmbeddedConnectorTest extends TestCase {
 
 
-
     public void testLoadDriver() throws Exception {
-        final DerbyEmbeddedConnector connector=DerbyEmbeddedConnector.newDefaultInstance("jdbc:derby:db/testdb;create=true", "gblaster", "gblaser");
-        TestCase.assertEquals(true,connector.loadDriver());
+        final DerbyEmbeddedConnector connector = DerbyEmbeddedConnector.newDefaultInstance("jdbc:derby:db/testdb;create=true", "gblaster", "gblaser");
+        TestCase.assertEquals(true, connector.loadDriver());
     }
 
     public void testNewDefaultInstance() throws Exception {
@@ -16,7 +15,7 @@ public class DerbyEmbeddedConnectorTest extends TestCase {
     }
 
     public void testConnectToDatabase() throws Exception {
-        final DerbyEmbeddedConnector connector=DerbyEmbeddedConnector.newDefaultInstance("jdbc:derby:testres/db/derby/testdb;create=true", "gblaster", "gblaster");
+        final DerbyEmbeddedConnector connector = DerbyEmbeddedConnector.newDefaultInstance("jdbc:derby:testres/db/derby/testdb;create=true", "gblaster", "gblaster");
         TestCase.assertEquals(true, connector.connectToDatabase());
     }
 }

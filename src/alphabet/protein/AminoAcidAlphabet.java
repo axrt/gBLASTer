@@ -14,31 +14,31 @@ import java.util.Optional;
 public class AminoAcidAlphabet extends Alphabet<AminoAcid> {
     public static enum ALPHABET {
 
-        G(new AminoAcid('G',(byte)'G',"Gly")),
-        A(new AminoAcid('A',(byte)'A',"Ala")),
-        V(new AminoAcid('V',(byte)'V',"Val")),
-        L(new AminoAcid('L',(byte)'L',"Leu")),
-        I(new AminoAcid('I',(byte)'I',"Ile")),
+        G(new AminoAcid('G', (byte) 'G', "Gly")),
+        A(new AminoAcid('A', (byte) 'A', "Ala")),
+        V(new AminoAcid('V', (byte) 'V', "Val")),
+        L(new AminoAcid('L', (byte) 'L', "Leu")),
+        I(new AminoAcid('I', (byte) 'I', "Ile")),
 
-        M(new AminoAcid('M',(byte)'M',"Met")),
-        F(new AminoAcid('F',(byte)'F',"Phe")),
-        P(new AminoAcid('P',(byte)'P',"Pro")),
-        S(new AminoAcid('S',(byte)'S',"Ser")),
-        T(new AminoAcid('T',(byte)'T',"Thr")),
+        M(new AminoAcid('M', (byte) 'M', "Met")),
+        F(new AminoAcid('F', (byte) 'F', "Phe")),
+        P(new AminoAcid('P', (byte) 'P', "Pro")),
+        S(new AminoAcid('S', (byte) 'S', "Ser")),
+        T(new AminoAcid('T', (byte) 'T', "Thr")),
 
-        C(new AminoAcid('C',(byte)'C',"Cys")),
-        Y(new AminoAcid('Y',(byte)'Y',"Tyr")),
-        N(new AminoAcid('N',(byte)'N',"Asn")),
-        Q(new AminoAcid('Q',(byte)'Q',"Gln")),
-        W(new AminoAcid('W',(byte)'W',"Trp")),
+        C(new AminoAcid('C', (byte) 'C', "Cys")),
+        Y(new AminoAcid('Y', (byte) 'Y', "Tyr")),
+        N(new AminoAcid('N', (byte) 'N', "Asn")),
+        Q(new AminoAcid('Q', (byte) 'Q', "Gln")),
+        W(new AminoAcid('W', (byte) 'W', "Trp")),
 
-        D(new AminoAcid('D',(byte)'D',"Asp")),
-        E(new AminoAcid('E',(byte)'E',"Glu")),
-        K(new AminoAcid('K',(byte)'K',"Lys")),
-        R(new AminoAcid('R',(byte)'R',"Arg")),
-        H(new AminoAcid('H',(byte)'H',"His")),
+        D(new AminoAcid('D', (byte) 'D', "Asp")),
+        E(new AminoAcid('E', (byte) 'E', "Glu")),
+        K(new AminoAcid('K', (byte) 'K', "Lys")),
+        R(new AminoAcid('R', (byte) 'R', "Arg")),
+        H(new AminoAcid('H', (byte) 'H', "His")),
 
-        STOP(new AminoAcid('X',(byte)'X',"Stop"));
+        STOP(new AminoAcid('X', (byte) 'X', "Stop"));
 
 
         private final AminoAcid aminoAcid;

@@ -17,7 +17,7 @@ public class ORF extends ProteinSequence<AminoAcid> {
         this.start = start;
         this.stop = stop;
         this.frame = frame;
-        this.id=0;
+        this.id = 0;
     }
 
     public int getFrame() {
@@ -42,7 +42,7 @@ public class ORF extends ProteinSequence<AminoAcid> {
 
     @Override
     public String toString() {
-        final StringBuilder stringBuilder=new StringBuilder();
+        final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("AC: ");
         stringBuilder.append(this.ac);
         stringBuilder.append('\n');
@@ -59,7 +59,7 @@ public class ORF extends ProteinSequence<AminoAcid> {
         return stringBuilder.toString();
     }
 
-    public static ORF get(String sequence, String ac, int start, int stop, int frame){
-        return new ORF(sequence,ac,start,stop,frame);
+    public static ORF get(String sequence, String ac, int start, int stop, int frame) {
+        return new ORF(sequence, ac, start, stop, frame);
     }
 }

@@ -17,6 +17,7 @@ public class MySQLConnector extends Connector {
      */
     protected static final String MYSQL_DRIVER = "com.mysql.jdbc.Driver";
     //protected final
+
     /**
      * @param URL      {@link String} of the database
      * @param user     {@link String} user name for the database

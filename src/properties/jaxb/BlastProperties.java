@@ -16,15 +16,15 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * 
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "pathToMakeBlastDb",
-    "pathToBlastP",
-    "expect",
-    "minORFLength",
-    "maxORFLength"
+        "pathToMakeBlastDb",
+        "pathToBlastP",
+        "expect",
+        "minORFLength",
+        "maxORFLength"
 })
 @XmlRootElement(name = "BlastProperties")
 public class BlastProperties {
@@ -42,11 +42,9 @@ public class BlastProperties {
 
     /**
      * Gets the value of the pathToMakeBlastDb property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link PathToMakeBlastDb }
-     *     
+     *
+     * @return possible object is
+     * {@link PathToMakeBlastDb }
      */
     public PathToMakeBlastDb getPathToMakeBlastDb() {
         return pathToMakeBlastDb;
@@ -54,11 +52,9 @@ public class BlastProperties {
 
     /**
      * Sets the value of the pathToMakeBlastDb property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link PathToMakeBlastDb }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link PathToMakeBlastDb }
      */
     public void setPathToMakeBlastDb(PathToMakeBlastDb value) {
         this.pathToMakeBlastDb = value;
@@ -66,11 +62,9 @@ public class BlastProperties {
 
     /**
      * Gets the value of the pathToBlastP property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link PathToBlastP }
-     *     
+     *
+     * @return possible object is
+     * {@link PathToBlastP }
      */
     public PathToBlastP getPathToBlastP() {
         return pathToBlastP;
@@ -78,11 +72,9 @@ public class BlastProperties {
 
     /**
      * Sets the value of the pathToBlastP property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link PathToBlastP }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link PathToBlastP }
      */
     public void setPathToBlastP(PathToBlastP value) {
         this.pathToBlastP = value;
@@ -90,11 +82,9 @@ public class BlastProperties {
 
     /**
      * Gets the value of the expect property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Expect }
-     *     
+     *
+     * @return possible object is
+     * {@link Expect }
      */
     public Expect getExpect() {
         return expect;
@@ -102,11 +92,9 @@ public class BlastProperties {
 
     /**
      * Sets the value of the expect property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Expect }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Expect }
      */
     public void setExpect(Expect value) {
         this.expect = value;
@@ -114,11 +102,9 @@ public class BlastProperties {
 
     /**
      * Gets the value of the minORFLength property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link MinORFLength }
-     *     
+     *
+     * @return possible object is
+     * {@link MinORFLength }
      */
     public MinORFLength getMinORFLength() {
         return minORFLength;
@@ -126,11 +112,9 @@ public class BlastProperties {
 
     /**
      * Sets the value of the minORFLength property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link MinORFLength }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link MinORFLength }
      */
     public void setMinORFLength(MinORFLength value) {
         this.minORFLength = value;
@@ -138,11 +122,9 @@ public class BlastProperties {
 
     /**
      * Gets the value of the maxORFLength property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link MaxORFLength }
-     *     
+     *
+     * @return possible object is
+     * {@link MaxORFLength }
      */
     public MaxORFLength getMaxORFLength() {
         return maxORFLength;
@@ -150,11 +132,9 @@ public class BlastProperties {
 
     /**
      * Sets the value of the maxORFLength property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link MaxORFLength }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link MaxORFLength }
      */
     public void setMaxORFLength(MaxORFLength value) {
         this.maxORFLength = value;

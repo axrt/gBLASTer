@@ -21,7 +21,7 @@ import java.sql.SQLException;
 public class DeployerTest {
 
     @Test
-    public void Test(){
+    public void Test() {
         final Path pathToFile = Paths.get("/home/alext/Documents/Ocular Project/sequencing/DES/Fasta/1173L.fasta");
         try {
 
@@ -29,12 +29,12 @@ public class DeployerTest {
             mySQLConnector.connectToDatabase();
             final GenomeDAO gd = (GenomeDAO) mySQLConnector;
 
-            final Genome genome=new Genome();
+            final Genome genome = new Genome();
             genome.setName(new Name());
             genome.getName().setName("testname");
             genome.setPathToFile(new PathToFile());
             genome.getPathToFile().setPath(pathToFile.toFile().getPath());
-            Deployer.deployAndGetchromosomeIds(gd, genome, CommonFormats.LARGE_FASTA, Paths.get("/home/alext/Downloads/tmp"), NucleotideAlphabet.get(),10)
+            Deployer.deployAndGetchromosomeIds(gd, genome, CommonFormats.LARGE_FASTA, Paths.get("/home/alext/Downloads/tmp"), NucleotideAlphabet.get(), 10)
                     .forEach(System.out::println);
 
         } catch (SQLException e) {

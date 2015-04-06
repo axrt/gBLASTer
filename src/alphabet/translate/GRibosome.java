@@ -17,6 +17,7 @@ import java.util.stream.StreamSupport;
 public class GRibosome extends Ribosome<Nucleotide, AminoAcid, ORF> {
 
     protected final Map<String, AminoAcid> codonTable;
+
     protected GRibosome(Sequence<Nucleotide> matrix, Map<String, AminoAcid> codonTable) {
         super(matrix);
         this.codonTable = codonTable;
@@ -34,7 +35,7 @@ public class GRibosome extends Ribosome<Nucleotide, AminoAcid, ORF> {
 
     public Stream<ORF> translateParallel() {
 
-       return this.translate().parallel();
+        return this.translate().parallel();
     }
 
     protected class Frame {
@@ -74,7 +75,7 @@ public class GRibosome extends Ribosome<Nucleotide, AminoAcid, ORF> {
                         final AminoAcid nextAA = codonTable.get(matrixString.substring(position, position + 3));
                         if (nextAA == null || nextAA.getPillar() == AminoAcidAlphabet.ALPHABET.STOP.getAA().getPillar()) {
 
-                            if(stringBuilder.length()==0){
+                            if (stringBuilder.length() == 0) {
                                 stringBuilder.append(AminoAcidAlphabet.ALPHABET.STOP.toString());
                             }
                             break;
@@ -83,7 +84,7 @@ public class GRibosome extends Ribosome<Nucleotide, AminoAcid, ORF> {
                     }
                     count++;
                     final ORF orf = ORF.get(stringBuilder.toString(), String.valueOf(count), start, position, frame);
-                    position+=3;
+                    position += 3;
                     //System.out.println("new orf was born");
                     return orf;
                 }

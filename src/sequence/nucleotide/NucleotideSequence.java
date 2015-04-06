@@ -14,9 +14,9 @@ public class NucleotideSequence<T extends Nucleotide> extends Sequence<T> {
     }
 
 
-    public static NucleotideSequence<Nucleotide> get(String sequence, String ac){
+    public static NucleotideSequence<Nucleotide> get(String sequence, String ac) {
 
-        return new NucleotideSequence<>(sequence,ac);
+        return new NucleotideSequence<>(sequence, ac);
     }
 
 }

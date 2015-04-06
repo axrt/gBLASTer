@@ -10,8 +10,9 @@ import java.util.Map;
  * Created by alext on 6/5/14.
  * TODO document class
  */
-public class GeneticCode<A extends AminoAcid> extends HashMap<String,A> {
-    public static final GeneticCode<AminoAcid> STANDARD=new GeneticCode<>(64,"Standard Genetic Code");
+public class GeneticCode<A extends AminoAcid> extends HashMap<String, A> {
+    public static final GeneticCode<AminoAcid> STANDARD = new GeneticCode<>(64, "Standard Genetic Code");
+
     static {
         //TXT
         STANDARD.put("TTT", AminoAcidAlphabet.ALPHABET.F.getAA());
@@ -94,6 +95,7 @@ public class GeneticCode<A extends AminoAcid> extends HashMap<String,A> {
         STANDARD.put("GGA", AminoAcidAlphabet.ALPHABET.G.getAA());
         STANDARD.put("GGG", AminoAcidAlphabet.ALPHABET.G.getAA());
     }
+
     protected final String name;
 
     /**
@@ -103,7 +105,7 @@ public class GeneticCode<A extends AminoAcid> extends HashMap<String,A> {
      * @param initialCapacity the initial capacity
      * @param loadFactor      the load factor
      * @throws IllegalArgumentException if the initial capacity is negative
-     *                                            or the load factor is nonpositive
+     *                                  or the load factor is nonpositive
      */
     public GeneticCode(int initialCapacity, float loadFactor, String name) {
         super(initialCapacity, loadFactor);
@@ -148,7 +150,7 @@ public class GeneticCode<A extends AminoAcid> extends HashMap<String,A> {
         return this.name;
     }
 
-    public static GeneticCode<AminoAcid> altered(String name){
-        return new GeneticCode<>(STANDARD,name);
+    public static GeneticCode<AminoAcid> altered(String name) {
+        return new GeneticCode<>(STANDARD, name);
     }
 }

@@ -21,15 +21,14 @@ import java.nio.file.Paths;
 public class BlastHelperTest {
 
     @Test
-    public void marshallTest(){
+    public void marshallTest() {
 
-        final Path toFile= Paths.get("/home/alext/Downloads/tmp/out_13619607277eef4ff4-f7ff-4cf5-bb68-f984d5687b15");
-        try(InputStream inputStream=new FileInputStream(toFile.toFile())){
+        final Path toFile = Paths.get("/home/alext/Downloads/tmp/out_13619607277eef4ff4-f7ff-4cf5-bb68-f984d5687b15");
+        try (InputStream inputStream = new FileInputStream(toFile.toFile())) {
 
-            final BlastOutput blastOutput= BlastHelper.catchBLASTOutput(inputStream);
-            final Iteration it=blastOutput.getBlastOutputIterations().getIteration().get(0);
+            final BlastOutput blastOutput = BlastHelper.catchBLASTOutput(inputStream);
+            final Iteration it = blastOutput.getBlastOutputIterations().getIteration().get(0);
             BlastHelper.marshallIteration(it, System.out);
-
 
 
         } catch (FileNotFoundException e) {

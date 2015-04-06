@@ -65,8 +65,8 @@ public class MakeBlastDB implements Callable<Optional<File>> {
              InputStream errorStream = p.getErrorStream();
              BufferedReader errorStreamReader = new BufferedReader(new InputStreamReader(errorStream));
              BufferedReader inputStreamReader = new BufferedReader(new InputStreamReader(inputStream))) {
-             System.out.println(inputStreamReader.lines().collect(Collectors.joining("\n","OUT>: ","")));
-             System.out.println(errorStreamReader.lines().collect(Collectors.joining("\n","ERR>: ","")));
+            System.out.println(inputStreamReader.lines().collect(Collectors.joining("\n", "OUT>: ", "")));
+            System.out.println(errorStreamReader.lines().collect(Collectors.joining("\n", "ERR>: ", "")));
         }
 
         return Optional.of(this.pathToDbFolder.resolve(this.name).toFile());

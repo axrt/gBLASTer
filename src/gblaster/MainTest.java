@@ -27,7 +27,7 @@ import java.util.Map;
 public class MainTest {
 
     @Test
-    public void matchPairsTest(){
+    public void matchPairsTest() {
 
         try (InputStream inputStream = new FileInputStream(main.propertiesFile)) {
             //1.Load
@@ -41,7 +41,7 @@ public class MainTest {
 
             mySQLConnector.connectToDatabase();
 
-            final Genome[][] sorted=main.matchPairs(gBlasterProperties.getGenome(),(OrfDAO)mySQLConnector);
+            final Genome[][] sorted = main.matchPairs(gBlasterProperties.getGenome(), (OrfDAO) mySQLConnector);
 
             System.out.println();
 

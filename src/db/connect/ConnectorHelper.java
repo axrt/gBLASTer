@@ -1,5 +1,6 @@
 package db.connect;
 //TODO document
+
 /**
  * A noninstantiable class that stores static variables for the Connection class
  */

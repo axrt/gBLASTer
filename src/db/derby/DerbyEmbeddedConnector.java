@@ -27,7 +27,7 @@ public class DerbyEmbeddedConnector extends Connector {
         return true;
     }
 
-    public static DerbyEmbeddedConnector newDefaultInstance(String URL, String user, String password){
-        return new DerbyEmbeddedConnector(URL,user,password);
+    public static DerbyEmbeddedConnector newDefaultInstance(String URL, String user, String password) {
+        return new DerbyEmbeddedConnector(URL, user, password);
     }
 }

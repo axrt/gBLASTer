@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
  * Created by alext on 6/10/14.
  * TODO document class
  */
-public class LargeChromosome extends Chromosome implements AutoCloseable{
+public class LargeChromosome extends Chromosome implements AutoCloseable {
 
     private final InputStream sequence;
     private final LargeFormat format;
@@ -53,8 +53,8 @@ public class LargeChromosome extends Chromosome implements AutoCloseable{
         return new LargeChromosome(ac, bufferedInputStream, largeFormat);
     }
 
-    public static LargeChromosome formPreprocessedComponents(String ac, InputStream sequence, LargeFormat format){
-        return new LargeChromosome(ac, sequence,format);
+    public static LargeChromosome formPreprocessedComponents(String ac, InputStream sequence, LargeFormat format) {
+        return new LargeChromosome(ac, sequence, format);
     }
 
     /**

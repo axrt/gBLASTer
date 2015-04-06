@@ -238,7 +238,7 @@ public class GMySQLConnectorTest {
             final MySQLConnector mySQLConnector = GMySQLConnector.get("jdbc:mysql://localhost", "gblaster", "gblaster");
             mySQLConnector.connectToDatabase();
             final BlastDAO blastDAO = (BlastDAO) mySQLConnector;
-            blastDAO.saveBlastResult(it,1,2);
+            blastDAO.saveBlastResult(it, 1, 2);
 
 
         } catch (FileNotFoundException e) {
@@ -271,8 +271,8 @@ public class GMySQLConnectorTest {
         try {
             mySQLConnector.connectToDatabase();
             final BlastDAO blastDAO = (BlastDAO) mySQLConnector;
-            TestSetup.assertEquals(blastDAO.genomeHasBeenBlastedOver(query,target),true);
-            TestSetup.assertEquals(blastDAO.genomeHasBeenBlastedOver(query,mock),false);
+            TestSetup.assertEquals(blastDAO.genomeHasBeenBlastedOver(query, target), true);
+            TestSetup.assertEquals(blastDAO.genomeHasBeenBlastedOver(query, mock), false);
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -281,12 +281,12 @@ public class GMySQLConnectorTest {
     }
 
     //@Test
-    public void calculateOrfsForGenomeNameTest(){
+    public void calculateOrfsForGenomeNameTest() {
         final MySQLConnector mySQLConnector = GMySQLConnector.get("jdbc:mysql://localhost", "gblaster", "gblaster");
         try {
             mySQLConnector.connectToDatabase();
             final OrfDAO orfDAO = (OrfDAO) mySQLConnector;
-            System.out.println(orfDAO.calculateOrfsForGenomeName("human_mito",100,10000));
+            System.out.println(orfDAO.calculateOrfsForGenomeName("human_mito", 100, 10000));
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -296,7 +296,7 @@ public class GMySQLConnectorTest {
 
 
     //@Test
-    public void getBBHforGenomePairTest(){
+    public void getBBHforGenomePairTest() {
         final MySQLConnector mySQLConnector = GMySQLConnector.get("jdbc:mysql://localhost", "gblaster", "gblaster");
         try {
             mySQLConnector.connectToDatabase();
@@ -310,7 +310,7 @@ public class GMySQLConnectorTest {
             final Genome mock = new Genome();
             mock.setName(new Name());
 
-            blastDAO.getBBHforGenomePair(one,two,Integer.MIN_VALUE).forEach(bbh->{
+            blastDAO.getBBHforGenomePair(one, two, Integer.MIN_VALUE).forEach(bbh -> {
                 try {
                     System.out.println(bbh.getForwardHit().getIteration());
                     System.out.println(bbh.getReverseHit().getIteration());

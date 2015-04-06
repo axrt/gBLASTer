@@ -17,13 +17,13 @@ public class LargeSequenceHelperTest {
     @Test
     public void Test() {
         final Path tmpFolder = Paths.get("/home/alext/Downloads/tmp");
-        final File inpuputTmpFile=tmpFolder.resolve("fwd.tmp").toFile();
+        final File inpuputTmpFile = tmpFolder.resolve("fwd.tmp").toFile();
         final File outputTmpFile = tmpFolder.resolve("rwd.tmp").toFile();
         try (FileInputStream fileInputStream = new FileInputStream(new File("/home/alext/Downloads/tmp/test.nu"));
-            BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(
-                    LargeSequenceHelper.revertLargeNucleotideSequence(fileInputStream, NucleotideAlphabet.get(), inpuputTmpFile,outputTmpFile)));
-            BufferedReader bufferedReader1=new BufferedReader(new FileReader(new File("/home/alext/Downloads/tmp/test.nu")));
-        ){
+             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
+                     LargeSequenceHelper.revertLargeNucleotideSequence(fileInputStream, NucleotideAlphabet.get(), inpuputTmpFile, outputTmpFile)));
+             BufferedReader bufferedReader1 = new BufferedReader(new FileReader(new File("/home/alext/Downloads/tmp/test.nu")));
+        ) {
 
             final StringBuilder stringBuilder = new StringBuilder(bufferedReader.lines().collect(Collectors.joining()));
             System.out.println(bufferedReader1.lines().collect(Collectors.joining()));

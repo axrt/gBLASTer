@@ -33,7 +33,7 @@ public class ParseBHs {
                     final String record = stringBuilder.toString();
 
                     final String blastIdString = record.substring(0, record.indexOf('\t'));
-                    final String scoreValue = String.valueOf(comulativeScore(record.substring(record.indexOf('\"')+1, record.lastIndexOf('\"')).replaceAll("\\\\","")));
+                    final String scoreValue = String.valueOf(comulativeScore(record.substring(record.indexOf('\"') + 1, record.lastIndexOf('\"')).replaceAll("\\\\", "")));
                     bufferedWriter.write(blastIdString.concat("\t").concat(scoreValue));
                     bufferedWriter.newLine();
                     stringBuilder = new StringBuilder();
@@ -55,7 +55,7 @@ public class ParseBHs {
 
 
     public static double comulativeScore(String xmlBlastOutput) throws JAXBException, SAXException {
-        xmlBlastOutput=xmlBlastOutput.substring(xmlBlastOutput.indexOf("<Hit_hsps>"),xmlBlastOutput.indexOf("</Hit_hsps>")+"</Hit_hsps>".length());
+        xmlBlastOutput = xmlBlastOutput.substring(xmlBlastOutput.indexOf("<Hit_hsps>"), xmlBlastOutput.indexOf("</Hit_hsps>") + "</Hit_hsps>".length());
         final InputStream stream = new ByteArrayInputStream(xmlBlastOutput.getBytes(StandardCharsets.UTF_8));
         final Optional<HitHsps> hitHsps = BlastHelper.unmarshallHsps(stream);
         final double comulativeScore;

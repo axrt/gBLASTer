@@ -67,8 +67,8 @@ public class main {
     final static int largeChromosomeBatchSize = 1;
     final static int minimumOrfLength = 50;
     final static double bitscoreCutoff = 80;
-    final static int gpu_threads=4;
-    final static int gpu_blocks=512;
+    final static int gpu_threads = 4;
+    final static int gpu_blocks = 512;
     static int countDown;
 
     /**
@@ -121,12 +121,12 @@ public class main {
                                 System.out.println("Deploying Genome ".concat(g.getName().getName()));
                                 final IntStream chromosomeIdStream = Deployer.deployAndGetchromosomeIds(genomeDAO, g, largeFormat, tmpFolder, nucleotideAlphabet, largeChromosomeBatchSize);
                                 System.out.println("Translating ORFs for Genome ".concat(g.getName().getName()));
-                                Deployer.translateAndGetORFStreamForGenomeId(chromosomeIdStream, genomeDAO, orfDAO, genomeGeneticCodeMap.get(g), largeFormat, orfBatchSize, minimumOrfLength,tmpFolder);
+                                Deployer.translateAndGetORFStreamForGenomeId(chromosomeIdStream, genomeDAO, orfDAO, genomeGeneticCodeMap.get(g), largeFormat, orfBatchSize, minimumOrfLength, tmpFolder);
                                 System.out.println("ORFs for Genome ".concat(g.getName().getName().concat(" translated.")));
-                            }else if(g.getFastaType().getType().equals("prot")){
+                            } else if (g.getFastaType().getType().equals("prot")) {
                                 System.out.println("Deploying ORFs ".concat(g.getName().getName()));
-                                Deployer.deployMockGenomeORFBase(genomeDAO,g.getName().getName(),orfDAO,orfBatchSize,g);
-                            } else{
+                                Deployer.deployMockGenomeORFBase(genomeDAO, g.getName().getName(), orfDAO, orfBatchSize, g);
+                            } else {
                                 throw new IllegalArgumentException("Genome type can be either \"nucl\" or \"prot\"");
                             }
                         } else {
@@ -300,7 +300,7 @@ public class main {
         final Callable<Object> pairRun = new Callable<Object>() {
             @Override
             public Object call() throws Exception {
-                pairBlast(pair[0], pair[1], blastBufferSize, genomeDAO, orfDAO, blastDAO, blastProperties, maxThreadsOnBlast,gpu_threads,gpu_blocks);
+                pairBlast(pair[0], pair[1], blastBufferSize, genomeDAO, orfDAO, blastDAO, blastProperties, maxThreadsOnBlast, gpu_threads, gpu_blocks);
                 synchronized (System.out.getClass()) {
                     System.out.println("Blasts to run: " + --countDown);
                 }

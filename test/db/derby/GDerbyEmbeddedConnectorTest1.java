@@ -49,7 +49,7 @@ public class GDerbyEmbeddedConnectorTest1 {
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
-        }finally{
+        } finally {
             Assert.assertTrue(this.connector.genomeForNameExists(genomeName));
         }
     }
@@ -94,7 +94,7 @@ public class GDerbyEmbeddedConnectorTest1 {
         connector.removeGenomeForName(genomeName);
         Assert.assertFalse(connector.genomeForNameExists(genomeName));
         //Chromosomes will be deleted automatically
-        final int[] absentChromosomes=connector.loadChromosomeIdsForGenomeId(genomeID).toArray();
+        final int[] absentChromosomes = connector.loadChromosomeIdsForGenomeId(genomeID).toArray();
         Assert.assertEquals(absentChromosomes.length, 0);
     }
 }

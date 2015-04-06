@@ -16,14 +16,14 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * 
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "name",
-    "pathToFile",
-    "geneticTable",
-    "fastaType"
+        "name",
+        "pathToFile",
+        "geneticTable",
+        "fastaType"
 })
 @XmlRootElement(name = "Genome")
 public class Genome {
@@ -39,11 +39,9 @@ public class Genome {
 
     /**
      * Gets the value of the name property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link Name }
-     *     
+     *
+     * @return possible object is
+     * {@link Name }
      */
     public Name getName() {
         return name;
@@ -51,11 +49,9 @@ public class Genome {
 
     /**
      * Sets the value of the name property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link Name }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link Name }
      */
     public void setName(Name value) {
         this.name = value;
@@ -63,11 +59,9 @@ public class Genome {
 
     /**
      * Gets the value of the pathToFile property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link PathToFile }
-     *     
+     *
+     * @return possible object is
+     * {@link PathToFile }
      */
     public PathToFile getPathToFile() {
         return pathToFile;
@@ -75,11 +69,9 @@ public class Genome {
 
     /**
      * Sets the value of the pathToFile property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link PathToFile }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link PathToFile }
      */
     public void setPathToFile(PathToFile value) {
         this.pathToFile = value;
@@ -87,11 +79,9 @@ public class Genome {
 
     /**
      * Gets the value of the geneticTable property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link GeneticTable }
-     *     
+     *
+     * @return possible object is
+     * {@link GeneticTable }
      */
     public GeneticTable getGeneticTable() {
         return geneticTable;
@@ -99,11 +89,9 @@ public class Genome {
 
     /**
      * Sets the value of the geneticTable property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link GeneticTable }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link GeneticTable }
      */
     public void setGeneticTable(GeneticTable value) {
         this.geneticTable = value;
@@ -111,11 +99,9 @@ public class Genome {
 
     /**
      * Gets the value of the fastaType property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link FastaType }
-     *     
+     *
+     * @return possible object is
+     * {@link FastaType }
      */
     public FastaType getFastaType() {
         return fastaType;
@@ -123,11 +109,9 @@ public class Genome {
 
     /**
      * Sets the value of the fastaType property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link FastaType }
-     *     
+     *
+     * @param value allowed object is
+     *              {@link FastaType }
      */
     public void setFastaType(FastaType value) {
         this.fastaType = value;

@@ -25,7 +25,7 @@ public class LargeFastaTest {
             LargeFormat largeFasta = CommonFormats.LARGE_FASTA;
 
             largeFasta.iterateRecords(inputStream, pathToFile.resolveSibling(".test.tmp")).forEach(is -> readOut(is));
-            System.out.println(count*2);
+            System.out.println(count * 2);
 
 
         } catch (FileNotFoundException e) {

@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Properties;
 //TODO document
+
 /**
  * An abstract class to extend for a certain type of a database used.
  */
@@ -34,16 +35,14 @@ public abstract class Connector {
      * established
      */
     protected boolean connected = false;
+
     /**
-     * @param URL
-     *            {@link String} of the database
-     * @param user
-     *            {@link String} user name
-     * @param password
-     *            {@link String} password
+     * @param URL      {@link String} of the database
+     * @param user     {@link String} user name
+     * @param password {@link String} password
      */
     protected Connector(String URL, String user,
-                                       String password) {
+                        String password) {
         super();
         this.URL = URL;
         this.user = user;
@@ -57,7 +56,6 @@ public abstract class Connector {
     }
 
     /**
-     *
      * @return {@link java.sql.Connection} connection to the database
      */
     public Connection getConnection() {
@@ -71,6 +69,7 @@ public abstract class Connector {
 
     /**
      * Attemts to connect to the database
+     *
      * @return {@code true} in case successfully conected, {@code false} otherwise
      * @throws Exception
      */
@@ -84,9 +83,8 @@ public abstract class Connector {
     }
 
     /**
-     *
      * @return {@code true} in case the database connection has been
-     *         established, {@code false} otherwise
+     * established, {@code false} otherwise
      */
     public boolean isConnected() {
         return this.connected;

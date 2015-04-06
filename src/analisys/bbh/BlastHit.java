@@ -22,12 +22,12 @@ public class BlastHit {
     protected final String textIteration;
 
     protected BlastHit(int id_genomes, long id_blasts, long orfs_id, String sequence, long hitorf_id, String textIteration) {
-        this.id_genomes= id_genomes;
+        this.id_genomes = id_genomes;
         this.id_blasts = id_blasts;
         this.orfs_id = orfs_id;
         this.sequence = sequence;
         this.hitorf_id = hitorf_id;
-        this.textIteration=textIteration;
+        this.textIteration = textIteration;
     }
 
     public long getId_blasts() {
@@ -38,13 +38,17 @@ public class BlastHit {
         return orfs_id;
     }
 
-    public String getSequence() { return sequence; }
+    public String getSequence() {
+        return sequence;
+    }
 
     public long getHitorf_id() {
         return hitorf_id;
     }
 
-    public String getTextIteration() { return textIteration; }
+    public String getTextIteration() {
+        return textIteration;
+    }
 
     public int getId_genomes() {
         return id_genomes;
@@ -54,10 +58,11 @@ public class BlastHit {
         return BlastHelper.unmarshallSingleIteraton(new ByteArrayInputStream(textIteration.getBytes()));
     }
 
-    public static BlastHit get(int id_genomes,long id_blasts, long orfs_id, String sequence, long hitorf_id, Iteration iteration) throws JAXBException {
-        return new BlastHit(id_genomes,id_blasts, orfs_id, sequence, hitorf_id, BlastHelper.marshallIterationToString(iteration));
+    public static BlastHit get(int id_genomes, long id_blasts, long orfs_id, String sequence, long hitorf_id, Iteration iteration) throws JAXBException {
+        return new BlastHit(id_genomes, id_blasts, orfs_id, sequence, hitorf_id, BlastHelper.marshallIterationToString(iteration));
     }
-    public static BlastHit get(int id_genomes,long id_blasts, long orfs_id, String sequence, long hitorf_id, String textIteration) {
-        return new BlastHit(id_genomes,id_blasts, orfs_id, sequence, hitorf_id, textIteration);
+
+    public static BlastHit get(int id_genomes, long id_blasts, long orfs_id, String sequence, long hitorf_id, String textIteration) {
+        return new BlastHit(id_genomes, id_blasts, orfs_id, sequence, hitorf_id, textIteration);
     }
 }

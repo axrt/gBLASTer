@@ -8,10 +8,13 @@ import alphabet.character.Character;
  */
 public abstract class Alphabet<C extends Character> {
 
-     public abstract byte toRepresentaton(char pillar);
-     public abstract char toPillar(byte representation);
-     public abstract byte[]encode(String sequence);
-     public abstract String decode(byte[]representations);
+    public abstract byte toRepresentaton(char pillar);
+
+    public abstract char toPillar(byte representation);
+
+    public abstract byte[] encode(String sequence);
+
+    public abstract String decode(byte[] representations);
 
 
 }

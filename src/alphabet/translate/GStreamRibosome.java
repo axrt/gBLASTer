@@ -15,7 +15,7 @@ import java.util.stream.StreamSupport;
  * TODO document class
  */
 public class GStreamRibosome extends Ribosome<Nucleotide, AminoAcid, ORF> {
-    public static final ORF FAKENULL=ORF.get("","FAKENULL",0,0,0);
+    public static final ORF FAKENULL = ORF.get("", "FAKENULL", 0, 0, 0);
     protected final InputStream inputStream;
     protected final Map<String, AminoAcid> codonTable;
     protected final Queue<ORF> orfs;
@@ -142,14 +142,14 @@ public class GStreamRibosome extends Ribosome<Nucleotide, AminoAcid, ORF> {
         }
 
         protected boolean finalizeORF() {
-            if(orfBuilder.length()>0) {
+            if (orfBuilder.length() > 0) {
                 final ORF orf = ORF.get(this.orfBuilder.toString(), String.valueOf(this.orfsCreated), this.orfStart, this.orfStop, this.frame);
                 orfs.add(orf);
                 this.orfsCreated++;
                 this.orfBuilder = new StringBuilder();
                 this.orfStart = this.orfStop + 1;
                 return true;
-            }else {
+            } else {
                 return false;
             }
         }

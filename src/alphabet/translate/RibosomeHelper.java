@@ -33,14 +33,16 @@ public class RibosomeHelper {
                     final BufferedReader bufferedReader = new BufferedReader(new FileReader(toReadFrom.toFile()));
                     String line;
                     int i;
+
                     {
                         line = bufferedReader.readLine();
-                        i=0;
+                        i = 0;
                     }
+
                     @Override
                     public boolean hasNext() {
 
-                        if (line == null||!line.startsWith(CommonFormats.Fasta.FASTA_START)) {
+                        if (line == null || !line.startsWith(CommonFormats.Fasta.FASTA_START)) {
                             return false;
                         } else {
                             return true;
@@ -51,21 +53,21 @@ public class RibosomeHelper {
                     @Override
                     public ORF next() {
 
-                        final String ac=new String(line.substring(1));
+                        final String ac = new String(line.substring(1));
                         final StringBuilder stringBuilder = new StringBuilder();
 
                         try {
-                            line=bufferedReader.readLine();
-                            while (line!= null && !line.startsWith(CommonFormats.Fasta.FASTA_START)) {
+                            line = bufferedReader.readLine();
+                            while (line != null && !line.startsWith(CommonFormats.Fasta.FASTA_START)) {
                                 stringBuilder.append(line);
-                                line=bufferedReader.readLine();
+                                line = bufferedReader.readLine();
                             }
                         } catch (IOException e) {
                             throw new UncheckedIOException(e);
                         }
 
-                        final String sequence=stringBuilder.toString();
-                        final ORF orf=ORF.get(sequence,String.valueOf(i),0,sequence.length(),0);
+                        final String sequence = stringBuilder.toString();
+                        final ORF orf = ORF.get(sequence, String.valueOf(i), 0, sequence.length(), 0);
                         i++;
                         return orf;
                     }

@@ -14,7 +14,7 @@ public class GPUMakeBlastDB extends MakeBlastDB {
         super(builder);
     }
 
-    public static class GPUMakeBlastDBBuilder extends MakeBlastDBBuilder{
+    public static class GPUMakeBlastDBBuilder extends MakeBlastDBBuilder {
 
         public GPUMakeBlastDBBuilder(String name) {
             super(name);
@@ -22,36 +22,36 @@ public class GPUMakeBlastDB extends MakeBlastDB {
 
         @Override
         public GPUMakeBlastDBBuilder pathToMakeBlastDb(Path toMakeBlastDb) {
-            return (GPUMakeBlastDBBuilder)super.pathToMakeBlastDb(toMakeBlastDb);
+            return (GPUMakeBlastDBBuilder) super.pathToMakeBlastDb(toMakeBlastDb);
         }
 
         @Override
         public GPUMakeBlastDBBuilder pathToDbFolder(Path toDbFolder) {
-            return (GPUMakeBlastDBBuilder)super.pathToDbFolder(toDbFolder);
+            return (GPUMakeBlastDBBuilder) super.pathToDbFolder(toDbFolder);
         }
 
         @Override
         public GPUMakeBlastDBBuilder type(DBType type) {
-            return (GPUMakeBlastDBBuilder)super.type(type);
+            return (GPUMakeBlastDBBuilder) super.type(type);
         }
 
         @Override
         public GPUMakeBlastDBBuilder pathToSequenceFile(Path toSequenceFile) {
-            return (GPUMakeBlastDBBuilder)super.pathToSequenceFile(toSequenceFile);
+            return (GPUMakeBlastDBBuilder) super.pathToSequenceFile(toSequenceFile);
         }
 
         @Override
         public GPUMakeBlastDBBuilder name(String name) {
-            return (GPUMakeBlastDBBuilder)super.name(name);
+            return (GPUMakeBlastDBBuilder) super.name(name);
         }
 
         public GPUMakeBlastDB build() {
 
             if (!pathChecks(this.makeBlastDb) || !pathChecks(this.pathToDbFolder) || !pathChecks(this.pathToSequenceFile)) {
                 throw new IllegalStateException("One of the input paths is null or does not exist. Please check!\n"
-                        +this.makeBlastDb.toFile()+'\n'
-                        +this.pathToDbFolder.toFile()+'\n'
-                        +this.pathToSequenceFile.toFile()
+                        + this.makeBlastDb.toFile() + '\n'
+                        + this.pathToDbFolder.toFile() + '\n'
+                        + this.pathToSequenceFile.toFile()
                 );
             }
             if (this.type == null) {

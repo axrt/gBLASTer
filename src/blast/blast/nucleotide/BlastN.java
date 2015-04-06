@@ -9,5 +9,4 @@ import blast.blast.AbstractBlast;
 public abstract class BlastN<E> extends AbstractBlast<E> {
 
 
-
 }

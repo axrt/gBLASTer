@@ -7,8 +7,8 @@ package format.binary.nucleotide;
 public final class Helper {
 
     private Helper() {
-        throw new AssertionError(Helper.class.toString()+" can't be instantiated!");
+        throw new AssertionError(Helper.class.toString() + " can't be instantiated!");
     }
 
-    public static String BINARY_HEADER="gBLASTer";
+    public static String BINARY_HEADER = "gBLASTer";
 }

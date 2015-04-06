@@ -235,6 +235,7 @@ public final class NucleotideAlphabet extends Alphabet<Nucleotide> {
         }
         return data;
     }
+
     public static NucleotideAlphabet get() {
         return LazyHolder.INSTANCE;
     }

@@ -49,12 +49,14 @@ public class ReparseBHs {
     @Test
     public void reparse() {
         final Path dir = Paths.get("/home/alext/Documents/gBlaster/bh/");
-        final Set<String> fileNames=Arrays.asList(dir.toFile().listFiles()).stream().map(file->{return file.getPath();}).collect(Collectors.toSet());
-        final List<File> paths=new ArrayList<>();
-        for(String s:fileNames){
-            if(!s.endsWith(".short")){
-                if(!fileNames.contains(s.concat(".short"))){
-                   paths.add(new File(s));
+        final Set<String> fileNames = Arrays.asList(dir.toFile().listFiles()).stream().map(file -> {
+            return file.getPath();
+        }).collect(Collectors.toSet());
+        final List<File> paths = new ArrayList<>();
+        for (String s : fileNames) {
+            if (!s.endsWith(".short")) {
+                if (!fileNames.contains(s.concat(".short"))) {
+                    paths.add(new File(s));
                 }
             }
         }
@@ -125,7 +127,7 @@ public class ReparseBHs {
     public static String processHitHsps(String source) {
         final StringBuilder stringBuilder = new StringBuilder();
 
-        final List<Matcher>matchers=Arrays.asList(new Matcher[]{
+        final List<Matcher> matchers = Arrays.asList(new Matcher[]{
                 NUM_SCORE_OPEN_TAG.matcher(source),
                 NUM_SCORE_CLOSE_TAG.matcher(source),
                 QSEQ_SCORE_OPEN_TAG.matcher(source),
@@ -135,13 +137,13 @@ public class ReparseBHs {
                 MIDLINE_SCORE_OPEN_TAG.matcher(source),
                 MIDLINE_SCORE_CLOSE_TAG.matcher(source)});
 
-        while(matchers.get(0).find()){
+        while (matchers.get(0).find()) {
 
             matchers.stream().skip(1).forEach(Matcher::find);
-            int i=0;
+            int i = 0;
 
             stringBuilder.append("<Hsp_num>");
-            stringBuilder.append(source.substring(matchers.get(i++).end(),matchers.get(i++).start()));
+            stringBuilder.append(source.substring(matchers.get(i++).end(), matchers.get(i++).start()));
             stringBuilder.append("</Hsp_num>");
             stringBuilder.append('\t');
             stringBuilder.append("<Hsp_qseq>");

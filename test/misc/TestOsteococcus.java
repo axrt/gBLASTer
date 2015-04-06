@@ -20,8 +20,10 @@ public class TestOsteococcus {
     }
 
     @Test
-    public void testOsteococcus() throws Exception{
-        connector.loadLargeChromosomesForGenomeID(2, CommonFormats.LARGE_FASTA).forEach(lc->{System.out.println(lc.getAc());});
+    public void testOsteococcus() throws Exception {
+        connector.loadLargeChromosomesForGenomeID(2, CommonFormats.LARGE_FASTA).forEach(lc -> {
+            System.out.println(lc.getAc());
+        });
     }
 
 }

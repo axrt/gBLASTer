@@ -34,8 +34,8 @@ public class GDerbyEmbeddedConnectorTest3 {
     @BeforeClass
     public static void setUp() throws Exception {
         System.out.println("setUp()");
-        toChromosomeFile= Paths.get("testres/db/chromosomes/ch1.fasta");
-        largeFormat= CommonFormats.LARGE_FASTA;
+        toChromosomeFile = Paths.get("testres/db/chromosomes/ch1.fasta");
+        largeFormat = CommonFormats.LARGE_FASTA;
         connector = GDerbyEmbeddedConnector.get("jdbc:derby:testres/db/derby/testdb;", "gblaster", "gblaster");
         connector.connectToDatabase();
         testGenomePath = Paths.get("testres/db/genome/toxoplasma_gondii_m49.fasta");
@@ -49,12 +49,12 @@ public class GDerbyEmbeddedConnectorTest3 {
     }
 
     @Test
-    public void testGenomeIDByChromosomeID() throws Exception{
-        try(BufferedInputStream bufferedInputStream=new BufferedInputStream(new FileInputStream(toChromosomeFile.toFile()))){
-            final LargeChromosome lc=LargeChromosome.fromRecord(bufferedInputStream,largeFormat);
-            chromosomeID=connector.saveLargeChromososmeForGenomeID(genomeID,lc);
-            Assert.assertEquals(connector.genomeIDByChromosomeID(chromosomeID).get(),genomeID);
-        }catch (Exception e){
+    public void testGenomeIDByChromosomeID() throws Exception {
+        try (BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(toChromosomeFile.toFile()))) {
+            final LargeChromosome lc = LargeChromosome.fromRecord(bufferedInputStream, largeFormat);
+            chromosomeID = connector.saveLargeChromososmeForGenomeID(genomeID, lc);
+            Assert.assertEquals(connector.genomeIDByChromosomeID(chromosomeID).get(), genomeID);
+        } catch (Exception e) {
             e.printStackTrace();
             throw e;
         }
@@ -67,7 +67,7 @@ public class GDerbyEmbeddedConnectorTest3 {
         connector.removeGenomeForName(genomeName);
         Assert.assertFalse(connector.genomeForNameExists(genomeName));
         //Chromosomes will be deleted automatically
-        final int[] absentChromosomes=connector.loadChromosomeIdsForGenomeId(genomeID).toArray();
+        final int[] absentChromosomes = connector.loadChromosomeIdsForGenomeId(genomeID).toArray();
         Assert.assertEquals(absentChromosomes.length, 0);
     }
 }

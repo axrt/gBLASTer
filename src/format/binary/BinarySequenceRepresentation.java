@@ -10,7 +10,7 @@ import java.util.List;
  * Created by alext on 5/23/14.
  * TODO document class
  */
-public abstract class BinarySequenceRepresentation<T extends Character,S extends Sequence<T>> extends SequenceRepresentation<T,S>{
+public abstract class BinarySequenceRepresentation<T extends Character, S extends Sequence<T>> extends SequenceRepresentation<T, S> {
 
     protected final byte[] header;
     protected final byte[] stop;

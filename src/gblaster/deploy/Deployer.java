@@ -53,7 +53,7 @@ public final class Deployer {
             final LargeGenome largeGenome = LargeGenome.grasp(genome.getName().getName(), fileInputStream, format, toTmpFolder);
             final int genomeId = genomeDAO.saveLargeGenome(largeGenome);
             final Stream<LargeChromosome> largeChromosomeStream = largeGenome.stream();
-            genomeDAO.saveLargeChromosomesForGenomeId(genomeId, largeChromosomeStream,batchSize).forEach(i->System.out.println("Chromosome saved for id: " + i));
+            genomeDAO.saveLargeChromosomesForGenomeId(genomeId, largeChromosomeStream, batchSize).forEach(i -> System.out.println("Chromosome saved for id: " + i));
             //Calculate the RCs
             final Stream<LargeChromosome> largeChromosomes = genomeDAO.loadLargeChromosomesForGenomeID(genomeId, format);
             final Stream<LargeChromosome> largeRCChromosomes = largeChromosomes.map(lch -> {
@@ -76,20 +76,20 @@ public final class Deployer {
                     throw new UncheckedIOException(e);
                 }
             });
-            final IntStream stream = genomeDAO.saveLargeChromosomesForGenomeId(genomeId, largeRCChromosomes,batchSize);
+            final IntStream stream = genomeDAO.saveLargeChromosomesForGenomeId(genomeId, largeRCChromosomes, batchSize);
             return stream;
         }
     }
 
-    public static void deployMockGenomeORFBase(GenomeDAO genomeDAO,String genomeName, OrfDAO orfDAO,int batchSize, Genome g ) throws Exception{
+    public static void deployMockGenomeORFBase(GenomeDAO genomeDAO, String genomeName, OrfDAO orfDAO, int batchSize, Genome g) throws Exception {
         //Lock on file
         final Path toORFBaseFile = Paths.get(g.getPathToFile().getPath());
         //Save genome
-        final int id_genome=genomeDAO.saveGenomeForName(genomeName);
+        final int id_genome = genomeDAO.saveGenomeForName(genomeName);
         //Save mock chromosome
-        final int id_chromosome=genomeDAO.saveMockChromosome(id_genome);
+        final int id_chromosome = genomeDAO.saveMockChromosome(id_genome);
         //Save ORFS from file
-        orfDAO.saveOrfsForChromosomeId(id_chromosome, RibosomeHelper.readORFsFromFile(toORFBaseFile),batchSize);
+        orfDAO.saveOrfsForChromosomeId(id_chromosome, RibosomeHelper.readORFsFromFile(toORFBaseFile), batchSize);
 
     }
 
@@ -109,20 +109,20 @@ public final class Deployer {
                 final Optional<LargeChromosome> largeChromosomeOptional = chromosomeDAO.loadLargeCrhomosomeForID(chid, chromosomeFormat);
                 if (largeChromosomeOptional.isPresent()) {
                     LargeChromosome largeChromosome = largeChromosomeOptional.get();
-                    final File transfile=tmpFolder.resolve(TRANS_FILE).toFile();
-                    try(InputStream inputStream=largeChromosome.getSequenceInputstream();
-                    BufferedOutputStream bufferedOutputStream= new BufferedOutputStream(new FileOutputStream(transfile))){
-                        final byte[]buffer=new byte[1024];
+                    final File transfile = tmpFolder.resolve(TRANS_FILE).toFile();
+                    try (InputStream inputStream = largeChromosome.getSequenceInputstream();
+                         BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(transfile))) {
+                        final byte[] buffer = new byte[1024];
                         int bytesRead;
-                        while((bytesRead=inputStream.read(buffer))!=-1){
-                            bufferedOutputStream.write(buffer,0,bytesRead);
+                        while ((bytesRead = inputStream.read(buffer)) != -1) {
+                            bufferedOutputStream.write(buffer, 0, bytesRead);
                         }
                     }
 
-                    System.out.println("Translating chromosome for id: "+chid);
+                    System.out.println("Translating chromosome for id: " + chid);
                     final GStreamRibosome gStreamRibosome = GStreamRibosome.newInstance(new BufferedInputStream(new FileInputStream(transfile)), geneticCode);
-                    orfDAO.saveOrfsForChromosomeId(chid, gStreamRibosome.translate().filter(orf->orf.getSequence().length()>minOrfSize),batchSize);
-                    System.out.println("ORFs from chromosome for id "+chid+" saved.");
+                    orfDAO.saveOrfsForChromosomeId(chid, gStreamRibosome.translate().filter(orf -> orf.getSequence().length() > minOrfSize), batchSize);
+                    System.out.println("ORFs from chromosome for id " + chid + " saved.");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -143,7 +143,7 @@ public final class Deployer {
         return genomeGeneticCodeMap;
     }
 
-    public static File unloadORFsForGenomeToFile(String genomeName, OrfDAO orfDAO, GenomeDAO genomeDAO,Format format,int minLength,int maxLength, Path dir,int balancer) throws Exception {
+    public static File unloadORFsForGenomeToFile(String genomeName, OrfDAO orfDAO, GenomeDAO genomeDAO, Format format, int minLength, int maxLength, Path dir, int balancer) throws Exception {
 
         final File toUnload = dir.resolve(genomeName).toFile();
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(toUnload))) {
@@ -151,20 +151,20 @@ public final class Deployer {
             if (genomeId == 0) {
                 throw new Exception("No genome for name: ".concat(genomeName));
             }
-            orfDAO.loadAllOrfsForGenomeId(genomeId,balancer,minLength,maxLength)
-                    .forEach(orf->{
-                try {
-                    bufferedWriter.write(format.formatORF(orf));
-                    bufferedWriter.newLine();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            orfDAO.loadAllOrfsForGenomeId(genomeId, balancer, minLength, maxLength)
+                    .forEach(orf -> {
+                        try {
+                            bufferedWriter.write(format.formatORF(orf));
+                            bufferedWriter.newLine();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
 
-        } catch (RuntimeException e){
+        } catch (RuntimeException e) {
             //First thing - delete the file
-             toUnload.delete();
-            if(e.getCause() instanceof IOException){
+            toUnload.delete();
+            if (e.getCause() instanceof IOException) {
                 throw (IOException) e.getCause();
             }
             throw e;

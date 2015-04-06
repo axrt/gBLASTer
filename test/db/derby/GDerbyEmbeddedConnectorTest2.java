@@ -45,24 +45,24 @@ public class GDerbyEmbeddedConnectorTest2 {
     }
 
     @Test
-    public void testSaveLoadLargeCrhomosomeForID() throws Exception{
+    public void testSaveLoadLargeCrhomosomeForID() throws Exception {
         final int checkedID;
         try (InputStream inputStream = new BufferedInputStream(new FileInputStream(testChromosomePath.toFile()))) {
             lg = LargeGenome.grasp(genomeName, inputStream, largeFormat, toTmp);
             genomeID = connector.saveLargeGenome(lg);
-            final int gid=genomeID;
+            final int gid = genomeID;
 
-            final List<Integer> generatedIDs=lg.stream().map(lc->{
-                int id=0;
-                try{
-                   id= connector.saveLargeChromososmeForGenomeID(gid,lc);
-                }catch (Exception e) {
+            final List<Integer> generatedIDs = lg.stream().map(lc -> {
+                int id = 0;
+                try {
+                    id = connector.saveLargeChromososmeForGenomeID(gid, lc);
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
                 return id;
             }).collect(Collectors.toList());
 
-            checkedID=generatedIDs.get(0);
+            checkedID = generatedIDs.get(0);
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
@@ -71,12 +71,12 @@ public class GDerbyEmbeddedConnectorTest2 {
         try (InputStream inputStream = new BufferedInputStream(new FileInputStream(testChromosomePath.toFile()))) {
 
             lg = LargeGenome.grasp(genomeName, inputStream, largeFormat, toTmp);
-            final List<String> seqList=lg.stream().map(LargeChromosome::getSequence).collect(Collectors.toList());
-            final String seq=connector.loadLargeCrhomosomeForID(checkedID,largeFormat).get().getSequence();
+            final List<String> seqList = lg.stream().map(LargeChromosome::getSequence).collect(Collectors.toList());
+            final String seq = connector.loadLargeCrhomosomeForID(checkedID, largeFormat).get().getSequence();
 
-            Assert.assertEquals(seq,seqList.get(0));
+            Assert.assertEquals(seq, seqList.get(0));
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             throw e;
         }
@@ -89,7 +89,7 @@ public class GDerbyEmbeddedConnectorTest2 {
         connector.removeGenomeForName(genomeName);
         Assert.assertFalse(connector.genomeForNameExists(genomeName));
         //Chromosomes will be deleted automatically
-        final int[] absentChromosomes=connector.loadChromosomeIdsForGenomeId(genomeID).toArray();
+        final int[] absentChromosomes = connector.loadChromosomeIdsForGenomeId(genomeID).toArray();
         Assert.assertEquals(absentChromosomes.length, 0);
     }
 }

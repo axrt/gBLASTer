@@ -9,8 +9,11 @@ import sequence.protein.ORF;
 public interface Format {
 
     public String formatORF(ORF toFormat);
+
     public boolean checkFormatting(String toCheck);
+
     public String getAc(String record);
+
     public String getSequence(String record);
 
 }

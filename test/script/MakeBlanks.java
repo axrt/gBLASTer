@@ -15,13 +15,13 @@ import java.util.List;
 public class MakeBlanks {
 
     @Test
-    public void make(){
+    public void make() {
 
-        final Path dir= Paths.get("/home/alext/Documents/gBlaster/bbh");
+        final Path dir = Paths.get("/home/alext/Documents/gBlaster/bbh");
         List<File> files = Arrays.asList(dir.toFile().listFiles());
-        files.stream().forEach(file->{
-            try(BufferedWriter bufferedWriter=new BufferedWriter(new FileWriter(file))){
-               bufferedWriter.write("Wiped out to save space!");
+        files.stream().forEach(file -> {
+            try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file))) {
+                bufferedWriter.write("Wiped out to save space!");
             } catch (IOException e) {
                 e.printStackTrace();
             }

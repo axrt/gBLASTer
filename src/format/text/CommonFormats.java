@@ -31,7 +31,7 @@ public class CommonFormats {
 
         @Override
         public String formatORF(ORF toFormat) {
-            final StringBuilder stringBuilder=new StringBuilder();
+            final StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(FASTA_START);
             stringBuilder.append(toFormat.getId());
             stringBuilder.append('|');
@@ -68,19 +68,19 @@ public class CommonFormats {
     public static class LargeFasta extends Fasta implements LargeFormat {
         @Override
         public boolean checkFormatting(InputStream toCheck) throws IOException {
-            final byte[]buffer=new byte[1];
+            final byte[] buffer = new byte[1];
             toCheck.read(buffer);
-            if(buffer[0]==-1){
+            if (buffer[0] == -1) {
                 return false;
             }
-            final char firstCharacter=(char)buffer[0];
-            if (firstCharacter!=FASTA_START.charAt(0)) {
+            final char firstCharacter = (char) buffer[0];
+            if (firstCharacter != FASTA_START.charAt(0)) {
                 return false;
             }
-            while(toCheck.read(buffer)>-1){
-                if((char)buffer[0]=='\n'){
+            while (toCheck.read(buffer) > -1) {
+                if ((char) buffer[0] == '\n') {
                     toCheck.read(buffer);
-                    if(buffer[0]!=-1){
+                    if (buffer[0] != -1) {
                         return true;
                     }
                 }
@@ -112,7 +112,7 @@ public class CommonFormats {
                     try {
                         this.pushbackInputStream.close();
                     } catch (IOException e) {
-                       throw new UncheckedIOException(e);
+                        throw new UncheckedIOException(e);
                     }
                 }
 
@@ -132,23 +132,23 @@ public class CommonFormats {
                 public InputStream next() {
                     try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(this.tmpFile))) {
                         byte[] buffer = new byte[1];
-                        boolean firsLine=true;
-                        boolean inAc=true;
+                        boolean firsLine = true;
+                        boolean inAc = true;
                         int read;
                         while ((read = pushbackInputStream.read(buffer)) != -1) {
                             if (!firsLine && FASTA_START.charAt(0) == (char) buffer[0]) {
                                 pushbackInputStream.unread(buffer);
                                 break;
                             }
-                            if(inAc){
+                            if (inAc) {
                                 bufferedWriter.write((char) buffer[0]);
-                            }else if((char)buffer[0]!='\n'){
+                            } else if ((char) buffer[0] != '\n') {
                                 bufferedWriter.write((char) buffer[0]);
                             }
-                            if((char)buffer[0]=='\n'){
-                                inAc=false;
+                            if ((char) buffer[0] == '\n') {
+                                inAc = false;
                             }
-                            firsLine=false;
+                            firsLine = false;
                         }
                         if (read == -1) {
                             this.empty = true;

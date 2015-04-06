@@ -12,18 +12,17 @@ import javax.xml.bind.annotation.XmlRegistry;
 
 
 /**
- * This object contains factory methods for each 
- * Java content interface and Java element interface 
- * generated in the generated package. 
- * <p>An ObjectFactory allows you to programatically 
- * construct new instances of the Java representation 
- * for XML content. The Java representation of XML 
- * content can consist of schema derived interfaces 
- * and classes representing the binding of schema 
- * type definitions, element declarations and model 
- * groups.  Factory methods for each of these are 
+ * This object contains factory methods for each
+ * Java content interface and Java element interface
+ * generated in the generated package.
+ * <p>An ObjectFactory allows you to programatically
+ * construct new instances of the Java representation
+ * for XML content. The Java representation of XML
+ * content can consist of schema derived interfaces
+ * and classes representing the binding of schema
+ * type definitions, element declarations and model
+ * groups.  Factory methods for each of these are
  * provided in this class.
- * 
  */
 @XmlRegistry
 public class ObjectFactory {
@@ -31,14 +30,12 @@ public class ObjectFactory {
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: generated
-     * 
      */
     public ObjectFactory() {
     }
 
     /**
      * Create an instance of {@link DBConnection }
-     * 
      */
     public DBConnection createDBConnection() {
         return new DBConnection();
@@ -46,7 +43,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GBlasterProperties }
-     * 
      */
     public GBlasterProperties createGBlasterProperties() {
         return new GBlasterProperties();
@@ -54,7 +50,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link BlastProperties }
-     * 
      */
     public BlastProperties createBlastProperties() {
         return new BlastProperties();
@@ -62,7 +57,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Genome }
-     * 
      */
     public Genome createGenome() {
         return new Genome();
@@ -70,7 +64,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link MinORFLength }
-     * 
      */
     public MinORFLength createMinORFLength() {
         return new MinORFLength();
@@ -78,7 +71,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link MaxORFLength }
-     * 
      */
     public MaxORFLength createMaxORFLength() {
         return new MaxORFLength();
@@ -86,7 +78,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PathToBlastP }
-     * 
      */
     public PathToBlastP createPathToBlastP() {
         return new PathToBlastP();
@@ -94,7 +85,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PathToMakeBlastDb }
-     * 
      */
     public PathToMakeBlastDb createPathToMakeBlastDb() {
         return new PathToMakeBlastDb();
@@ -102,7 +92,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Name }
-     * 
      */
     public Name createName() {
         return new Name();
@@ -110,7 +99,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link AlterCodon }
-     * 
      */
     public AlterCodon createAlterCodon() {
         return new AlterCodon();
@@ -118,7 +106,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Expect }
-     * 
      */
     public Expect createExpect() {
         return new Expect();
@@ -126,7 +113,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link GeneticTable }
-     * 
      */
     public GeneticTable createGeneticTable() {
         return new GeneticTable();
@@ -134,7 +120,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link FastaType }
-     * 
      */
     public FastaType createFastaType() {
         return new FastaType();
@@ -142,7 +127,6 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link PathToFile }
-     * 
      */
     public PathToFile createPathToFile() {
         return new PathToFile();

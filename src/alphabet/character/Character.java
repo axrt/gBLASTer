@@ -24,9 +24,9 @@ public abstract class Character {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj instanceof Character){
-           final Character c=(Character)obj;
-            if(this.pillar==c.pillar&&this.representation==c.representation){
+        if (obj instanceof Character) {
+            final Character c = (Character) obj;
+            if (this.pillar == c.pillar && this.representation == c.representation) {
                 return true;
             }
         }
@@ -35,6 +35,6 @@ public abstract class Character {
 
     @Override
     public int hashCode() {
-        return this.pillar+this.representation;
+        return this.pillar + this.representation;
     }
 }

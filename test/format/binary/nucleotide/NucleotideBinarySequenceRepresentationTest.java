@@ -108,11 +108,11 @@ public class NucleotideBinarySequenceRepresentationTest {
                     System.out.println("Sequence " + i + " starts at:" + starts[i]);
                 }
             }
-            byte[]buffer=new byte[32+33];
-            System.out.println(dataInputStream.skipBytes(starts[1]-20));
+            byte[] buffer = new byte[32 + 33];
+            System.out.println(dataInputStream.skipBytes(starts[1] - 20));
             dataInputStream.read(buffer);
-            System.out.println("AC is: " + new String(buffer,0,32));
-            System.out.println("Sequence is: " + NucleotideAlphabet.get().decode(Arrays.copyOfRange(buffer,32, buffer.length-1)));
+            System.out.println("AC is: " + new String(buffer, 0, 32));
+            System.out.println("Sequence is: " + NucleotideAlphabet.get().decode(Arrays.copyOfRange(buffer, 32, buffer.length - 1)));
         } catch (IOException e) {
             e.printStackTrace();
         }

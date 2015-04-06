@@ -43,16 +43,16 @@ public class GeneticCodeTest {
     }
 
     @Test
-    public void testAltered(){
+    public void testAltered() {
 
-        final GeneticCode<AminoAcid> std=GeneticCode.STANDARD;
-        AminoAcid inSTD=std.get("TAG");
+        final GeneticCode<AminoAcid> std = GeneticCode.STANDARD;
+        AminoAcid inSTD = std.get("TAG");
         System.out.println(inSTD.getPillar());
-        final GeneticCode<AminoAcid> alt=GeneticCode.altered("altered");
-        alt.put("TAG",new AminoAcid('J',(byte)0,"ALT"));
-        inSTD=std.get("TAG");
+        final GeneticCode<AminoAcid> alt = GeneticCode.altered("altered");
+        alt.put("TAG", new AminoAcid('J', (byte) 0, "ALT"));
+        inSTD = std.get("TAG");
         System.out.println(inSTD.getPillar());
-        AminoAcid inALT=alt.get("TAG");
+        AminoAcid inALT = alt.get("TAG");
         System.out.println(inALT.getPillar());
     }
 }

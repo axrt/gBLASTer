@@ -13,8 +13,8 @@ import java.nio.file.Paths;
 public class RibosomeHelperTest {
 
     @Test
-    public void readORFsFromFileTest(){
-       final Path toFile= Paths.get("/home/alext/Documents/gBlaster/orfs/Human_mito_323_600.fasta");
+    public void readORFsFromFileTest() {
+        final Path toFile = Paths.get("/home/alext/Documents/gBlaster/orfs/Human_mito_323_600.fasta");
         try {
             RibosomeHelper.readORFsFromFile(toFile).forEach(System.out::println);
         } catch (IOException e) {
