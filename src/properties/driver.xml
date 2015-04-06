@@ -68,67 +68,67 @@ and open the template in the editor.
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
-    <!--<Genome>
+    <Genome>
         <Name name="Caenorhabditis_Elegans_Bristol_N2"/>
-        <PathToFile path="/home/alext/Documents/gBlaster/genomes/caenorhabditis_elegans_bristol_n2.fasta"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Caenorhabditis_Elegans_Bristol_N2.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
     <Genome>
-        <Name name="Saccharomyces_Cerevisiae_S288c"/>
-        <PathToFile path="/home/alext/Documents/gBlaster/genomes/saccharomyces_cerevisiae_s288c.fasta"/>
+        <Name name="Saccharomyces_cerevisiae_S288c"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Saccharomyces_cerevisiae_S288c.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
     <Genome>
-        <Name name="Cryptosporidium_Parvum"/>
-        <PathToFile path="/home/alext/Documents/gBlaster/genomes/cryptosporidium_parvum.fasta"/>
+        <Name name="Cryptosporidium_parvum_Iowa_II"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Cryptosporidium_parvum_Iowa_II.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
     <Genome>
-        <Name name="Schizosaccharomyces_Pombe_972h"/>
-        <PathToFile path="/home/alext/Documents/gBlaster/genomes/schizosaccharomyces_pombe_972h.fasta"/>
+        <Name name="Schizosaccharomyces_pombe_972h"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Schizosaccharomyces_pombe_972h.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Thalassiosira_pseudonana_CCMP1335"/>
-        <PathToFile path="/home/alext/Documents/gBlaster/genomes/thalassiosira_pseudonana_CCMP1335.fasta"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Thalassiosira_pseudonana_CCMP1335.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Anopheles_gambiae_str_PEST"/>
-        <PathToFile path="/home/alext/Documents/gBlaster/genomes/anopheles_gambiae_str_pest.fasta"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Anopheles_gambiae_str_PEST.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
-    <Genome>
+   <Genome>
         <Name name="Takifugu_rubripes"/>
-        <PathToFile path="/home/alext/Documents/gBlaster/genomes/takifugu_rubripes.fasta"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Takifugu_rubripes.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
     <Genome>
-        <Name name="Encephalitozoon_cuniculi_GB-M1"/>
-        <PathToFile path="/home/alext/Documents/gBlaster/genomes/encephalitozoon_cuniculi_gb-m1.fasta"/>
+        <Name name="Encephalitozoon_cuniculi_GB_M1"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Encephalitozoon_cuniculi_GB_M1.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Methanosarcina_barkeri_str_Fusaro"/>
-        <PathToFile path="/home/alext/Documents/gBlaster/genomes/methanosarcina_barkeri_str_fusaro.fasta"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Methanosarcina_barkeri_str_Fusaro.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
     <Genome>
         <Name name="Haloquadratum_walsbyi"/>
-        <PathToFile path="/home/alext/Documents/gBlaster/genomes/haloquadratum_walsbyi.fasta"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Haloquadratum_walsbyi.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
-    <Genome>
+    <!--<Genome>
         <Name name="Acidilobus_saccharovorans"/>
         <PathToFile path="/home/alext/Documents/gBlaster/genomes/acidilobus_saccharovorans.fasta"/>
         <GeneticTable type="standard"/>

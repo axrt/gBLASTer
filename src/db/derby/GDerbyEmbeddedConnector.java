@@ -17,10 +17,7 @@ import sequence.nucleotide.genome.LargeGenome;
 import sequence.protein.ORF;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -46,37 +43,38 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
         super(URL, user, password);
     }
 
-    public static GDerbyEmbeddedConnector get(String URL, String user, String password){
-        return new GDerbyEmbeddedConnector(URL,user,password);
+    public static GDerbyEmbeddedConnector get(String URL, String user, String password) {
+        return new GDerbyEmbeddedConnector(URL, user, password);
     }
 
     @Override
     public Optional<Integer> genomeIDByChromosomeID(int chromosomeID) throws Exception {
         try (PreparedStatement preparedStatement = this.connection
-                .prepareStatement("select id_genome from app.chromosomes where id_chromosome=?")){
+                .prepareStatement("select id_genome from app.chromosomes where id_chromosome=?")) {
             preparedStatement.setInt(1, chromosomeID);
-            final ResultSet resultSet=preparedStatement.executeQuery();
-            if(resultSet.next()){
+            final ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                this.connection.commit();
                 return Optional.of(resultSet.getInt(1));
-            }else{
-                throw new Exception("Could not find a corresponding genome for chromosome_id: "+chromosomeID);
+            } else {
+                throw new Exception("Could not find a corresponding genome for chromosome_id: " + chromosomeID);
             }
         }
     }
 
     @Override
     public boolean removeAllChromosomesForGenomeID(int genomeId) throws Exception {
-       throw new NotImplementedException();
+        throw new NotImplementedException();
     }
 
     @Override
     public boolean removeGenomeForName(String name) throws Exception {
         try (PreparedStatement preparedStatement = this.connection
-                .prepareStatement("delete from app.genomes where name=?")){
+                .prepareStatement("delete from app.genomes where name=?")) {
             preparedStatement.setString(1, name);
             preparedStatement.executeUpdate();
             this.connection.commit();
-        }catch (Exception e){
+        } catch (Exception e) {
             this.connection.rollback();
             throw e;
         }
@@ -95,7 +93,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
 
     @Override
     public boolean genomeHasBeenBlastedOver(Genome query, Genome target) throws Exception {
-        System.out.println(query.getName().getName() + " -> " + target.getName().getName());
+
         final int query_genome_id = this.genomeIdByName(query.getName().getName());
         final int target_genome_id = this.genomeIdByName(target.getName().getName());
 
@@ -116,7 +114,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
             );
             this.connection.commit();
             return resultSet.next();
-        }catch (Exception e){
+        } catch (Exception e) {
             throw e;
         }
     }
@@ -241,7 +239,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
                     preparedStatement.setString(3, BlastHelper.marshallIterationToString(iter));
                     preparedStatement.setInt(4, qgenome_id);
                     preparedStatement.setInt(5, tgenome_id);
-                    preparedStatement.setDouble(6,BlastHelper.comulativeBitScore(iter));
+                    preparedStatement.setDouble(6, BlastHelper.comulativeBitScore(iter));
                     preparedStatement.addBatch();
 
                 } catch (Exception e) {
@@ -322,8 +320,6 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
                                 resultSet.getString(6), resultSet.getDouble(7), resultSet.getString(4));
 
                         return unidirectionalBlastHit;
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -351,13 +347,12 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
             preparedStatement.setString(1, genome);
             preparedStatement.setString(2, COMMENT_TEMPLATE);
             preparedStatement.executeUpdate();
-            this.connection.commit();
-            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+            final ResultSet resultSet = preparedStatement.getGeneratedKeys();
             if (resultSet.next()) {
                 id_genome = resultSet.getInt(1);
             }
             this.connection.commit();
-        }catch (Exception e){
+        } catch (Exception e) {
             this.connection.rollback();
             throw e;
         }
@@ -386,14 +381,13 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
     @Override
     public int genomeIdByName(String name) throws Exception {
         try (PreparedStatement preparedStatement = this.connection.prepareStatement("select id_genome from app.genomes where name=?")) {
-
             preparedStatement.setString(1, name);
             final ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 this.connection.commit();
                 return resultSet.getInt(1);
-            }else{
-             throw new Exception("Genome by name \""+name+"\" does not exist in the database!");
+            } else {
+                throw new Exception("Genome by name \"" + name + "\" does not exist in the database!");
             }
         }
     }
@@ -410,25 +404,24 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
 
     @Override
     public int saveLargeChromososmeForGenomeID(int genomeId, LargeChromosome largeChromosome) throws Exception {
-        int id_chormosome = 0;
         try (PreparedStatement preparedStatement = this.connection
                 .prepareStatement("INSERT INTO app.chromosomes (id_genome, name, sequence) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-             BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(largeChromosome.getSequenceInputstream()))) {
+            InputStreamReader inputStreamReader=new InputStreamReader(largeChromosome.getSequenceInputstream())) {
 
             preparedStatement.setInt(1, genomeId);
             preparedStatement.setString(2, largeChromosome.getAc());
-            preparedStatement.setClob(3, bufferedReader);
+            preparedStatement.setClob(3, inputStreamReader);
             preparedStatement.executeUpdate();
-            this.connection.commit();
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
             if (resultSet.next()) {
-                id_chormosome = resultSet.getInt(1);
+                return resultSet.getInt(1);
+            }else{
+                throw new Exception("Save operation failed to return chromosome ID!");
             }
         } catch (SQLException | IOException e) {
             this.connection.rollback();
             throw e;
         }
-        return id_chormosome;
     }
 
     @Override
@@ -470,40 +463,41 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
                 builder.accept(resultSet.getInt(1));
             }
             return builder.build();
-        }catch (Exception e){
+        } catch (Exception e) {
             throw e;
         }
     }
 
     @Override
     public IntStream saveLargeChromosomesForGenomeId(int genomeId, Stream<? extends LargeChromosome> chromoStream, int batchSize) throws Exception {
+
         try (PreparedStatement preparedStatement = this.connection
                 .prepareStatement("INSERT INTO app.chromosomes (id_genome, name, sequence) VALUES (?, ?, ?)")) {
             final int[] counter = {0};
-            final List<BufferedReader> readers=new ArrayList<>();
             chromoStream.forEach(ch -> {
-                final BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(ch.getSequenceInputstream()));
-                readers.add(bufferedReader);
+                final Reader reader=new InputStreamReader(ch.getSequenceInputstream());
                 try {
                     preparedStatement.setInt(1, genomeId);
                     preparedStatement.setString(2, ch.getAc());
-                    preparedStatement.setClob(3, bufferedReader);
+                    preparedStatement.setClob(3, reader);
+                    System.out.println("Added chromosome: "+ch.getAc());
                     preparedStatement.addBatch();
-                    counter[0]++;
-                    if (counter[0] > batchSize) {
-                        counter[0] = 0;
-                        preparedStatement.executeBatch();
-                        this.connection.commit();
+                    try{
+                    reader.close();
+                    }catch (IOException e){
+                        throw new UncheckedIOException(e);
                     }
+                    //counter[0]++;
+                    //if (counter[0] > batchSize) {
+                        //counter[0] = 0;
+                        //preparedStatement.executeBatch();
+                   // }
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
             });
             preparedStatement.executeBatch();
             this.connection.commit();
-            for (BufferedReader br:readers){
-                br.close();
-            }
         }
         catch (Exception e){
             this.connection.rollback();
@@ -516,7 +510,6 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
             while (resultSet.next()) {
                 builder.accept(resultSet.getInt(1));
             }
-            this.connection.commit();
             return builder.build();
         } catch (RuntimeException e) {
             this.connection.rollback();
@@ -532,7 +525,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
     public Stream<LargeChromosome> loadLargeChromosomesForGenomeID(int genomeId, LargeFormat largeFormat) throws Exception {
 
         PreparedStatement preparedStatement = this.connection
-                .prepareStatement("select * from app.chromosomes where id_genome=?");
+                .prepareStatement("select * from app.chromosomes where id_genome=?",ResultSet.TYPE_FORWARD_ONLY);
         try {
             preparedStatement.setInt(1, genomeId);
             final ResultSet resultSet = preparedStatement.executeQuery();
@@ -556,7 +549,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
                     try {
 
                         return LargeChromosome.formPreprocessedComponents(resultSet.getString(3),
-                                new ReaderInputStream(new BufferedReader(resultSet.getCharacterStream(4))), largeFormat);
+                                new ReaderInputStream(resultSet.getCharacterStream(4)), largeFormat);
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
                     }
@@ -577,7 +570,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
     @Override
     public IntStream saveOrfsForChromosomeId(int idChromosome, Stream<? extends ORF> orfStream, int batchSize) throws Exception {
 
-        final int genome_id=this.genomeIDByChromosomeID(idChromosome).get();
+        final int genome_id = this.genomeIDByChromosomeID(idChromosome).get();
         try (PreparedStatement preparedStatement = this.connection
                 .prepareStatement("INSERT INTO app.orfs " +
                         "(id_chromosome, id_genome, frame, start, stop, name, sequence, length) " +
@@ -586,7 +579,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
             orfStream.forEach(orf -> {
                 try {
 
-                    int position=0;
+                    int position = 0;
                     preparedStatement.setInt(++position, idChromosome);
                     preparedStatement.setInt(++position, genome_id);
                     preparedStatement.setInt(++position, orf.getFrame());
@@ -610,11 +603,16 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
             preparedStatement.executeBatch();
             this.connection.commit();
             final ResultSet resultSet = preparedStatement.getGeneratedKeys();
-            final IntStream.Builder builder = IntStream.builder();
-            while (resultSet.next()) {
-                builder.accept(resultSet.getInt(1));
+            if(resultSet!=null) {
+                final IntStream.Builder builder = IntStream.builder();
+
+                while (resultSet.next()) {
+                    builder.accept(resultSet.getInt(1));
+                }
+                return builder.build();
+            }else{
+                return IntStream.empty();
             }
-            return builder.build();
         } catch (RuntimeException e) {
             this.connection.rollback();
             if (e.getCause() instanceof SQLException) {
@@ -684,7 +682,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
     @Override
     public long calculateOrfsForGenomeName(String genomeName, int minLength, int maxLength) throws Exception {
 
-        final int genome_id=this.genomeIdByName(genomeName);
+        final int genome_id = this.genomeIdByName(genomeName);
 
         try (PreparedStatement preparedStatement = this.connection
                 .prepareStatement("select count(*) from app.orfs where id_genome=?"
@@ -703,7 +701,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
 
     @Override
     public long reportORFBaseSize(Genome genome) throws Exception {
-        final int gemome_id=this.genomeIdByName(genome.getName().getName());
+        final int gemome_id = this.genomeIdByName(genome.getName().getName());
         try (PreparedStatement preparedStatement = this.connection.prepareStatement("select count(id_orf) from app.orfs where id_genome=?")) {
             preparedStatement.setInt(1, gemome_id);
             final ResultSet resultSet = preparedStatement.executeQuery();

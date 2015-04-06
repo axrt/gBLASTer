@@ -121,7 +121,7 @@ public class main {
                                 System.out.println("Deploying Genome ".concat(g.getName().getName()));
                                 final IntStream chromosomeIdStream = Deployer.deployAndGetchromosomeIds(genomeDAO, g, largeFormat, tmpFolder, nucleotideAlphabet, largeChromosomeBatchSize);
                                 System.out.println("Translating ORFs for Genome ".concat(g.getName().getName()));
-                                Deployer.translateAndGetORFStreamForGenomeId(chromosomeIdStream, genomeDAO, orfDAO, genomeGeneticCodeMap.get(g), largeFormat, orfBatchSize, minimumOrfLength);
+                                Deployer.translateAndGetORFStreamForGenomeId(chromosomeIdStream, genomeDAO, orfDAO, genomeGeneticCodeMap.get(g), largeFormat, orfBatchSize, minimumOrfLength,tmpFolder);
                                 System.out.println("ORFs for Genome ".concat(g.getName().getName().concat(" translated.")));
                             }else if(g.getFastaType().getType().equals("prot")){
                                 System.out.println("Deploying ORFs ".concat(g.getName().getName()));

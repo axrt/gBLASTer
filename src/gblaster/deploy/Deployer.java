@@ -32,6 +32,8 @@ import java.util.stream.Stream;
 public final class Deployer {
     public static final String FWD_FILE = "fwd.tmp";
     public static final String RWD_FILE = "rwd.tmp";
+    public static final String TRANS_FILE = "transcript.tmp";
+
 
     private Deployer() {
         throw new AssertionError("Non-instantiable!");
@@ -98,16 +100,27 @@ public final class Deployer {
             GeneticCode<AminoAcid> geneticCode,
             LargeFormat chromosomeFormat,
             int batchSize,
-            int minOrfSize
+            int minOrfSize,
+            Path tmpFolder
     ) throws Exception {
 
         chromosomeIds.forEach(chid -> {
             try {
                 final Optional<LargeChromosome> largeChromosomeOptional = chromosomeDAO.loadLargeCrhomosomeForID(chid, chromosomeFormat);
                 if (largeChromosomeOptional.isPresent()) {
-                    final LargeChromosome largeChromosome = largeChromosomeOptional.get();
+                    LargeChromosome largeChromosome = largeChromosomeOptional.get();
+                    final File transfile=tmpFolder.resolve(TRANS_FILE).toFile();
+                    try(InputStream inputStream=largeChromosome.getSequenceInputstream();
+                    BufferedOutputStream bufferedOutputStream= new BufferedOutputStream(new FileOutputStream(transfile))){
+                        final byte[]buffer=new byte[1024];
+                        int bytesRead;
+                        while((bytesRead=inputStream.read(buffer))!=-1){
+                            bufferedOutputStream.write(buffer,0,bytesRead);
+                        }
+                    }
+
                     System.out.println("Translating chromosome for id: "+chid);
-                    final GStreamRibosome gStreamRibosome = GStreamRibosome.newInstance(largeChromosome.getSequenceInputstream(), geneticCode);
+                    final GStreamRibosome gStreamRibosome = GStreamRibosome.newInstance(new BufferedInputStream(new FileInputStream(transfile)), geneticCode);
                     orfDAO.saveOrfsForChromosomeId(chid, gStreamRibosome.translate().filter(orf->orf.getSequence().length()>minOrfSize),batchSize);
                     System.out.println("ORFs from chromosome for id "+chid+" saved.");
                 }
