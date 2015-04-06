@@ -17,12 +17,14 @@ public abstract class QSimScan<R extends QSimScan.REPORT> implements Callable<Li
     protected final Path outputFile;
     protected final int numberFastasPerPart;
     protected List<Path> inputParts;
+    protected final List<String> commandParams;
 
     protected QSimScan(QSimScanBuilder builder) {
         this.queryFile=builder.queryFile;
         this.targetFile=builder.targetFile;
         this.outputFile=builder.outputFile;
         this.numberFastasPerPart=builder.numberFastasPerPart;
+        this.commandParams=builder.commandParams;
     }
 
     @Override
@@ -30,26 +32,58 @@ public abstract class QSimScan<R extends QSimScan.REPORT> implements Callable<Li
 
         this.inputParts=QSimScanHelper.splitFasta(this.queryFile,this.numberFastasPerPart);
 
+        for(Path p:this.inputParts){
+            final List<String>command=new ArrayList<>();
+            command.add(p.toFile().toString());
+            command.addAll(this.commandParams);
+            command.add(this.targetFile.toFile().toString());
+            command.add(this.outputFile.toFile().toString());
+            final ProcessBuilder processBuilder=new ProcessBuilder(command);
+            final Process process=processBuilder.start();
+            process.waitFor();
+        }
+
         return new ArrayList<>();
     }
 
     public abstract static class QSimScanBuilder {
+        /**
+         * -a --ap --append : Append results to existing output object (or file)
+         */
+        protected static final String APPEND ="--append";
 
         protected final Path queryFile;
         protected final Path targetFile;
         protected final Path outputFile;
         protected int numberFastasPerPart=1000;
+        protected final List<String> commandParams;
 
         public QSimScanBuilder(Path queryFile, Path targetFile, Path outputFile) {
 
             this.queryFile = queryFile;
             this.targetFile = targetFile;
             this.outputFile = outputFile;
+            this.commandParams=new ArrayList<>();
+            this.appendOn();//default
 
         }
 
-        public QSimScanBuilder setnumberFastasPerPart(int numberOfParts) {
+        public QSimScanBuilder setNumberFastasPerPart(int numberOfParts) {
             this.numberFastasPerPart = numberOfParts;
+            return this;
+        }
+
+        public QSimScanBuilder appendOn(){
+            if(!this.commandParams.contains(APPEND)){
+                this.commandParams.add(APPEND);
+            }
+            return this;
+        }
+
+        public QSimScanBuilder appendOff(){
+            if(this.commandParams.contains(APPEND)){
+                this.commandParams.remove(APPEND);
+            }
             return this;
         }
 
