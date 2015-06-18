@@ -753,6 +753,11 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
         }
     }
 
+    @Override
+    public int setBlastedPair(int queryGenomeId, int targetGenomeId) throws Exception {
+        throw new NotImplementedException();
+    }
+
     public static GMySQLConnector get(String URL, String user, String password) {
         return new GMySQLConnector(URL, user, password);
     }

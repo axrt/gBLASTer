@@ -713,4 +713,9 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
             }
         }
     }
+
+    @Override
+    public int setBlastedPair(int queryGenomeId, int targetGenomeId) throws Exception {
+        return 0;
+    }
 }
