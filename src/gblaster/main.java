@@ -323,39 +323,7 @@ public class main {
 
             }
         }
-        List<Genome[]> toSort = Arrays.asList(pairs);
-        final Set<Genome[]> genomeSet = toSort.stream().collect(Collectors.toSet());
-        final Map<Genome[], Integer> genomeMap = new HashMap<>();
-        //TODO create a procedure to prehash orf base size
-        genomeSet.stream().forEach(gen -> {
-            try {
-                final int num = (int) (orfDAO.reportORFBaseSize(gen[0]) + orfDAO.reportORFBaseSize(gen[1]));
-                genomeMap.put(gen, num);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-        try {
-            toSort = toSort.stream().sorted(new Comparator<Genome[]>() {
-                @Override
-                public int compare(Genome[] o1, Genome[] o2) {
-
-                    final int first = genomeMap.get(o1);
-                    final int second = genomeMap.get(o2);
-                    if (first == second) {
-                        return 0;
-                    }
-                    if (first > second) {
-                        return 1;
-                    }
-                    return -1;
-
-                }
-            }).collect(Collectors.toList());
-        } catch (RuntimeException e) {
-            throw (Exception) e.getCause();
-        }
-        return toSort.toArray(pairs);
+        return pairs;
     }
 
     public static void pairBlast(Genome query, Genome target, int bufferCapasity, GenomeDAO genomeDAO, OrfDAO orfDAO, BlastDAO blastDAO, BlastProperties blastProperties, int numThreads, int gpu_threads, int gpu_blocks) throws Exception {
