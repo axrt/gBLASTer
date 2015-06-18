@@ -154,6 +154,7 @@ public class main {
                         throw new RuntimeException(e);
                     }
                 });
+
                 //9.Deploy all blastdbs for all genomes
                 final List<Future<Optional<File>>> makeBlastDbFutures = gBlasterProperties.getGenome().stream()
                         .filter(g -> {
@@ -325,6 +326,7 @@ public class main {
         List<Genome[]> toSort = Arrays.asList(pairs);
         final Set<Genome[]> genomeSet = toSort.stream().collect(Collectors.toSet());
         final Map<Genome[], Integer> genomeMap = new HashMap<>();
+        //TODO create a procedure to prehash orf base size
         genomeSet.stream().forEach(gen -> {
             try {
                 final int num = (int) (orfDAO.reportORFBaseSize(gen[0]) + orfDAO.reportORFBaseSize(gen[1]));
@@ -426,6 +428,8 @@ public class main {
                     }
                     totalBlasts++;
                 }
+
+                blastDAO.setBlastedPair(query,target);
 
                 synchronized (System.out.getClass()) {
                     System.out.println("Total number of blasts: " + totalBlasts + " done for " + query.getName().getName() + " <->" + target.getName().getName());

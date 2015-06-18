@@ -25,4 +25,6 @@ public interface BlastDAO {
     public boolean saveBlastResultBatch(Stream<Iteration> iterations, int qgenome_id, int tgenome_id) throws Exception;
 
     public Stream<UnidirectionalBlastHit> getBHforGenomePair(Genome one, Genome two, double cutoff, int balancer) throws Exception;
+
+    public int setBlastedPair(properties.jaxb.Genome queryGenome, properties.jaxb.Genome targetGenome) throws Exception;
 }

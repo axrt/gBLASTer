@@ -22,6 +22,4 @@ public interface GenomeDAO extends ChromosomeDAO {
 
     public boolean removeGenomeForName(String name) throws Exception;
 
-    public int setBlastedPair(int queryGenomeId, int targetGenomeId) throws Exception;
-
 }

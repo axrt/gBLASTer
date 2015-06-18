@@ -103,9 +103,9 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
 
             final ResultSet resultSet = statement.executeQuery(
                     "select \n" +
-                            "id_blast\n" +
+                            "id_progress\n" +
                             "from \n" +
-                            "app.blasts\n" +
+                            "app.progress\n" +
                             "where \n" +
                             "ID_QUERY_GENOME=" + query_genome_id + "\n" +
                             "and\n" +
@@ -715,7 +715,26 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
     }
 
     @Override
-    public int setBlastedPair(int queryGenomeId, int targetGenomeId) throws Exception {
-        return 0;
+    public int setBlastedPair(Genome queryGenome, Genome targetGenome) throws Exception {
+
+        final int queryGenomeID = this.genomeIdByName(queryGenome.getName().getName());
+        final int targetGenomeID = this.genomeIdByName(targetGenome.getName().getName());
+
+        int returnKey=0;
+        try (PreparedStatement preparedStatement = this.connection
+                .prepareStatement("INSERT INTO app.progress " +
+                        "(id_query_genome, id_target_genome) " +
+                        "VALUES (?, ?)", Statement.RETURN_GENERATED_KEYS)) {
+            preparedStatement.setInt(1,queryGenomeID);
+            preparedStatement.setInt(2,targetGenomeID);
+            preparedStatement.executeUpdate();
+            this.connection.commit();
+            final ResultSet resultSet = preparedStatement.getGeneratedKeys();
+            if(resultSet.next()){
+                returnKey=resultSet.getInt(1);
+            }
+        }
+
+        return returnKey;
     }
 }

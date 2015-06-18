@@ -754,7 +754,7 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     }
 
     @Override
-    public int setBlastedPair(int queryGenomeId, int targetGenomeId) throws Exception {
+    public int setBlastedPair(properties.jaxb.Genome queryGenome, properties.jaxb.Genome targetGenome) throws Exception {
         throw new NotImplementedException();
     }
 
