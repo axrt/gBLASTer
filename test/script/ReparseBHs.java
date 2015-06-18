@@ -41,14 +41,14 @@ public class ReparseBHs {
         stringBuilder.append("TARGET_ORF_ID\t");
         stringBuilder.append("TARGET_SEQUENCE\t");
         stringBuilder.append("BLAST_ID\t");
-        stringBuilder.append("COMULATIVE_BITSCORE\t");
-        stringBuilder.append("ITERATION\t");
+        stringBuilder.append("COMULATIVE_BITSCORE");
+        //stringBuilder.append("ITERATION");
         HEADER = stringBuilder.toString();
     }
 
     @Test
     public void reparse() {
-        final Path dir = Paths.get("/home/alext/Documents/gBlaster/bh/");
+        final Path dir = Paths.get("/home/alext/Documents/Research/gBLASTer/bh/");
         final Set<String> fileNames = Arrays.asList(dir.toFile().listFiles()).stream().map(file -> {
             return file.getPath();
         }).collect(Collectors.toSet());
@@ -89,8 +89,8 @@ public class ReparseBHs {
                 stringBuilder.append("\t");
             }
             stringBuilder.append(ReparseBBHs.DECIMAL_FORMAT.format(comulativeBitScore));
-            stringBuilder.append("\t");
-            stringBuilder.append(processHitHsps(report));
+            //stringBuilder.append("\t");
+            //stringBuilder.append(processHitHsps(report));
             return stringBuilder.toString();
         } else return "";
     }

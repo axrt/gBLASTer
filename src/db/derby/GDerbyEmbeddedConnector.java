@@ -200,7 +200,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
                     }
                 }
             };
-            this.connection.commit();
+
             return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
                     iter, Spliterator.NONNULL), false);
         } catch (RuntimeException e) {
@@ -325,7 +325,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
                     }
                 }
             };
-            this.connection.commit();
+
             return StreamSupport.stream(Spliterators.spliteratorUnknownSize(
                     iter, Spliterator.NONNULL), false);
         } catch (RuntimeException e) {

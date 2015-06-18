@@ -47,29 +47,29 @@ import java.util.stream.Stream;
  */
 public class main {
 
-    final static File propertiesFile = new File("/home/alext/Developer/gBLASTer/src/properties/driver.xml");
-    final static Path home = Paths.get("/home/alext/Documents/Research/gBLASTer");
-    final static Path tmpFolder = home.resolve("tmp");
-    final static Path orfFolder = home.resolve("orfs");
-    final static Path bbhFolder = home.resolve("bbh");
-    final static Path bhFolder = home.resolve("bh");
-    final static Path blastdbFolder = home.resolve("blastdb");
-    final static Path toMakeBlastDb = Paths.get("/usr/local/bin/gmakeblastdb");
-    final static Path toBlastP = Paths.get("/usr/local/bin/gblastp");
-    final static int maxThreads = 1;
-    final static ExecutorService blastExecutorService = Executors.newFixedThreadPool(maxThreads);
-    final static ExecutorService helperExecutorService = Executors.newCachedThreadPool();
-    final static ExecutorService blastDriverExecutorService = Executors.newCachedThreadPool();
-    final static int orfUnloadBalancer = 100;
-    final static int orfBatchSize = 1000;
-    final static int blastBufferSize = 5000;
-    final static int blastThreadsPerRun = 6;
-    final static int largeChromosomeBatchSize = 1;
-    final static int minimumOrfLength = 50;
-    final static double bitscoreCutoff = 80;
-    final static int gpu_threads = 4;
-    final static int gpu_blocks = 512;
-    static int countDown;
+    public final static File propertiesFile = new File("/home/alext/Developer/gBLASTer/src/properties/driver.xml");
+    public  final static Path home = Paths.get("/home/alext/Documents/Research/gBLASTer");
+    public final static Path tmpFolder = home.resolve("tmp");
+    public final static Path orfFolder = home.resolve("orfs");
+    public final static Path bbhFolder = home.resolve("bbh");
+    public final static Path bhFolder = home.resolve("bh");
+    public final static Path blastdbFolder = home.resolve("blastdb");
+    public final static Path toMakeBlastDb = Paths.get("/usr/local/bin/gmakeblastdb");
+    public final static Path toBlastP = Paths.get("/usr/local/bin/gblastp");
+    public final static int maxThreads = 1;
+    public final static ExecutorService blastExecutorService = Executors.newFixedThreadPool(maxThreads);
+    public final static ExecutorService helperExecutorService = Executors.newCachedThreadPool();
+    public final static ExecutorService blastDriverExecutorService = Executors.newCachedThreadPool();
+    public final static int orfUnloadBalancer = 100;
+    public final static int orfBatchSize = 1000;
+    public final static int blastBufferSize = 5000;
+    public final static int blastThreadsPerRun = 6;
+    public final static int largeChromosomeBatchSize = 1;
+    public final static int minimumOrfLength = 50;
+    public final static double bitscoreCutoff = 80;
+    public final static int gpu_threads = 4;
+    public final static int gpu_blocks = 512;
+    public static int countDown;
 
     /**
      * So far this is just a runscript
@@ -238,15 +238,16 @@ public class main {
                                 + " <-> " + gBlasterProperties.getGenome().get(j).getName().getName()
                                 + " has already been unloaded.");
                     }
+                    connector.getConnection().commit();
                 }
             }
 
             //Unload BHs
             for (int i = 0; i < gBlasterProperties.getGenome().size(); i++) {
                 for (int j = 0; j < gBlasterProperties.getGenome().size(); j++) {
-                    if (i == j) {
-                        continue;
-                    }
+                    //if (i == j) {
+                        //continue;
+                    //}
                     System.out.println("Unloading hits: " + gBlasterProperties.getGenome().get(i).getName().getName() + " <-> " + gBlasterProperties.getGenome().get(j).getName().getName());
                     final Path toUnload = bhFolder.resolve(String.valueOf(genomeDAO.genomeIdByName(gBlasterProperties.getGenome().get(i).getName().getName()))
                             .concat("_VS_")
@@ -266,11 +267,11 @@ public class main {
                                 + " <-> " + gBlasterProperties.getGenome().get(j).getName().getName()
                                 + " have already been unloaded.");
                     }
+                    connector.getConnection().commit();
                 }
             }
 
             System.out.println("All done.");
-            connector.getConnection().commit();
             connector.getConnection().close();
             //TODO: Create the legend for the BBHs TODO
 
@@ -311,14 +312,14 @@ public class main {
     }
 
     public static Genome[][] matchPairs(List<? extends Genome> genomes, OrfDAO orfDAO) throws Exception {
-        final Genome[][] pairs = new Genome[genomes.size() * genomes.size() - genomes.size()][2];
+        final Genome[][] pairs = new Genome[genomes.size() * genomes.size()][2];
         int number = 0;
         for (int i = 0; i < genomes.size(); i++) {
             for (int j = 0; j < genomes.size(); j++) {
-                if (i != j) {
+
                     pairs[number][0] = genomes.get(i);
                     pairs[number++][1] = genomes.get(j);
-                }
+
             }
         }
         List<Genome[]> toSort = Arrays.asList(pairs);
