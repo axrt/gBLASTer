@@ -313,4 +313,10 @@ and open the template in the editor.
          <GeneticTable type="standard"/>
          <FastaType type="nucl"/>
      </Genome>-->
+    <Genome>
+        <Name name="Prunus_persica_Lowell"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Prunus_persica_Lowell.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
 </gBlasterProperties>

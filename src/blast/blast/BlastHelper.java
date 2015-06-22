@@ -14,6 +14,8 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -22,6 +24,8 @@ import java.util.stream.Collectors;
  * TODO document class
  */
 public final class BlastHelper {
+
+    public static final List<QueryStartStop> EMPTY = new ArrayList<>();
 
     private BlastHelper() {
         throw new AssertionError("Helper class, non-instantiable.");
@@ -424,10 +428,62 @@ public final class BlastHelper {
 
     public static double comulativeBitScore(HitHsps hitHsps) throws JAXBException, SAXException {
 
-        final double comulativeBitScore = hitHsps.getHsp().stream().mapToDouble(hsp -> {
+        final List<BlastHelper.QueryStartStop> startStops = new ArrayList<>();
+        for (Hsp h : hitHsps.getHsp()) {
+            startStops.add(new BlastHelper.QueryStartStop(Integer.parseInt(h.getHspQueryFrom()), Integer.parseInt(h.getHspQueryTo()), h));
+        }
+        hitHsps.getHsp().clear();
+        hitHsps.getHsp().addAll(BlastHelper.nonOverlappingFirst(startStops).stream().map(qss -> {
+            return qss.hsp;
+        }).collect(Collectors.toList()));
+        return hitHsps.getHsp().stream().mapToDouble(hsp->{
             return Double.parseDouble(hsp.getHspBitScore());
         }).sum();
 
-        return comulativeBitScore;
+    }
+
+    public static List<QueryStartStop> nonOverlappingFirst(List<QueryStartStop> candidates) {
+        final List<QueryStartStop> uniques = new ArrayList<>();
+        uniques.add(candidates.get(0));
+        for (int i = 1; i < candidates.size(); i++) {
+            if (!candidates.get(0).overlaps(candidates.get(i))) {
+                uniques.add(candidates.get(i));
+            }
+        }
+        final List<QueryStartStop> trueUniques = new ArrayList<>();
+        trueUniques.add(uniques.get(0));
+        if(uniques.size()>1){
+            trueUniques.addAll(nonOverlappingFirst(uniques.subList(1, uniques.size())));
+        }
+        return trueUniques;
+    }
+
+
+    public static class QueryStartStop {
+        public final int start;
+        public final int stop;
+        public final Hsp hsp;
+
+        public QueryStartStop(int start, int stop, Hsp hsp) {
+            this.start = start;
+            this.stop = stop;
+            this.hsp = hsp;
+        }
+
+        public boolean overlaps(QueryStartStop candidate) {
+            if (!between(candidate.start) && !between(candidate.stop)) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        public boolean between(int candidate) {
+            if (candidate >= start && candidate <= stop) {
+                return true;
+            } else {
+                return false;
+            }
+        }
     }
 }

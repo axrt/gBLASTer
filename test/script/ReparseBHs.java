@@ -1,5 +1,7 @@
 package script;
 
+import blast.blast.BlastHelper;
+import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -8,6 +10,8 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -60,17 +64,25 @@ public class ReparseBHs {
                 }
             }
         }
-
-        paths.parallelStream().forEach(path -> {
-            System.out.println("Parsing ".concat(path.getName().toString()));
-            try {
-                if (!path.getName().contains("directory")) {
-                    processFile(path.toPath());
+        final ForkJoinPool forkJoinPool = new ForkJoinPool(6);
+        try {
+            forkJoinPool.submit(() ->
+            paths.stream().parallel().forEach(path -> {
+                System.out.println("Parsing ".concat(path.getName().toString()));
+                try {
+                    if (!path.getName().contains("directory")) {
+                        processFile(path.toPath());
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+            })
+            ).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
     public static String parseString(String s) throws JAXBException, SAXException {
@@ -81,7 +93,8 @@ public class ReparseBHs {
                 iterationString.indexOf(
                         "<Hit_hsps>"), iterationString.lastIndexOf("</Hit_hsps>") + "</Hit_hsps>".length()
         );
-        double comulativeBitScore = fastCommulativeBitScore(report);
+        final InputStream inputStream= IOUtils.toInputStream(report);
+        double comulativeBitScore = BlastHelper.comulativeBitScore(BlastHelper.unmarshallHsps(inputStream).get());
         if (comulativeBitScore >= cutoff) {
             final StringBuilder stringBuilder = new StringBuilder();
             for (int i = 0; i < split.length - 2; i++) {
@@ -89,8 +102,6 @@ public class ReparseBHs {
                 stringBuilder.append("\t");
             }
             stringBuilder.append(ReparseBBHs.DECIMAL_FORMAT.format(comulativeBitScore));
-            //stringBuilder.append("\t");
-            //stringBuilder.append(processHitHsps(report));
             return stringBuilder.toString();
         } else return "";
     }
