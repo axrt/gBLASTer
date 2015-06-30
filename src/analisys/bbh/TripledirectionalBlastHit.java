@@ -26,4 +26,15 @@ public class TripledirectionalBlastHit {
     public BlastHit getB() {
         return B;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder stringBuilder=new StringBuilder();
+        stringBuilder.append(A.toString());
+        stringBuilder.append("\t");
+        stringBuilder.append(B.toString());
+        stringBuilder.append("\t");
+        stringBuilder.append(C.toString());
+        return stringBuilder.toString();
+    }
 }

@@ -67,6 +67,23 @@ public class BlastHit {
         return BlastHelper.unmarshallSingleIteraton(new ByteArrayInputStream(textIteration.getBytes()));
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder stringBuilder=new StringBuilder();
+        stringBuilder.append(this.id_genomes);
+        stringBuilder.append("\t");
+        stringBuilder.append(id_blasts);
+        stringBuilder.append("\t");
+        stringBuilder.append(orfs_id);
+        stringBuilder.append("\t");
+        stringBuilder.append(sequence);
+        stringBuilder.append("\t");
+        stringBuilder.append(hitorf_id);
+        stringBuilder.append("\t");
+        stringBuilder.append(textIteration);
+        return stringBuilder.toString();
+    }
+
     public static BlastHit get(int id_genomes, long id_blasts, long orfs_id, String sequence, long hitorf_id, Iteration iteration) throws JAXBException {
         return new BlastHit(id_genomes, id_blasts, orfs_id, sequence, hitorf_id, BlastHelper.marshallIterationToString(iteration));
     }
