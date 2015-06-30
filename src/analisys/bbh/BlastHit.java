@@ -21,6 +21,15 @@ public class BlastHit {
     protected final long hitorf_id;
     protected final String textIteration;
 
+    /**
+     *
+     * @param id_genomes query genome
+     * @param id_blasts
+     * @param orfs_id
+     * @param sequence
+     * @param hitorf_id
+     * @param textIteration
+     */
     protected BlastHit(int id_genomes, long id_blasts, long orfs_id, String sequence, long hitorf_id, String textIteration) {
         this.id_genomes = id_genomes;
         this.id_blasts = id_blasts;

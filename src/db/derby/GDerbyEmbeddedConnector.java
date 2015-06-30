@@ -119,6 +119,8 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
         }
     }
 
+
+
     @Override
     public Stream<BidirectionalBlastHit> getBBHforGenomePair(Genome one, Genome two, int balancer) throws Exception {
         final int query_genome_id = this.genomeIdByName(one.getName().getName());
