@@ -29,7 +29,7 @@ public class GDerbyEmbeddedResearchConnectorTest {
         connector.connectToDatabase();
         AGenomeName = "Archaeon_Loki_Lokiarch";
         BGenomeName = "Haloquadratum_walsbyi";
-        CGenomeName = "tOstreococcus_tauri";
+        CGenomeName = "Ostreococcus_tauri";
 
     }
 

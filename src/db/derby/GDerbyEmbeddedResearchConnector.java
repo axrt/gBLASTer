@@ -44,12 +44,12 @@ public class GDerbyEmbeddedResearchConnector extends GDerbyEmbeddedConnector imp
             //18,45,45,18,18,8,8,18,8,45,45,8 ->AA,BB,CC,DD,EE,FF -> query, target
             final PreparedStatement preparedStatement =
                     this.connection.prepareStatement(
-                            "select \n" +
+                            "select\n" +
                                     "A.id_query_genome, A.id_blast, A.id_query_orf, AO.sequence, A.id_target_orf, A.iteration,\n" +
                                     "B.id_query_genome, B.id_blast, B.id_query_orf, BO.sequence, B.id_target_orf, B.iteration,\n" +
                                     "D.id_query_genome, D.id_blast, D.id_query_orf, DO.sequence, D.id_target_orf, D.iteration\n" +
                                     "from\n" +
-                                    "app.blasts A \n" +
+                                    "app.blasts A\n" +
                                     "inner join app.blasts B on A.id_query_orf = B.id_target_orf and A.id_target_orf = B.id_query_orf\n" +
                                     "inner join app.blasts C on A.id_query_orf = C.id_query_orf\n" +
                                     "inner join app.blasts D on C.id_query_orf = D.id_target_orf and C.id_target_orf = D.id_query_orf\n" +
@@ -58,7 +58,7 @@ public class GDerbyEmbeddedResearchConnector extends GDerbyEmbeddedConnector imp
                                     "inner join app.orfs AO on A.id_query_orf = AO.id_orf\n" +
                                     "inner join app.orfs BO on B.id_query_orf = BO.id_orf\n" +
                                     "inner join app.orfs DO on D.id_query_orf = DO.id_orf\n" +
-                                    "where F.id_query_orf=B.id_query_orf" +
+                                    "where F.id_query_orf=B.id_query_orf\n" +
                                     "and A.id_query_genome=?\n" +
                                     "and A.id_target_genome=?\n" +
                                     "and B.id_query_genome=?\n" +
