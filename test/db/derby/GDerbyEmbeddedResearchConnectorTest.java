@@ -54,7 +54,7 @@ public class GDerbyEmbeddedResearchConnectorTest {
         }
     }
 
-    private Genome assembleMock(String name){
+    public static Genome assembleMock(String name){
         final Genome mockQueryGenome=new Genome();
         final Name mockQueryGenomeName=new Name();
         mockQueryGenomeName.setName(name);

@@ -71,15 +71,15 @@ public class BlastHit {
     public String toString() {
         final StringBuilder stringBuilder=new StringBuilder();
         stringBuilder.append(this.id_genomes);
-        stringBuilder.append("\t");
+        stringBuilder.append('\t');
         stringBuilder.append(id_blasts);
-        stringBuilder.append("\t");
+        stringBuilder.append('\t');
         stringBuilder.append(orfs_id);
-        stringBuilder.append("\t");
+        stringBuilder.append('\t');
         stringBuilder.append(sequence);
-        stringBuilder.append("\t");
+        stringBuilder.append('\t');
         stringBuilder.append(hitorf_id);
-        stringBuilder.append("\t");
+        stringBuilder.append('\t');
         stringBuilder.append(textIteration);
         return stringBuilder.toString();
     }
