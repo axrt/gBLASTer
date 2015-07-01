@@ -126,7 +126,7 @@ public class UnloadTBHs {
                                 HitHsps hitHsps= BlastHelper.unmarshallHsps(
                                         IOUtils.toInputStream(
                                                 iter.substring(
-                                                        iter.indexOf("<Hit_hsps>"),iter.lastIndexOf("/<Hit_hsps>")
+                                                        iter.indexOf("<Hit_hsps>"),iter.lastIndexOf("/<Hit_hsps>")+ "</Hit_hsps>".length()
                                                 )
                                         )
                                 ).get();
@@ -147,7 +147,7 @@ public class UnloadTBHs {
                             hitHsps= BlastHelper.unmarshallHsps(
                                     IOUtils.toInputStream(
                                             iter.substring(
-                                                    iter.indexOf("<Hit_hsps>"), iter.lastIndexOf("/<Hit_hsps>")
+                                                    iter.indexOf("<Hit_hsps>"), iter.lastIndexOf("/<Hit_hsps>")+ "</Hit_hsps>".length()
                                             )
                                     )
                             ).get();
@@ -168,7 +168,7 @@ public class UnloadTBHs {
                             hitHsps= BlastHelper.unmarshallHsps(
                                     IOUtils.toInputStream(
                                             iter.substring(
-                                                    iter.indexOf("<Hit_hsps>"), iter.lastIndexOf("/<Hit_hsps>")
+                                                    iter.indexOf("<Hit_hsps>"), iter.lastIndexOf("/<Hit_hsps>")+ "</Hit_hsps>".length()
                                             )
                                     )
                             ).get();
