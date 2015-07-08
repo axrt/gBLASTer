@@ -46,7 +46,7 @@ public class GDerbyEmbeddedResearchConnector extends GDerbyEmbeddedConnector imp
                     this.connection.prepareStatement(
                             "select\n" +
                                     "A.id_query_genome, A.id_blast, A.id_query_orf, AO.sequence, A.id_target_orf, A.iteration,\n" +
-                                    "B.id_query_genome, B.id_blast, B.id_query_orf, BO.sequence, B.id_target_orf, B.iteration,\n" +
+                                    "F.id_query_genome, F.id_blast, F.id_query_orf, FO.sequence, F.id_target_orf, F.iteration,\n" +
                                     "D.id_query_genome, D.id_blast, D.id_query_orf, DO.sequence, D.id_target_orf, D.iteration\n" +
                                     "from\n" +
                                     "app.blasts A\n" +
@@ -56,7 +56,7 @@ public class GDerbyEmbeddedResearchConnector extends GDerbyEmbeddedConnector imp
                                     "inner join app.blasts E on D.id_query_orf = E.id_query_orf\n" +
                                     "inner join app.blasts F on E.id_query_orf = F.id_target_orf and E.id_target_orf = F.id_query_orf\n" +
                                     "inner join app.orfs AO on A.id_query_orf = AO.id_orf\n" +
-                                    "inner join app.orfs BO on B.id_query_orf = BO.id_orf\n" +
+                                    "inner join app.orfs FO on F.id_query_orf = FO.id_orf\n" +
                                     "inner join app.orfs DO on D.id_query_orf = DO.id_orf\n" +
                                     "where F.id_query_orf=B.id_query_orf\n" +
                                     "and A.id_query_genome=?\n" +
@@ -97,6 +97,7 @@ public class GDerbyEmbeddedResearchConnector extends GDerbyEmbeddedConnector imp
                             return true;
                         } else {
                             preparedStatement.close();
+                            connection.commit();
                             return false;
                         }
                     } catch (SQLException e) {

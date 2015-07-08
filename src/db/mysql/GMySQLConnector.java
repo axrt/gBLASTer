@@ -8,6 +8,7 @@ import blast.ncbi.output.Iteration;
 import db.BlastDAO;
 import db.GenomeDAO;
 import db.OrfDAO;
+import db.legend.GenomeLegend;
 import format.text.LargeFormat;
 import org.apache.commons.dbcp2.BasicDataSource;
 import sequence.nucleotide.genome.Chromosome;
@@ -56,6 +57,11 @@ public class GMySQLConnector extends MySQLConnector implements GenomeDAO, OrfDAO
     public void setNumberOfConnections(int numberOfConnections) {
         this.connectionPool.setInitialSize(numberOfConnections);
         this.connectionPool.setMaxOpenPreparedStatements(numberOfConnections);
+    }
+
+    @Override
+    public List<GenomeLegend.GenomeLegendLine> getLegend() throws Exception {
+        throw new NotImplementedException();
     }
 
     @Override

@@ -8,6 +8,7 @@ import blast.ncbi.output.Iteration;
 import db.BlastDAO;
 import db.GenomeDAO;
 import db.OrfDAO;
+import db.legend.GenomeLegend;
 import format.text.LargeFormat;
 import org.apache.commons.io.input.ReaderInputStream;
 import properties.jaxb.Genome;
@@ -45,6 +46,19 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
 
     public static GDerbyEmbeddedConnector get(String URL, String user, String password) {
         return new GDerbyEmbeddedConnector(URL, user, password);
+    }
+
+    @Override
+    public List<GenomeLegend.GenomeLegendLine> getLegend() throws Exception {
+        final List<GenomeLegend.GenomeLegendLine> genomeLegends=new ArrayList<>();
+        try(PreparedStatement preparedStatement = this.connection
+                .prepareStatement("select * from app.genomes")){
+            final ResultSet resultSet=preparedStatement.executeQuery();
+            while(resultSet.next()){
+                genomeLegends.add(new GenomeLegend.GenomeLegendLine(resultSet.getString(1),resultSet.getInt(2),resultSet.getString(3)));
+            }
+        }
+        return genomeLegends;
     }
 
     @Override

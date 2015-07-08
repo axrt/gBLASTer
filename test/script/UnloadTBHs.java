@@ -28,13 +28,13 @@ import java.util.stream.Stream;
 public class UnloadTBHs {
     protected static GDerbyEmbeddedResearchConnector connector;
     final static Path toFolder = Paths.get("/home/alext/Documents/Research/gBLASTer/research");
-    final static String HEADER="A_genome_id\tA_orf_id\tA_sequence\tA<->B_bitScore\t" +
+    final static String HEADER = "A_genome_id\tA_orf_id\tA_sequence\tA<->B_bitScore\t" +
             "B_genome_id\tB_orf_id\tB_sequence\tB<->C_bitScore\t" +
             "C_genome_id\tC_orf_id\tC_sequence\tC<->A_bitScore";
 
-    public static void main (String[]args){
+    public static void main(String[] args) {
 
-        if(!toFolder.toFile().exists()){
+        if (!toFolder.toFile().exists()) {
             toFolder.toFile().mkdir();
         }
 
@@ -45,19 +45,21 @@ public class UnloadTBHs {
                             "gblaster", "gblaster");
             connector.connectToDatabase();
 
-            final ResearchDAO researchDAO=(ResearchDAO)connector;
-            final GenomeDAO genomeDAO=(GenomeDAO)connector;
+            final ResearchDAO researchDAO = (ResearchDAO) connector;
+            final GenomeDAO genomeDAO = (GenomeDAO) connector;
 
             //Create groups
-            final String[]archaeas = {
-                    "Methanosarcina_barkeri_str_Fusaro",
+            final String[] archaeas = {
+                    "Archaeon_Loki_Lokiarch",
                     "Haloquadratum_walsbyi",
                     "Acidilobus_saccharovorans",
-                    "Pyrobaculum_aerophilum_str_IM2"
+                    "Pyrobaculum_aerophilum_str_IM2",
+                    "Escherichia_coli_str_K_12_substr_MG1655_complete_genome",
+                    "Bacillus_subtilis_subsp_subtilis_str_168_chromosome_complete_genome"
             };
 
-            final String[]eucaryotes = {
-                   "Drosophila_simulans",
+            final String[] eucaryotes = {
+                    "Drosophila_simulans",
                     "Arabidopsis_thaliana",
                     "Ostreococcus_tauri",
                     "Takifugu_rubripes",
@@ -68,18 +70,18 @@ public class UnloadTBHs {
                     "Saccharomyces_cerevisiae_S288c"
             };
 
-            final String[]loki = {
-               "Archaeon_Loki_Lokiarch"
+            final String[] loki = {
+                    "Methanosarcina_barkeri_str_Fusaro"
             };
 
-            final List<String[]> triplets=new ArrayList<>();
+            final List<String[]> triplets = new ArrayList<>();
 
-            for(int i=0;i<archaeas.length;i++){
-                for(int j=0;j<eucaryotes.length;j++){
-                    final String[]triplet=new String[3];
-                    triplet[0]=archaeas[i];
-                    triplet[1]=eucaryotes[j];
-                    triplet[2]=loki[0];
+            for (int i = 0; i < archaeas.length; i++) {
+                for (int j = 0; j < eucaryotes.length; j++) {
+                    final String[] triplet = new String[3];
+                    triplet[0] = archaeas[i];
+                    triplet[1] = eucaryotes[j];
+                    triplet[2] = loki[0];
                     triplets.add(triplet);
                 }
             }
@@ -92,105 +94,109 @@ public class UnloadTBHs {
                 System.out.println(trp[2]);
             });
 
-            System.out.println("Number of triplets: "+triplets.size());
+            System.out.println("Number of triplets: " + triplets.size());
 
-            for(String[]trp:triplets){
-                System.out.println("Unloading: "+trp[0]+"->"+trp[1]+"->"+trp[2]);
-                final Genome AGenome= GDerbyEmbeddedResearchConnectorTest.assembleMock(trp[0]);
-                final Genome BGenome= GDerbyEmbeddedResearchConnectorTest.assembleMock(trp[1]);
-                final Genome CGenome= GDerbyEmbeddedResearchConnectorTest.assembleMock(trp[2]);
+            for (String[] trp : triplets) {
+
+                final Genome AGenome = GDerbyEmbeddedResearchConnectorTest.assembleMock(trp[0]);
+                final Genome BGenome = GDerbyEmbeddedResearchConnectorTest.assembleMock(trp[1]);
+                final Genome CGenome = GDerbyEmbeddedResearchConnectorTest.assembleMock(trp[2]);
                 final Stream<TripledirectionalBlastHit> hitStream = researchDAO.getTBHForGenomes(AGenome, BGenome, CGenome, 100);
 
-                final String name=""+genomeDAO.genomeIdByName(trp[0])+"_"
-                        +genomeDAO.genomeIdByName(trp[1])+"_"
-                        +genomeDAO.genomeIdByName(trp[2])
-                        +".tbh";
-                try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(toFolder.resolve(name).toFile()))) {
+                final String name = "" + genomeDAO.genomeIdByName(trp[0]) + "_"
+                        + genomeDAO.genomeIdByName(trp[1]) + "_"
+                        + genomeDAO.genomeIdByName(trp[2])
+                        + ".tbh";
+                if (!toFolder.resolve(name).toFile().exists()) {
+                    System.out.println("Unloading: " + trp[0] + "->" + trp[1] + "->" + trp[2] + " to "+ toFolder.resolve(name).toFile());
 
-                    bufferedWriter.write(HEADER);
-                    bufferedWriter.newLine();
+                    try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(toFolder.resolve(name).toFile()))) {
 
-                    hitStream.forEach(tripleHit -> {
+                        bufferedWriter.write(HEADER);
+                        bufferedWriter.newLine();
 
-                        try {
-                            //A
-                            bufferedWriter.write(String.valueOf(tripleHit.getA().getId_genomes()));
-                            bufferedWriter.write('\t');
-                            bufferedWriter.write(String.valueOf(tripleHit.getA().getOrfs_id()));
-                            bufferedWriter.write('\t');
-                            bufferedWriter.write(tripleHit.getA().getSequence());
-                            bufferedWriter.write('\t');
-                            String iter=tripleHit.getA().getTextIteration();
+                        hitStream.forEach(tripleHit -> {
+
+                            try {
+                                //A
+                                bufferedWriter.write(String.valueOf(tripleHit.getA().getId_genomes()));
+                                bufferedWriter.write('\t');
+                                bufferedWriter.write(String.valueOf(tripleHit.getA().getOrfs_id()));
+                                bufferedWriter.write('\t');
+                                bufferedWriter.write(tripleHit.getA().getSequence());
+                                bufferedWriter.write('\t');
+                                String iter = tripleHit.getA().getTextIteration();
 
 
-                                HitHsps hitHsps= BlastHelper.unmarshallHsps(
+                                HitHsps hitHsps = BlastHelper.unmarshallHsps(
                                         IOUtils.toInputStream(
                                                 iter.substring(
-                                                        iter.indexOf("<Hit_hsps>"),iter.lastIndexOf("</Hit_hsps>")+ "</Hit_hsps>".length()
+                                                        iter.indexOf("<Hit_hsps>"), iter.lastIndexOf("</Hit_hsps>") + "</Hit_hsps>".length()
                                                 )
                                         )
                                 ).get();
 
-                            bufferedWriter.write(""+BlastHelper.comulativeBitScore(hitHsps));
-                            bufferedWriter.write('\t');
+                                bufferedWriter.write("" + BlastHelper.comulativeBitScore(hitHsps));
+                                bufferedWriter.write('\t');
 
-                            //B
-                            bufferedWriter.write(String.valueOf(tripleHit.getB().getId_genomes()));
-                            bufferedWriter.write('\t');
-                            bufferedWriter.write(String.valueOf(tripleHit.getB().getOrfs_id()));
-                            bufferedWriter.write('\t');
-                            bufferedWriter.write(tripleHit.getB().getSequence());
-                            bufferedWriter.write('\t');
-                            iter=tripleHit.getB().getTextIteration();
-
-
-                            hitHsps= BlastHelper.unmarshallHsps(
-                                    IOUtils.toInputStream(
-                                            iter.substring(
-                                                    iter.indexOf("<Hit_hsps>"), iter.lastIndexOf("</Hit_hsps>")+ "</Hit_hsps>".length()
-                                            )
-                                    )
-                            ).get();
-
-                            bufferedWriter.write(""+BlastHelper.comulativeBitScore(hitHsps));
-                            bufferedWriter.write('\t');
-
-                            //C
-                            bufferedWriter.write(String.valueOf(tripleHit.getC().getId_genomes()));
-                            bufferedWriter.write('\t');
-                            bufferedWriter.write(String.valueOf(tripleHit.getC().getOrfs_id()));
-                            bufferedWriter.write('\t');
-                            bufferedWriter.write(tripleHit.getC().getSequence());
-                            bufferedWriter.write('\t');
-                            iter=tripleHit.getC().getTextIteration();
+                                //B
+                                bufferedWriter.write(String.valueOf(tripleHit.getB().getId_genomes()));
+                                bufferedWriter.write('\t');
+                                bufferedWriter.write(String.valueOf(tripleHit.getB().getOrfs_id()));
+                                bufferedWriter.write('\t');
+                                bufferedWriter.write(tripleHit.getB().getSequence());
+                                bufferedWriter.write('\t');
+                                iter = tripleHit.getB().getTextIteration();
 
 
-                            hitHsps= BlastHelper.unmarshallHsps(
-                                    IOUtils.toInputStream(
-                                            iter.substring(
-                                                    iter.indexOf("<Hit_hsps>"), iter.lastIndexOf("</Hit_hsps>")+ "</Hit_hsps>".length()
-                                            )
-                                    )
-                            ).get();
+                                hitHsps = BlastHelper.unmarshallHsps(
+                                        IOUtils.toInputStream(
+                                                iter.substring(
+                                                        iter.indexOf("<Hit_hsps>"), iter.lastIndexOf("</Hit_hsps>") + "</Hit_hsps>".length()
+                                                )
+                                        )
+                                ).get();
 
-                            bufferedWriter.write(""+BlastHelper.comulativeBitScore(hitHsps));
-                            bufferedWriter.newLine();
+                                bufferedWriter.write("" + BlastHelper.comulativeBitScore(hitHsps));
+                                bufferedWriter.write('\t');
 
-                        } catch (IOException e) {
-                            throw new UncheckedIOException(e);
-                        } catch (SAXException e) {
-                            e.printStackTrace();
-                        } catch (JAXBException e) {
-                            e.printStackTrace();
-                        }
+                                //C
+                                bufferedWriter.write(String.valueOf(tripleHit.getC().getId_genomes()));
+                                bufferedWriter.write('\t');
+                                bufferedWriter.write(String.valueOf(tripleHit.getC().getOrfs_id()));
+                                bufferedWriter.write('\t');
+                                bufferedWriter.write(tripleHit.getC().getSequence());
+                                bufferedWriter.write('\t');
+                                iter = tripleHit.getC().getTextIteration();
 
-                    });
 
-                }catch (Exception e){
-                    e.printStackTrace();
+                                hitHsps = BlastHelper.unmarshallHsps(
+                                        IOUtils.toInputStream(
+                                                iter.substring(
+                                                        iter.indexOf("<Hit_hsps>"), iter.lastIndexOf("</Hit_hsps>") + "</Hit_hsps>".length()
+                                                )
+                                        )
+                                ).get();
+
+                                bufferedWriter.write("" + BlastHelper.comulativeBitScore(hitHsps));
+                                bufferedWriter.newLine();
+
+                            } catch (IOException e) {
+                                throw new UncheckedIOException(e);
+                            } catch (SAXException e) {
+                                e.printStackTrace();
+                            } catch (JAXBException e) {
+                                e.printStackTrace();
+                            }
+
+                        });
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
 
+            }
             //Assemble triplets
         } catch (Exception e) {
             e.printStackTrace();

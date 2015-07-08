@@ -1,8 +1,11 @@
 package db;
 
+import db.legend.GenomeLegend;
 import sequence.nucleotide.genome.Chromosome;
 import sequence.nucleotide.genome.Genome;
 import sequence.nucleotide.genome.LargeGenome;
+
+import java.util.List;
 
 /**
  * Created by alext on 6/4/14.
@@ -22,4 +25,5 @@ public interface GenomeDAO extends ChromosomeDAO {
 
     public boolean removeGenomeForName(String name) throws Exception;
 
+    public  List<GenomeLegend.GenomeLegendLine> getLegend() throws  Exception;
 }
