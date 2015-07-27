@@ -7,6 +7,7 @@ import db.GenomeDAO;
 import db.ResearchDAO;
 import db.derby.GDerbyEmbeddedResearchConnector;
 import db.derby.GDerbyEmbeddedResearchConnectorTest;
+import db.legend.GenomeLegend;
 import org.apache.commons.io.IOUtils;
 import org.xml.sax.SAXException;
 import properties.jaxb.Genome;
@@ -49,40 +50,18 @@ public class UnloadTBHs {
             final GenomeDAO genomeDAO = (GenomeDAO) connector;
 
             //Create groups
-            final String[] archaeas = {
-                    "Archaeon_Loki_Lokiarch",
-                    "Haloquadratum_walsbyi",
-                    "Acidilobus_saccharovorans",
-                    "Pyrobaculum_aerophilum_str_IM2",
-                    "Escherichia_coli_str_K_12_substr_MG1655_complete_genome",
-                    "Bacillus_subtilis_subsp_subtilis_str_168_chromosome_complete_genome"
-            };
-
-            final String[] eucaryotes = {
-                    "Drosophila_simulans",
-                    "Arabidopsis_thaliana",
-                    "Ostreococcus_tauri",
-                    "Takifugu_rubripes",
-                    "Monosiga_brevicollis",
-                    "Capsaspora_owczarzaki",
-                    "Naegleria_fowleri",
-                    "Caenorhabditis_Elegans_Bristol_N2",
-                    "Saccharomyces_cerevisiae_S288c"
-            };
-
-            final String[] loki = {
-                    "Methanosarcina_barkeri_str_Fusaro"
-            };
-
+            final GenomeLegend legend=GenomeLegend.get(genomeDAO);
             final List<String[]> triplets = new ArrayList<>();
 
-            for (int i = 0; i < archaeas.length; i++) {
-                for (int j = 0; j < eucaryotes.length; j++) {
-                    final String[] triplet = new String[3];
-                    triplet[0] = archaeas[i];
-                    triplet[1] = eucaryotes[j];
-                    triplet[2] = loki[0];
-                    triplets.add(triplet);
+            for (int i = 0; i < legend.size(); i++) {
+                for (int j = i+1; j < legend.size(); j++) {
+                    for(int k = j+1; k < legend.size(); k++){
+                        final String[] triplet = new String[3];
+                        triplet[0]=legend.get(i).getName();
+                        triplet[1]=legend.get(j).getName();
+                        triplet[2]=legend.get(k).getName();
+                        triplets.add(triplet);
+                    }
                 }
             }
 

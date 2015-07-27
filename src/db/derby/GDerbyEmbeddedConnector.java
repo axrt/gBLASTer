@@ -55,7 +55,7 @@ public class GDerbyEmbeddedConnector extends DerbyEmbeddedConnector implements G
                 .prepareStatement("select * from app.genomes")){
             final ResultSet resultSet=preparedStatement.executeQuery();
             while(resultSet.next()){
-                genomeLegends.add(new GenomeLegend.GenomeLegendLine(resultSet.getString(1),resultSet.getInt(2),resultSet.getString(3)));
+                genomeLegends.add(new GenomeLegend.GenomeLegendLine(resultSet.getString(2),resultSet.getInt(1),resultSet.getString(3)));
             }
         }
         return genomeLegends;

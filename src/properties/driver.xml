@@ -320,8 +320,8 @@ and open the template in the editor.
         <FastaType type="nucl"/>
     </Genome>
     <Genome>
-        <Name name=" Drosophila_simulans_strain_w501"/>
-        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/ Drosophila_simulans_strain_w501.fasta"/>
+        <Name name="Drosophila_simulans_strain_w501"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Drosophila_simulans_strain_w501.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
