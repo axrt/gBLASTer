@@ -157,12 +157,12 @@ and open the template in the editor.
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
-    <Genome>
+    <!--<Genome>
         <Name name="Cyanidioschyzon_merolae_strain_10D"/>
         <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Cyanidioschyzon_merolae_strain_10D.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
-    </Genome>
+    </Genome>-->
     <Genome>
         <Name name="Pyrobaculum_aerophilum_str_IM2"/>
         <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Pyrobaculum_aerophilum_str_IM2.fasta"/>
@@ -265,12 +265,12 @@ and open the template in the editor.
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
-    <Genome>
+    <!--<Genome>
         <Name name="Ichthyophthirius_multifiliis"/>
         <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Ichthyophthirius_multifiliis.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
-    </Genome>
+    </Genome>-->
     <Genome>
         <Name name="Genlisea_aurea"/>
         <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Genlisea_aurea.fasta"/>
@@ -319,11 +319,100 @@ and open the template in the editor.
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
-    <Genome>
+    <!--<Genome>
         <Name name="Drosophila_simulans_strain_w501"/>
         <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Drosophila_simulans_strain_w501.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
+    </Genome>-->
+    <Genome>
+        <Name name="Synechococcus_elongatus_PCC_7942"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Synechococcus_elongatus_PCC_7942.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
     </Genome>
-
+    <Genome>
+        <Name name="Prochlorococcus_marinus_CCMP1375"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Prochlorococcus_marinus_CCMP1375.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <Genome>
+        <Name name="Thermotoga_neapolitana_DSM_4359"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Thermotoga_neapolitana_DSM_4359.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <Genome>
+        <Name name="Thermus_aquaticus_Y51MC23"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Thermus_aquaticus_Y51MC23.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <Genome>
+        <Name name="Aquifex_aeolicus_VF5"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Aquifex_aeolicus_VF5.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <Genome>
+        <Name name="Oikopleura_dioica"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Oikopleura_dioica.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <Genome>
+        <Name name="Dictyostelium_discoideum_AX4"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Dictyostelium_discoideum_AX4.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <Genome>
+        <Name name="Entamoeba_histolytica_HM_1"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Entamoeba_histolytica_HM_1.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <Genome>
+        <Name name="Rozella_allomycis_CSF55"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Rozella_allomycis_CSF55.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <Genome>
+        <Name name="Meloidogyne_hapla_strain_VW9"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Meloidogyne_hapla_strain_VW9.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <Genome>
+        <Name name="Pandoravirus_salinus"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Pandoravirus_salinus.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <Genome>
+        <Name name="Acanthamoeba_polyphaga_mimivirus"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Acanthamoeba_polyphaga_mimivirus.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <Genome>
+        <Name name="Megavirus_chiliensis"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Megavirus_chiliensis.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <Genome>
+        <Name name="Meloidogyne_hapla_VW9"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Meloidogyne_hapla_VW9.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <Genome>
+        <Name name="Rickettsia_prowazekii_Madrid_E"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Rickettsia_prowazekii_Madrid_E.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
 </gBlasterProperties>

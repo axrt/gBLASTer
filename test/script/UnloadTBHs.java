@@ -20,7 +20,9 @@ import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -51,18 +53,17 @@ public class UnloadTBHs {
 
             //Create groups
             final GenomeLegend legend=GenomeLegend.get(genomeDAO);
+            final Map<Integer,String> idNameMap=new HashMap<>();
+            for(int i=0;i<legend.size();i++){
+                idNameMap.put(legend.get(i).getId(),legend.get(i).getName());
+            }
             final List<String[]> triplets = new ArrayList<>();
 
-            for (int i = 0; i < legend.size(); i++) {
-                for (int j = i+1; j < legend.size(); j++) {
-                    for(int k = j+1; k < legend.size(); k++){
-                        final String[] triplet = new String[3];
-                        triplet[0]=legend.get(i).getName();
-                        triplet[1]=legend.get(j).getName();
-                        triplet[2]=legend.get(k).getName();
-                        triplets.add(triplet);
-                    }
-                }
+            final int[] bacteria={1,2,3,28,33,36};
+            final int loki=45;
+            final int methano=16;
+            for(int i=0;i<bacteria.length;i++){
+                triplets.add(new String[]{idNameMap.get(bacteria[i]),idNameMap.get(loki),idNameMap.get(methano)});
             }
 
             triplets.stream().forEach(trp -> {
