@@ -403,15 +403,51 @@ and open the template in the editor.
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
-    <Genome>
+    <!--<Genome>
         <Name name="Meloidogyne_hapla_VW9"/>
         <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Meloidogyne_hapla_VW9.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
-    </Genome>
+    </Genome>-->
     <Genome>
         <Name name="Rickettsia_prowazekii_Madrid_E"/>
         <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Rickettsia_prowazekii_Madrid_E.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <!--<Genome>
+        <Name name="Chondrus_crispus_Stackhouse"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Chondrus_crispus_Stackhouse.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>-->
+    <Genome>
+        <Name name="Leishmania_donovani_BPK282A1"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Leishmania_donovani_BPK282A1.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <Genome>
+        <Name name="Leishmania_mexicana"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Leishmania_mexicana.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <Genome>
+        <Name name="Micromonas_sp_RCC299"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Micromonas_sp_RCC299.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <Genome>
+        <Name name="Belgica_antarctica"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Belgica_antarctica.fasta"/>
+        <GeneticTable type="standard"/>
+        <FastaType type="nucl"/>
+    </Genome>
+    <Genome>
+        <Name name="Ordospora_colligata"/>
+        <PathToFile path="/home/alext/Documents/Research/gBLASTer/genomes/Ordospora_colligata.fasta"/>
         <GeneticTable type="standard"/>
         <FastaType type="nucl"/>
     </Genome>
